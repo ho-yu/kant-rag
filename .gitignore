@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+
+# 비밀값 (.env.example만 커밋)
+.env
+.env.*
+!.env.example
+
+# 기타 필요한 파일
+logs/
+
+# 에디터·OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# artifacts 폴더 필요시 정의예정 (폴더는 .gitkeep으로 유지)
