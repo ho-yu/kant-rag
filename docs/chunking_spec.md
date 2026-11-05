@@ -1,6 +1,7 @@
 # 청킹 사양 (확정안)
 
 > 작성: 2026-11-05 / 대상: Basic 해운(shipping)부터, 이후 Intermediate·Advanced
+> 제출: 2026-11-13 13:00 KST
 
 ## 1. 구조 (부모-자식)
 
@@ -114,7 +115,7 @@ artifacts/qdrant_local/
 results/chunk_coverage/
 ```
 
-## 7. 설정 (config/ingestion/chunking.yaml)
+## 7. 설정 (config/chunking.yaml)
 
 ```yaml
 chunking:
@@ -276,7 +277,7 @@ docs[0].metadata["book_id"], docs[0].metadata["page"], docs[0].metadata["parent_
 ## 13. 코드 위치
 
 ```
-config/ingestion/chunking.yaml        청킹·색인·맥락 설정
+config/chunking.yaml                  청킹·색인·맥락 설정
 src/rag_service/contracts/chunk.py    청크 형식 (pydantic), embedding_text(), point_id
 src/rag_service/ingestion/
   ├─ pdf_reader.py                    PDF → 쪽별 머리글/제목/문단/표(제목·각주)
