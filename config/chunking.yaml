@@ -1,0 +1,10 @@
+chunking:
+  max_chunk_tokens: 300     # 넘는 문단은 문장 경계로만 분할
+  overlap_tokens: 0         # 오버랩 없음
+  jsonl_levels: [page, para, table, row]   # sent는 추후
+index:
+  levels: [page, para, table]   # row: off — Qdrant 무료 플랜 용량 제한 / sent: 추후
+jsonl:
+  max_shard_mb: 90          # 넘으면 SB_001, SB_002 … 로 분할
+                            # 단, 한 문서(예: SB09)는 절대 두 jsonl로 나누지 않음.
+                            # 다음 문서를 넣으면 90MB를 넘길 때만 다음 파일로 넘어감
