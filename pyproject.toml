@@ -11,6 +11,7 @@ dependencies = [
     "fastapi>=0.162.0",
     "kiwipiepy>=0.24.1",
     "langchain>=1.4.9",
+    "langchain-community>=0.3.31,<0.4",
     "langchain-core>=1.7.6",
     "langchain-huggingface>=1.2.3",
     "langchain-openai>=1.7.4",
