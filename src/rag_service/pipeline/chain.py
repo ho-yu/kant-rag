@@ -27,6 +27,8 @@ def create_chain():
 
     def retrieve_context(request):
         question = request.get("question")
+        if not question.strip():
+            raise ValueError("질문이 비어있어 답변할 수 없습니다.")
         mode = request.get("retrieval_mode", "naive")
         docs = retrievers[mode].invoke(question)
         return format_docs(docs)
