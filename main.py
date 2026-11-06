@@ -1,5 +1,5 @@
 from dotenv import load_dotenv
-from rag_service.pipeline.chain import create_chain
+from rag_service.pipeline import create_chain
 
 def main():
     load_dotenv()
