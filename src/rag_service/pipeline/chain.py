@@ -5,10 +5,7 @@ from langchain_core.runnables import RunnableLambda, RunnablePassthrough
 from rag_service.contracts.schemas import RagAnswer
 from rag_service.generation.prompt import answer_prompt
 
-# TODO retriever 함수 import
-# build_naive_retriever
-# build_hybrid_retriever
-# build_rerank_retriever
+from rag_service.retrieval_a import build_hybrid_retriever, build_naive_retriever, build_rerank_retriever
 
 
 def format_docs(docs: list[Document]) -> str:
@@ -23,9 +20,9 @@ def create_chain(domain, difficulty):
     model = ChatOpenAI(model="gpt-6-luna")
     
     retrievers = {
-        "naive": build_naive_retriever(domain=domain, difficulty=difficulty), #TODO
-        "hybrid": build_hybrid_retriever(domain=domain, difficulty=difficulty), #TODO
-        "hybrid_rerank": build_rerank_retriever(domain=domain, difficulty=difficulty), #TODO
+        "naive": build_naive_retriever(domain=domain, difficulty=difficulty),
+        "hybrid": build_hybrid_retriever(domain=domain, difficulty=difficulty),
+        "hybrid_rerank": build_rerank_retriever(domain=domain, difficulty=difficulty),
         }
         
     def retrieve_context(request):
