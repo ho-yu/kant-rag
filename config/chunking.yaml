@@ -4,7 +4,7 @@
 chunking:
   max_chunk_tokens: 300     # 넘는 문단은 문장 경계로만 분할
   overlap_tokens: 0         # 오버랩 없음
-  jsonl_levels: [page, para, table, row]   # sent는 추후
+  jsonl_levels: [page, para, table]   # row: off — 필요하면 다시 추가 / sent: 추후
   tokenizer: BAAI/bge-m3    # 토큰 수를 셀 때 쓰는 토크나이저 (임베딩 모델과 같게)
   max_table_tokens: 8000    # 표 전체 청크가 이보다 길면 경고만 남김 (표·row는 자르지 않음)
 
