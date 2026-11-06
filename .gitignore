@@ -20,4 +20,10 @@ logs/
 .DS_Store
 Thumbs.db
 
-# artifacts 폴더 필요시 정의예정 (폴더는 .gitkeep으로 유지)
+# artifacts: 청킹 결과jsonl은 참고만 하며 qdrant의 데이터를 사용하여 RAG를 진행 (맥락 캐시만 공유, 폴더는 .gitkeep으로 유지)
+#artifacts/corpus/**/*.jsonl
+#!artifacts/corpus/**/context_cache.jsonl
+#artifacts/corpus/**/manifest.json
+artifacts/corpus/**/history/
+#artifacts/qdrant_local/
+#results/chunk_coverage/

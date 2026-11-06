@@ -36,6 +36,7 @@ dependencies = [
     "streamlit>=1.66.1",
     "tenacity>=9.2.1",
     "tiktoken>=0.14.0",
+    "torch>=2.14.1",
     "tqdm>=4.70.1",
     "uvicorn>=0.54.0",
 ]
@@ -53,3 +54,12 @@ dev = [
     "pytest>=9.2.0",
     "ruff>=0.17.3",
 ]
+
+# 윈도우에서는 NVIDIA GPU(CUDA 13.0)용 PyTorch를 받는다. 맥·리눅스는 기존대로 PyPI.
+[tool.uv.sources]
+torch = [{ index = "pytorch-cu130", marker = "sys_platform == 'win32'" }]
+
+[[tool.uv.index]]
+name = "pytorch-cu130"
+url = "https://download.pytorch.org/whl/cu130"
+explicit = true
