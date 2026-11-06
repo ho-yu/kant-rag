@@ -6,7 +6,7 @@
       "pages": 24,
       "fingerprint": {
         "pdf_sha256": "8bb26df3c546f89abddf5d8750bf8823dc291d51926b3670cb6a788e34933d93",
-        "config_hash": "29f6ba299ceb8ee5",
+        "config_hash": "322ba2db1aaab1b9",
         "code_hash": "651fec1f2d357480"
       },
       "chunks": {
@@ -15,13 +15,13 @@
       },
       "context": {
         "enabled": true,
-        "pages_called": 16,
-        "pages_cached": 8,
+        "pages_called": 0,
+        "pages_cached": 24,
         "filled": 116,
         "missing": 0,
         "rejected": 0,
-        "prompt_tokens": 21268,
-        "completion_tokens": 5843,
+        "prompt_tokens": 0,
+        "completion_tokens": 0,
         "errors": [],
         "rejected_samples": []
       },
@@ -58,7 +58,7 @@
       "pages": 24,
       "fingerprint": {
         "pdf_sha256": "d758b4e07825999f050dc2ad3d742d9b850c06db34fe34681011ecf915779736",
-        "config_hash": "29f6ba299ceb8ee5",
+        "config_hash": "322ba2db1aaab1b9",
         "code_hash": "651fec1f2d357480"
       },
       "chunks": {
@@ -67,13 +67,13 @@
       },
       "context": {
         "enabled": true,
-        "pages_called": 10,
-        "pages_cached": 14,
+        "pages_called": 0,
+        "pages_cached": 24,
         "filled": 110,
         "missing": 0,
         "rejected": 0,
-        "prompt_tokens": 13055,
-        "completion_tokens": 3664,
+        "prompt_tokens": 0,
+        "completion_tokens": 0,
         "errors": [],
         "rejected_samples": []
       },
@@ -110,7 +110,7 @@
       "pages": 24,
       "fingerprint": {
         "pdf_sha256": "7649b60c206abf687225711aac9bf8dacb5e6fb2bb3503ba2b14112eaece0ccd",
-        "config_hash": "29f6ba299ceb8ee5",
+        "config_hash": "322ba2db1aaab1b9",
         "code_hash": "651fec1f2d357480"
       },
       "chunks": {
@@ -119,13 +119,13 @@
       },
       "context": {
         "enabled": true,
-        "pages_called": 13,
-        "pages_cached": 11,
+        "pages_called": 0,
+        "pages_cached": 24,
         "filled": 101,
         "missing": 0,
         "rejected": 0,
-        "prompt_tokens": 15723,
-        "completion_tokens": 4865,
+        "prompt_tokens": 0,
+        "completion_tokens": 0,
         "errors": [],
         "rejected_samples": []
       },
@@ -162,7 +162,7 @@
       "pages": 24,
       "fingerprint": {
         "pdf_sha256": "4498d4e1a92861d67aad3f900a603f49d1b61b706b29d8e5756ada004450f8b9",
-        "config_hash": "29f6ba299ceb8ee5",
+        "config_hash": "322ba2db1aaab1b9",
         "code_hash": "651fec1f2d357480"
       },
       "chunks": {
@@ -171,13 +171,13 @@
       },
       "context": {
         "enabled": true,
-        "pages_called": 11,
-        "pages_cached": 13,
+        "pages_called": 0,
+        "pages_cached": 24,
         "filled": 107,
         "missing": 0,
         "rejected": 0,
-        "prompt_tokens": 13736,
-        "completion_tokens": 4206,
+        "prompt_tokens": 0,
+        "completion_tokens": 0,
         "errors": [],
         "rejected_samples": []
       },
@@ -214,7 +214,7 @@
       "pages": 24,
       "fingerprint": {
         "pdf_sha256": "6b90e9f57ee2aa58f585c621c94e4240578832422020c14d28c925de7d8dafbc",
-        "config_hash": "29f6ba299ceb8ee5",
+        "config_hash": "322ba2db1aaab1b9",
         "code_hash": "651fec1f2d357480"
       },
       "chunks": {
@@ -223,13 +223,13 @@
       },
       "context": {
         "enabled": true,
-        "pages_called": 7,
-        "pages_cached": 17,
+        "pages_called": 0,
+        "pages_cached": 24,
         "filled": 101,
         "missing": 0,
         "rejected": 0,
-        "prompt_tokens": 8369,
-        "completion_tokens": 2474,
+        "prompt_tokens": 0,
+        "completion_tokens": 0,
         "errors": [],
         "rejected_samples": []
       },
@@ -266,7 +266,7 @@
       "pages": 24,
       "fingerprint": {
         "pdf_sha256": "2ce49febe49ae5dc1ec780873e282395925c802051f532bb44b3f7d8884f33c0",
-        "config_hash": "29f6ba299ceb8ee5",
+        "config_hash": "322ba2db1aaab1b9",
         "code_hash": "651fec1f2d357480"
       },
       "chunks": {
@@ -275,13 +275,13 @@
       },
       "context": {
         "enabled": true,
-        "pages_called": 10,
-        "pages_cached": 14,
+        "pages_called": 0,
+        "pages_cached": 24,
         "filled": 96,
         "missing": 0,
         "rejected": 0,
-        "prompt_tokens": 11654,
-        "completion_tokens": 3544,
+        "prompt_tokens": 0,
+        "completion_tokens": 0,
         "errors": [],
         "rejected_samples": []
       },
@@ -318,7 +318,7 @@
       "pages": 24,
       "fingerprint": {
         "pdf_sha256": "ac1a46deb897f5d4568a8f6148aa9f3e9f8839d1e52df5eddef3df75ab3476a0",
-        "config_hash": "29f6ba299ceb8ee5",
+        "config_hash": "322ba2db1aaab1b9",
         "code_hash": "651fec1f2d357480"
       },
       "chunks": {
@@ -327,13 +327,13 @@
       },
       "context": {
         "enabled": true,
-        "pages_called": 17,
-        "pages_cached": 7,
+        "pages_called": 0,
+        "pages_cached": 24,
         "filled": 116,
         "missing": 0,
         "rejected": 0,
-        "prompt_tokens": 23498,
-        "completion_tokens": 6875,
+        "prompt_tokens": 0,
+        "completion_tokens": 0,
         "errors": [],
         "rejected_samples": []
       },
@@ -370,7 +370,7 @@
       "pages": 24,
       "fingerprint": {
         "pdf_sha256": "c57c33d30aa958e27dc0db1d319bada9336a63e2188a10a661e9f724709f5eba",
-        "config_hash": "29f6ba299ceb8ee5",
+        "config_hash": "322ba2db1aaab1b9",
         "code_hash": "651fec1f2d357480"
       },
       "chunks": {
@@ -379,13 +379,13 @@
       },
       "context": {
         "enabled": true,
-        "pages_called": 7,
-        "pages_cached": 17,
+        "pages_called": 0,
+        "pages_cached": 24,
         "filled": 111,
         "missing": 0,
         "rejected": 0,
-        "prompt_tokens": 9056,
-        "completion_tokens": 2749,
+        "prompt_tokens": 0,
+        "completion_tokens": 0,
         "errors": [],
         "rejected_samples": []
       },
@@ -422,7 +422,7 @@
       "pages": 24,
       "fingerprint": {
         "pdf_sha256": "dbdb2c2297a1eeea2a1753928735e9956c0df1ddfa54945268651fb5b4960f93",
-        "config_hash": "29f6ba299ceb8ee5",
+        "config_hash": "322ba2db1aaab1b9",
         "code_hash": "651fec1f2d357480"
       },
       "chunks": {
@@ -431,13 +431,13 @@
       },
       "context": {
         "enabled": true,
-        "pages_called": 16,
-        "pages_cached": 8,
+        "pages_called": 0,
+        "pages_cached": 24,
         "filled": 106,
         "missing": 0,
         "rejected": 0,
-        "prompt_tokens": 20402,
-        "completion_tokens": 6145,
+        "prompt_tokens": 0,
+        "completion_tokens": 0,
         "errors": [],
         "rejected_samples": []
       },
@@ -474,7 +474,7 @@
       "pages": 24,
       "fingerprint": {
         "pdf_sha256": "b24fa78ffbae570db25fd8834d6bd11fc3778e2f287a2e42c61ac3b35f9d3cb8",
-        "config_hash": "29f6ba299ceb8ee5",
+        "config_hash": "322ba2db1aaab1b9",
         "code_hash": "651fec1f2d357480"
       },
       "chunks": {
@@ -483,13 +483,13 @@
       },
       "context": {
         "enabled": true,
-        "pages_called": 17,
-        "pages_cached": 7,
+        "pages_called": 0,
+        "pages_cached": 24,
         "filled": 112,
         "missing": 0,
         "rejected": 0,
-        "prompt_tokens": 22032,
-        "completion_tokens": 6284,
+        "prompt_tokens": 0,
+        "completion_tokens": 0,
         "errors": [],
         "rejected_samples": []
       },
@@ -526,7 +526,7 @@
       "pages": 24,
       "fingerprint": {
         "pdf_sha256": "2bf92073d9d5687bfcd06c56213281557deee1c4b3beb94c91ca1f34ce93aa19",
-        "config_hash": "29f6ba299ceb8ee5",
+        "config_hash": "322ba2db1aaab1b9",
         "code_hash": "651fec1f2d357480"
       },
       "chunks": {
@@ -535,13 +535,13 @@
       },
       "context": {
         "enabled": true,
-        "pages_called": 9,
-        "pages_cached": 15,
+        "pages_called": 0,
+        "pages_cached": 24,
         "filled": 106,
         "missing": 0,
         "rejected": 0,
-        "prompt_tokens": 11011,
-        "completion_tokens": 3271,
+        "prompt_tokens": 0,
+        "completion_tokens": 0,
         "errors": [],
         "rejected_samples": []
       },
@@ -578,7 +578,7 @@
       "pages": 24,
       "fingerprint": {
         "pdf_sha256": "b8d29debedde03821a4c84424d9860d12ce34d3a08fa6345c7a9fa35a297c081",
-        "config_hash": "29f6ba299ceb8ee5",
+        "config_hash": "322ba2db1aaab1b9",
         "code_hash": "651fec1f2d357480"
       },
       "chunks": {
@@ -587,13 +587,13 @@
       },
       "context": {
         "enabled": true,
-        "pages_called": 13,
-        "pages_cached": 11,
+        "pages_called": 0,
+        "pages_cached": 24,
         "filled": 108,
         "missing": 0,
         "rejected": 0,
-        "prompt_tokens": 15631,
-        "completion_tokens": 4527,
+        "prompt_tokens": 0,
+        "completion_tokens": 0,
         "errors": [],
         "rejected_samples": []
       },
@@ -630,7 +630,7 @@
       "pages": 24,
       "fingerprint": {
         "pdf_sha256": "47dc421f9c2a77611d16555834f54d85e5c7589c6aa158687ef76220aa16bf89",
-        "config_hash": "29f6ba299ceb8ee5",
+        "config_hash": "322ba2db1aaab1b9",
         "code_hash": "651fec1f2d357480"
       },
       "chunks": {
@@ -639,13 +639,13 @@
       },
       "context": {
         "enabled": true,
-        "pages_called": 12,
-        "pages_cached": 12,
+        "pages_called": 0,
+        "pages_cached": 24,
         "filled": 106,
         "missing": 0,
         "rejected": 0,
-        "prompt_tokens": 14988,
-        "completion_tokens": 4521,
+        "prompt_tokens": 0,
+        "completion_tokens": 0,
         "errors": [],
         "rejected_samples": []
       },
@@ -682,7 +682,7 @@
       "pages": 24,
       "fingerprint": {
         "pdf_sha256": "aa971e1bf8dd590ab3a23eafe80571ae3286afc778b34ff7cc8ebf1e26373acc",
-        "config_hash": "29f6ba299ceb8ee5",
+        "config_hash": "322ba2db1aaab1b9",
         "code_hash": "651fec1f2d357480"
       },
       "chunks": {
@@ -691,13 +691,13 @@
       },
       "context": {
         "enabled": true,
-        "pages_called": 9,
-        "pages_cached": 15,
+        "pages_called": 0,
+        "pages_cached": 24,
         "filled": 101,
         "missing": 0,
         "rejected": 0,
-        "prompt_tokens": 11300,
-        "completion_tokens": 3284,
+        "prompt_tokens": 0,
+        "completion_tokens": 0,
         "errors": [],
         "rejected_samples": []
       },
@@ -734,7 +734,7 @@
       "pages": 24,
       "fingerprint": {
         "pdf_sha256": "5eda541cf900103b814418349d6593ab9a31a14e7cb890d7367e53887381bdde",
-        "config_hash": "29f6ba299ceb8ee5",
+        "config_hash": "322ba2db1aaab1b9",
         "code_hash": "651fec1f2d357480"
       },
       "chunks": {
@@ -743,13 +743,13 @@
       },
       "context": {
         "enabled": true,
-        "pages_called": 10,
-        "pages_cached": 14,
+        "pages_called": 0,
+        "pages_cached": 24,
         "filled": 103,
         "missing": 0,
         "rejected": 0,
-        "prompt_tokens": 12371,
-        "completion_tokens": 3645,
+        "prompt_tokens": 0,
+        "completion_tokens": 0,
         "errors": [],
         "rejected_samples": []
       },
@@ -830,14 +830,38 @@
         "prompt": 224094,
         "completion": 65897
       }
+    },
+    {
+      "at": "2026-11-06T11:04:40+09:00",
+      "same_output": [
+        "SB01",
+        "SB02",
+        "SB03",
+        "SB04",
+        "SB05",
+        "SB06",
+        "SB07",
+        "SB08",
+        "SB09",
+        "SB10",
+        "SB11",
+        "SB12",
+        "SB13",
+        "SB14",
+        "SB15"
+      ],
+      "context_tokens": {
+        "prompt": 0,
+        "completion": 0
+      }
     }
   ],
   "difficulty": "basic",
   "domain": "shipping",
   "chunker_version": "1.1.0",
   "code_hash": "651fec1f2d357480",
-  "config_hash": "29f6ba299ceb8ee5",
-  "git_commit": "f917b72",
+  "config_hash": "322ba2db1aaab1b9",
+  "git_commit": "8dd8f24",
   "settings": {
     "chunking": {
       "max_chunk_tokens": 300,
@@ -845,8 +869,7 @@
       "jsonl_levels": [
         "page",
         "para",
-        "table",
-        "row"
+        "table"
       ],
       "tokenizer": "BAAI/bge-m3",
       "max_table_tokens": 8000
@@ -862,5 +885,5 @@
       "max_chars": 300
     }
   },
-  "updated_at": "2026-11-06T01:53:21+09:00"
+  "updated_at": "2026-11-06T11:04:40+09:00"
 }
