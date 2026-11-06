@@ -1,0 +1,866 @@
+{
+  "documents": {
+    "SB01": {
+      "file_name": "SB01.pdf",
+      "title": "가온루트해운 부산–LA 예약 업무 안내",
+      "pages": 24,
+      "fingerprint": {
+        "pdf_sha256": "8bb26df3c546f89abddf5d8750bf8823dc291d51926b3670cb6a788e34933d93",
+        "config_hash": "29f6ba299ceb8ee5",
+        "code_hash": "651fec1f2d357480"
+      },
+      "chunks": {
+        "page": 24,
+        "para": 116
+      },
+      "context": {
+        "enabled": true,
+        "pages_called": 16,
+        "pages_cached": 8,
+        "filled": 116,
+        "missing": 0,
+        "rejected": 0,
+        "prompt_tokens": 21268,
+        "completion_tokens": 5843,
+        "errors": [],
+        "rejected_samples": []
+      },
+      "version": 2,
+      "files": [
+        "SB01.jsonl"
+      ],
+      "updated_at": "2026-11-06T01:49:34+09:00",
+      "history": [
+        {
+          "version": 1,
+          "files": [
+            "history/SB01/v1.jsonl"
+          ],
+          "fingerprint": {
+            "pdf_sha256": "8bb26df3c546f89abddf5d8750bf8823dc291d51926b3670cb6a788e34933d93",
+            "config_hash": "29f6ba299ceb8ee5",
+            "code_hash": "c887e0330431d387"
+          },
+          "pages": 24,
+          "chunks": {
+            "page": 24,
+            "para": 116
+          },
+          "updated_at": "2026-11-06T01:18:22+09:00",
+          "archived_at": "2026-11-06T01:49:34+09:00",
+          "reason": "changed"
+        }
+      ]
+    },
+    "SB02": {
+      "file_name": "SB02.pdf",
+      "title": "예약 확정 후 준비와 장비 인수",
+      "pages": 24,
+      "fingerprint": {
+        "pdf_sha256": "d758b4e07825999f050dc2ad3d742d9b850c06db34fe34681011ecf915779736",
+        "config_hash": "29f6ba299ceb8ee5",
+        "code_hash": "651fec1f2d357480"
+      },
+      "chunks": {
+        "page": 24,
+        "para": 110
+      },
+      "context": {
+        "enabled": true,
+        "pages_called": 10,
+        "pages_cached": 14,
+        "filled": 110,
+        "missing": 0,
+        "rejected": 0,
+        "prompt_tokens": 13055,
+        "completion_tokens": 3664,
+        "errors": [],
+        "rejected_samples": []
+      },
+      "version": 2,
+      "files": [
+        "SB02.jsonl"
+      ],
+      "updated_at": "2026-11-06T01:49:47+09:00",
+      "history": [
+        {
+          "version": 1,
+          "files": [
+            "history/SB02/v1.jsonl"
+          ],
+          "fingerprint": {
+            "pdf_sha256": "d758b4e07825999f050dc2ad3d742d9b850c06db34fe34681011ecf915779736",
+            "config_hash": "29f6ba299ceb8ee5",
+            "code_hash": "c887e0330431d387"
+          },
+          "pages": 24,
+          "chunks": {
+            "page": 24,
+            "para": 110
+          },
+          "updated_at": "2026-11-06T01:18:51+09:00",
+          "archived_at": "2026-11-06T01:49:47+09:00",
+          "reason": "changed"
+        }
+      ]
+    },
+    "SB03": {
+      "file_name": "SB03.pdf",
+      "title": "수출 서류 제출 순서와 접수 관리",
+      "pages": 24,
+      "fingerprint": {
+        "pdf_sha256": "7649b60c206abf687225711aac9bf8dacb5e6fb2bb3503ba2b14112eaece0ccd",
+        "config_hash": "29f6ba299ceb8ee5",
+        "code_hash": "651fec1f2d357480"
+      },
+      "chunks": {
+        "page": 24,
+        "para": 101
+      },
+      "context": {
+        "enabled": true,
+        "pages_called": 13,
+        "pages_cached": 11,
+        "filled": 101,
+        "missing": 0,
+        "rejected": 0,
+        "prompt_tokens": 15723,
+        "completion_tokens": 4865,
+        "errors": [],
+        "rejected_samples": []
+      },
+      "version": 2,
+      "files": [
+        "SB03.jsonl"
+      ],
+      "updated_at": "2026-11-06T01:50:06+09:00",
+      "history": [
+        {
+          "version": 1,
+          "files": [
+            "history/SB03/v1.jsonl"
+          ],
+          "fingerprint": {
+            "pdf_sha256": "7649b60c206abf687225711aac9bf8dacb5e6fb2bb3503ba2b14112eaece0ccd",
+            "config_hash": "29f6ba299ceb8ee5",
+            "code_hash": "c887e0330431d387"
+          },
+          "pages": 24,
+          "chunks": {
+            "page": 24,
+            "para": 101
+          },
+          "updated_at": "2026-11-06T01:19:16+09:00",
+          "archived_at": "2026-11-06T01:50:06+09:00",
+          "reason": "changed"
+        }
+      ]
+    },
+    "SB04": {
+      "file_name": "SB04.pdf",
+      "title": "부산 반입센터 예약과 반입 확인 절차",
+      "pages": 24,
+      "fingerprint": {
+        "pdf_sha256": "4498d4e1a92861d67aad3f900a603f49d1b61b706b29d8e5756ada004450f8b9",
+        "config_hash": "29f6ba299ceb8ee5",
+        "code_hash": "651fec1f2d357480"
+      },
+      "chunks": {
+        "page": 24,
+        "para": 107
+      },
+      "context": {
+        "enabled": true,
+        "pages_called": 11,
+        "pages_cached": 13,
+        "filled": 107,
+        "missing": 0,
+        "rejected": 0,
+        "prompt_tokens": 13736,
+        "completion_tokens": 4206,
+        "errors": [],
+        "rejected_samples": []
+      },
+      "version": 2,
+      "files": [
+        "SB04.jsonl"
+      ],
+      "updated_at": "2026-11-06T01:50:21+09:00",
+      "history": [
+        {
+          "version": 1,
+          "files": [
+            "history/SB04/v1.jsonl"
+          ],
+          "fingerprint": {
+            "pdf_sha256": "4498d4e1a92861d67aad3f900a603f49d1b61b706b29d8e5756ada004450f8b9",
+            "config_hash": "29f6ba299ceb8ee5",
+            "code_hash": "c887e0330431d387"
+          },
+          "pages": 24,
+          "chunks": {
+            "page": 24,
+            "para": 107
+          },
+          "updated_at": "2026-11-06T01:19:43+09:00",
+          "archived_at": "2026-11-06T01:50:21+09:00",
+          "reason": "changed"
+        }
+      ]
+    },
+    "SB05": {
+      "file_name": "SB05.pdf",
+      "title": "선하증권 초안 확인과 발행 요청",
+      "pages": 24,
+      "fingerprint": {
+        "pdf_sha256": "6b90e9f57ee2aa58f585c621c94e4240578832422020c14d28c925de7d8dafbc",
+        "config_hash": "29f6ba299ceb8ee5",
+        "code_hash": "651fec1f2d357480"
+      },
+      "chunks": {
+        "page": 24,
+        "para": 101
+      },
+      "context": {
+        "enabled": true,
+        "pages_called": 7,
+        "pages_cached": 17,
+        "filled": 101,
+        "missing": 0,
+        "rejected": 0,
+        "prompt_tokens": 8369,
+        "completion_tokens": 2474,
+        "errors": [],
+        "rejected_samples": []
+      },
+      "version": 2,
+      "files": [
+        "SB05.jsonl"
+      ],
+      "updated_at": "2026-11-06T01:50:31+09:00",
+      "history": [
+        {
+          "version": 1,
+          "files": [
+            "history/SB05/v1.jsonl"
+          ],
+          "fingerprint": {
+            "pdf_sha256": "6b90e9f57ee2aa58f585c621c94e4240578832422020c14d28c925de7d8dafbc",
+            "config_hash": "29f6ba299ceb8ee5",
+            "code_hash": "c887e0330431d387"
+          },
+          "pages": 24,
+          "chunks": {
+            "page": 24,
+            "para": 101
+          },
+          "updated_at": "2026-11-06T01:20:08+09:00",
+          "archived_at": "2026-11-06T01:50:31+09:00",
+          "reason": "changed"
+        }
+      ]
+    },
+    "SB06": {
+      "file_name": "SB06.pdf",
+      "title": "출항 이후 진행 안내와 업무 인계",
+      "pages": 24,
+      "fingerprint": {
+        "pdf_sha256": "2ce49febe49ae5dc1ec780873e282395925c802051f532bb44b3f7d8884f33c0",
+        "config_hash": "29f6ba299ceb8ee5",
+        "code_hash": "651fec1f2d357480"
+      },
+      "chunks": {
+        "page": 24,
+        "para": 96
+      },
+      "context": {
+        "enabled": true,
+        "pages_called": 10,
+        "pages_cached": 14,
+        "filled": 96,
+        "missing": 0,
+        "rejected": 0,
+        "prompt_tokens": 11654,
+        "completion_tokens": 3544,
+        "errors": [],
+        "rejected_samples": []
+      },
+      "version": 2,
+      "files": [
+        "SB06.jsonl"
+      ],
+      "updated_at": "2026-11-06T01:50:45+09:00",
+      "history": [
+        {
+          "version": 1,
+          "files": [
+            "history/SB06/v1.jsonl"
+          ],
+          "fingerprint": {
+            "pdf_sha256": "2ce49febe49ae5dc1ec780873e282395925c802051f532bb44b3f7d8884f33c0",
+            "config_hash": "29f6ba299ceb8ee5",
+            "code_hash": "c887e0330431d387"
+          },
+          "pages": 24,
+          "chunks": {
+            "page": 24,
+            "para": 96
+          },
+          "updated_at": "2026-11-06T01:20:35+09:00",
+          "archived_at": "2026-11-06T01:50:45+09:00",
+          "reason": "changed"
+        }
+      ]
+    },
+    "SB07": {
+      "file_name": "SB07.pdf",
+      "title": "선적지시서 작성과 정정 요령",
+      "pages": 24,
+      "fingerprint": {
+        "pdf_sha256": "ac1a46deb897f5d4568a8f6148aa9f3e9f8839d1e52df5eddef3df75ab3476a0",
+        "config_hash": "29f6ba299ceb8ee5",
+        "code_hash": "651fec1f2d357480"
+      },
+      "chunks": {
+        "page": 24,
+        "para": 116
+      },
+      "context": {
+        "enabled": true,
+        "pages_called": 17,
+        "pages_cached": 7,
+        "filled": 116,
+        "missing": 0,
+        "rejected": 0,
+        "prompt_tokens": 23498,
+        "completion_tokens": 6875,
+        "errors": [],
+        "rejected_samples": []
+      },
+      "version": 2,
+      "files": [
+        "SB07.jsonl"
+      ],
+      "updated_at": "2026-11-06T01:51:08+09:00",
+      "history": [
+        {
+          "version": 1,
+          "files": [
+            "history/SB07/v1.jsonl"
+          ],
+          "fingerprint": {
+            "pdf_sha256": "ac1a46deb897f5d4568a8f6148aa9f3e9f8839d1e52df5eddef3df75ab3476a0",
+            "config_hash": "29f6ba299ceb8ee5",
+            "code_hash": "c887e0330431d387"
+          },
+          "pages": 24,
+          "chunks": {
+            "page": 24,
+            "para": 116
+          },
+          "updated_at": "2026-11-06T01:21:03+09:00",
+          "archived_at": "2026-11-06T01:51:08+09:00",
+          "reason": "changed"
+        }
+      ]
+    },
+    "SB08": {
+      "file_name": "SB08.pdf",
+      "title": "VGM 제출 내용과 접수 확인 안내",
+      "pages": 24,
+      "fingerprint": {
+        "pdf_sha256": "c57c33d30aa958e27dc0db1d319bada9336a63e2188a10a661e9f724709f5eba",
+        "config_hash": "29f6ba299ceb8ee5",
+        "code_hash": "651fec1f2d357480"
+      },
+      "chunks": {
+        "page": 24,
+        "para": 111
+      },
+      "context": {
+        "enabled": true,
+        "pages_called": 7,
+        "pages_cached": 17,
+        "filled": 111,
+        "missing": 0,
+        "rejected": 0,
+        "prompt_tokens": 9056,
+        "completion_tokens": 2749,
+        "errors": [],
+        "rejected_samples": []
+      },
+      "version": 2,
+      "files": [
+        "SB08.jsonl"
+      ],
+      "updated_at": "2026-11-06T01:51:19+09:00",
+      "history": [
+        {
+          "version": 1,
+          "files": [
+            "history/SB08/v1.jsonl"
+          ],
+          "fingerprint": {
+            "pdf_sha256": "c57c33d30aa958e27dc0db1d319bada9336a63e2188a10a661e9f724709f5eba",
+            "config_hash": "29f6ba299ceb8ee5",
+            "code_hash": "c887e0330431d387"
+          },
+          "pages": 24,
+          "chunks": {
+            "page": 24,
+            "para": 111
+          },
+          "updated_at": "2026-11-06T01:21:31+09:00",
+          "archived_at": "2026-11-06T01:51:19+09:00",
+          "reason": "changed"
+        }
+      ]
+    },
+    "SB09": {
+      "file_name": "SB09.pdf",
+      "title": "상업송장과 포장명세서의 서류 대조",
+      "pages": 24,
+      "fingerprint": {
+        "pdf_sha256": "dbdb2c2297a1eeea2a1753928735e9956c0df1ddfa54945268651fb5b4960f93",
+        "config_hash": "29f6ba299ceb8ee5",
+        "code_hash": "651fec1f2d357480"
+      },
+      "chunks": {
+        "page": 24,
+        "para": 106
+      },
+      "context": {
+        "enabled": true,
+        "pages_called": 16,
+        "pages_cached": 8,
+        "filled": 106,
+        "missing": 0,
+        "rejected": 0,
+        "prompt_tokens": 20402,
+        "completion_tokens": 6145,
+        "errors": [],
+        "rejected_samples": []
+      },
+      "version": 2,
+      "files": [
+        "SB09.jsonl"
+      ],
+      "updated_at": "2026-11-06T01:51:42+09:00",
+      "history": [
+        {
+          "version": 1,
+          "files": [
+            "history/SB09/v1.jsonl"
+          ],
+          "fingerprint": {
+            "pdf_sha256": "dbdb2c2297a1eeea2a1753928735e9956c0df1ddfa54945268651fb5b4960f93",
+            "config_hash": "29f6ba299ceb8ee5",
+            "code_hash": "c887e0330431d387"
+          },
+          "pages": 24,
+          "chunks": {
+            "page": 24,
+            "para": 106
+          },
+          "updated_at": "2026-11-06T01:21:58+09:00",
+          "archived_at": "2026-11-06T01:51:42+09:00",
+          "reason": "changed"
+        }
+      ]
+    },
+    "SB10": {
+      "file_name": "SB10.pdf",
+      "title": "선하증권 초안 항목별 확인 메모",
+      "pages": 24,
+      "fingerprint": {
+        "pdf_sha256": "b24fa78ffbae570db25fd8834d6bd11fc3778e2f287a2e42c61ac3b35f9d3cb8",
+        "config_hash": "29f6ba299ceb8ee5",
+        "code_hash": "651fec1f2d357480"
+      },
+      "chunks": {
+        "page": 24,
+        "para": 112
+      },
+      "context": {
+        "enabled": true,
+        "pages_called": 17,
+        "pages_cached": 7,
+        "filled": 112,
+        "missing": 0,
+        "rejected": 0,
+        "prompt_tokens": 22032,
+        "completion_tokens": 6284,
+        "errors": [],
+        "rejected_samples": []
+      },
+      "version": 2,
+      "files": [
+        "SB10.jsonl"
+      ],
+      "updated_at": "2026-11-06T01:52:03+09:00",
+      "history": [
+        {
+          "version": 1,
+          "files": [
+            "history/SB10/v1.jsonl"
+          ],
+          "fingerprint": {
+            "pdf_sha256": "b24fa78ffbae570db25fd8834d6bd11fc3778e2f287a2e42c61ac3b35f9d3cb8",
+            "config_hash": "29f6ba299ceb8ee5",
+            "code_hash": "c887e0330431d387"
+          },
+          "pages": 24,
+          "chunks": {
+            "page": 24,
+            "para": 112
+          },
+          "updated_at": "2026-11-06T01:22:28+09:00",
+          "archived_at": "2026-11-06T01:52:03+09:00",
+          "reason": "changed"
+        }
+      ]
+    },
+    "SB11": {
+      "file_name": "SB11.pdf",
+      "title": "11월 서류 마감 및 VGM 접수 경로 변경 공지",
+      "pages": 24,
+      "fingerprint": {
+        "pdf_sha256": "2bf92073d9d5687bfcd06c56213281557deee1c4b3beb94c91ca1f34ce93aa19",
+        "config_hash": "29f6ba299ceb8ee5",
+        "code_hash": "651fec1f2d357480"
+      },
+      "chunks": {
+        "page": 24,
+        "para": 106
+      },
+      "context": {
+        "enabled": true,
+        "pages_called": 9,
+        "pages_cached": 15,
+        "filled": 106,
+        "missing": 0,
+        "rejected": 0,
+        "prompt_tokens": 11011,
+        "completion_tokens": 3271,
+        "errors": [],
+        "rejected_samples": []
+      },
+      "version": 2,
+      "files": [
+        "SB11.jsonl"
+      ],
+      "updated_at": "2026-11-06T01:52:17+09:00",
+      "history": [
+        {
+          "version": 1,
+          "files": [
+            "history/SB11/v1.jsonl"
+          ],
+          "fingerprint": {
+            "pdf_sha256": "2bf92073d9d5687bfcd06c56213281557deee1c4b3beb94c91ca1f34ce93aa19",
+            "config_hash": "29f6ba299ceb8ee5",
+            "code_hash": "c887e0330431d387"
+          },
+          "pages": 24,
+          "chunks": {
+            "page": 24,
+            "para": 106
+          },
+          "updated_at": "2026-11-06T01:22:59+09:00",
+          "archived_at": "2026-11-06T01:52:17+09:00",
+          "reason": "changed"
+        }
+      ]
+    },
+    "SB12": {
+      "file_name": "SB12.pdf",
+      "title": "예약과 운송 단계 용어 FAQ",
+      "pages": 24,
+      "fingerprint": {
+        "pdf_sha256": "b8d29debedde03821a4c84424d9860d12ce34d3a08fa6345c7a9fa35a297c081",
+        "config_hash": "29f6ba299ceb8ee5",
+        "code_hash": "651fec1f2d357480"
+      },
+      "chunks": {
+        "page": 24,
+        "para": 108
+      },
+      "context": {
+        "enabled": true,
+        "pages_called": 13,
+        "pages_cached": 11,
+        "filled": 108,
+        "missing": 0,
+        "rejected": 0,
+        "prompt_tokens": 15631,
+        "completion_tokens": 4527,
+        "errors": [],
+        "rejected_samples": []
+      },
+      "version": 2,
+      "files": [
+        "SB12.jsonl"
+      ],
+      "updated_at": "2026-11-06T01:52:33+09:00",
+      "history": [
+        {
+          "version": 1,
+          "files": [
+            "history/SB12/v1.jsonl"
+          ],
+          "fingerprint": {
+            "pdf_sha256": "b8d29debedde03821a4c84424d9860d12ce34d3a08fa6345c7a9fa35a297c081",
+            "config_hash": "29f6ba299ceb8ee5",
+            "code_hash": "c887e0330431d387"
+          },
+          "pages": 24,
+          "chunks": {
+            "page": 24,
+            "para": 108
+          },
+          "updated_at": "2026-11-06T01:23:26+09:00",
+          "archived_at": "2026-11-06T01:52:33+09:00",
+          "reason": "changed"
+        }
+      ]
+    },
+    "SB13": {
+      "file_name": "SB13.pdf",
+      "title": "마감일과 적용일 문의 FAQ",
+      "pages": 24,
+      "fingerprint": {
+        "pdf_sha256": "47dc421f9c2a77611d16555834f54d85e5c7589c6aa158687ef76220aa16bf89",
+        "config_hash": "29f6ba299ceb8ee5",
+        "code_hash": "651fec1f2d357480"
+      },
+      "chunks": {
+        "page": 24,
+        "para": 106
+      },
+      "context": {
+        "enabled": true,
+        "pages_called": 12,
+        "pages_cached": 12,
+        "filled": 106,
+        "missing": 0,
+        "rejected": 0,
+        "prompt_tokens": 14988,
+        "completion_tokens": 4521,
+        "errors": [],
+        "rejected_samples": []
+      },
+      "version": 2,
+      "files": [
+        "SB13.jsonl"
+      ],
+      "updated_at": "2026-11-06T01:52:51+09:00",
+      "history": [
+        {
+          "version": 1,
+          "files": [
+            "history/SB13/v1.jsonl"
+          ],
+          "fingerprint": {
+            "pdf_sha256": "47dc421f9c2a77611d16555834f54d85e5c7589c6aa158687ef76220aa16bf89",
+            "config_hash": "29f6ba299ceb8ee5",
+            "code_hash": "c887e0330431d387"
+          },
+          "pages": 24,
+          "chunks": {
+            "page": 24,
+            "para": 106
+          },
+          "updated_at": "2026-11-06T01:23:55+09:00",
+          "archived_at": "2026-11-06T01:52:51+09:00",
+          "reason": "changed"
+        }
+      ]
+    },
+    "SB14": {
+      "file_name": "SB14.pdf",
+      "title": "업무별 담당 창구와 문의 범위",
+      "pages": 24,
+      "fingerprint": {
+        "pdf_sha256": "aa971e1bf8dd590ab3a23eafe80571ae3286afc778b34ff7cc8ebf1e26373acc",
+        "config_hash": "29f6ba299ceb8ee5",
+        "code_hash": "651fec1f2d357480"
+      },
+      "chunks": {
+        "page": 24,
+        "para": 101
+      },
+      "context": {
+        "enabled": true,
+        "pages_called": 9,
+        "pages_cached": 15,
+        "filled": 101,
+        "missing": 0,
+        "rejected": 0,
+        "prompt_tokens": 11300,
+        "completion_tokens": 3284,
+        "errors": [],
+        "rejected_samples": []
+      },
+      "version": 2,
+      "files": [
+        "SB14.jsonl"
+      ],
+      "updated_at": "2026-11-06T01:53:07+09:00",
+      "history": [
+        {
+          "version": 1,
+          "files": [
+            "history/SB14/v1.jsonl"
+          ],
+          "fingerprint": {
+            "pdf_sha256": "aa971e1bf8dd590ab3a23eafe80571ae3286afc778b34ff7cc8ebf1e26373acc",
+            "config_hash": "29f6ba299ceb8ee5",
+            "code_hash": "c887e0330431d387"
+          },
+          "pages": 24,
+          "chunks": {
+            "page": 24,
+            "para": 101
+          },
+          "updated_at": "2026-11-06T01:24:23+09:00",
+          "archived_at": "2026-11-06T01:53:07+09:00",
+          "reason": "changed"
+        }
+      ]
+    },
+    "SB15": {
+      "file_name": "SB15.pdf",
+      "title": "고객 문의 접수 메모 모음",
+      "pages": 24,
+      "fingerprint": {
+        "pdf_sha256": "5eda541cf900103b814418349d6593ab9a31a14e7cb890d7367e53887381bdde",
+        "config_hash": "29f6ba299ceb8ee5",
+        "code_hash": "651fec1f2d357480"
+      },
+      "chunks": {
+        "page": 24,
+        "para": 103
+      },
+      "context": {
+        "enabled": true,
+        "pages_called": 10,
+        "pages_cached": 14,
+        "filled": 103,
+        "missing": 0,
+        "rejected": 0,
+        "prompt_tokens": 12371,
+        "completion_tokens": 3645,
+        "errors": [],
+        "rejected_samples": []
+      },
+      "version": 2,
+      "files": [
+        "SB15.jsonl"
+      ],
+      "updated_at": "2026-11-06T01:53:21+09:00",
+      "history": [
+        {
+          "version": 1,
+          "files": [
+            "history/SB15/v1.jsonl"
+          ],
+          "fingerprint": {
+            "pdf_sha256": "5eda541cf900103b814418349d6593ab9a31a14e7cb890d7367e53887381bdde",
+            "config_hash": "29f6ba299ceb8ee5",
+            "code_hash": "c887e0330431d387"
+          },
+          "pages": 24,
+          "chunks": {
+            "page": 24,
+            "para": 103
+          },
+          "updated_at": "2026-11-06T01:24:52+09:00",
+          "archived_at": "2026-11-06T01:53:21+09:00",
+          "reason": "changed"
+        }
+      ]
+    }
+  },
+  "removed": {},
+  "runs": [
+    {
+      "at": "2026-11-06T01:24:52+09:00",
+      "added": [
+        "SB01",
+        "SB02",
+        "SB03",
+        "SB04",
+        "SB05",
+        "SB06",
+        "SB07",
+        "SB08",
+        "SB09",
+        "SB10",
+        "SB11",
+        "SB12",
+        "SB13",
+        "SB14",
+        "SB15"
+      ],
+      "context_tokens": {
+        "prompt": 455792,
+        "completion": 134896
+      }
+    },
+    {
+      "at": "2026-11-06T01:53:21+09:00",
+      "changed": [
+        "SB01",
+        "SB02",
+        "SB03",
+        "SB04",
+        "SB05",
+        "SB06",
+        "SB07",
+        "SB08",
+        "SB09",
+        "SB10",
+        "SB11",
+        "SB12",
+        "SB13",
+        "SB14",
+        "SB15"
+      ],
+      "context_tokens": {
+        "prompt": 224094,
+        "completion": 65897
+      }
+    }
+  ],
+  "difficulty": "basic",
+  "domain": "shipping",
+  "chunker_version": "1.1.0",
+  "code_hash": "651fec1f2d357480",
+  "config_hash": "29f6ba299ceb8ee5",
+  "git_commit": "f917b72",
+  "settings": {
+    "chunking": {
+      "max_chunk_tokens": 300,
+      "overlap_tokens": 0,
+      "jsonl_levels": [
+        "page",
+        "para",
+        "table",
+        "row"
+      ],
+      "tokenizer": "BAAI/bge-m3",
+      "max_table_tokens": 8000
+    },
+    "context": {
+      "enabled": true,
+      "model": "gpt-6-luna",
+      "prompt_version": "v1",
+      "levels": [
+        "para",
+        "table"
+      ],
+      "max_chars": 300
+    }
+  },
+  "updated_at": "2026-11-06T01:53:21+09:00"
+}
