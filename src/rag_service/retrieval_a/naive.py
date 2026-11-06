@@ -1,16 +1,3 @@
-"""검색 구현 A — Naive RAG.
-
-질문을 bge-m3로 임베딩해 Qdrant에서 가장 가까운 청크 top_k개를 그대로 돌려준다.
-키워드 검색(BM25)·리랭킹 없이 dense 벡터 유사도만 쓴다.
-
-반환: LangChain 검색기. `retriever.invoke(question)` → list[Document]
-  - page_content: 청크 원문
-  - metadata["book_id"]: PDF 파일명(확장자 제외), metadata["page"]: 1부터 시작하는 쪽 번호
-
-직접 실행:
-  uv run python -m rag_service.retrieval_a.naive "VGM은 언제까지 내야 하나요?"
-"""
-
 from __future__ import annotations
 
 import argparse
@@ -33,11 +20,10 @@ def load_config(path: Path = CONFIG_PATH) -> dict[str, Any]:
 
 
 DIFFICULTIES = ("basic", "intermediate", "advanced")
-DOMAINS = ("shipping", "finance", "manufacturing")  # client.py 선택지와 같게
+DOMAINS = ("shipping", "finance", "manufacturing")
 
 
 def collection_name(cfg: dict[str, Any], *, domain: str | None = None, difficulty: str | None = None) -> str:
-    """chain.py가 넘기는 domain·difficulty로 컬렉션 이름을 만든다. 예) kant_shipping_basic_bge-m3"""
     c = cfg["collection"]
     domain = (domain or c["domain"]).strip().lower()
     difficulty = (difficulty or c["difficulty"]).strip().lower()
@@ -49,7 +35,6 @@ def collection_name(cfg: dict[str, Any], *, domain: str | None = None, difficult
 
 
 def level_filter(levels: list[str]) -> models.Filter:
-    """metadata.level이 levels 중 하나인 포인트만 검색 (page와 문단이 중복으로 나오지 않게)."""
     return models.Filter(
         must=[models.FieldCondition(key="metadata.level", match=models.MatchAny(any=list(levels)))]
     )
@@ -65,7 +50,6 @@ def _resolve_device(device: str) -> str:
 
 @lru_cache(maxsize=4)
 def _embeddings(model_name: str, device: str, normalize: bool):
-    """임베딩 모델은 무거우니 한 번만 올린다."""
     from langchain_huggingface import HuggingFaceEmbeddings
 
     return HuggingFaceEmbeddings(
@@ -76,7 +60,6 @@ def _embeddings(model_name: str, device: str, normalize: bool):
 
 
 def _connect_client(name: str):
-    """Qdrant에 연결하고 컬렉션이 있는지 확인한다 (임베딩 모델은 올리지 않음)."""
     url = os.getenv("QDRANT_URL")
     if not url:
         raise RuntimeError(
@@ -118,13 +101,6 @@ def build_naive_retriever(
     levels: list[str] | None = None,
     config_path: Path = CONFIG_PATH,
 ) -> BaseRetriever:
-    """Naive RAG 검색기 (공통 체인용).
-
-    chain.py의 create_chain(domain, difficulty)에서
-    `build_naive_retriever(domain=domain, difficulty=difficulty)`로 한 번 만들고,
-    질문마다 `retriever.invoke(question)`으로 list[Document]를 받는다.
-    인자를 비우면 config/retrieval_a/naive.yaml 값을 쓴다.
-    """
     cfg = load_config(config_path)
     search = cfg["search"]
     store = _connect_store(cfg, collection_name(cfg, domain=domain, difficulty=difficulty))

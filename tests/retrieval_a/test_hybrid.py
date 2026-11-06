@@ -1,5 +1,3 @@
-"""retrieval_a Hybrid — 네트워크·모델 없이 확인할 수 있는 부분."""
-
 import numpy as np
 from langchain_core.documents import Document
 
@@ -40,14 +38,12 @@ def test_min_max_and_ranks():
 def test_fuse_minmax_and_rrf():
     dense = np.array([0.80, 0.70, 0.60])
     sparse = np.array([0.00, 0.30, 0.10])
-    # minmax: 0.7*[1, .5, 0] + 0.3*[0, 1, 1/3]  → 문서1(0.70)과 문서2(0.65), 문서3(0.10)
     f = fuse(dense, sparse, method="minmax", dense_weight=0.7, sparse_weight=0.3)
     assert np.argsort(-f).tolist() == [0, 1, 2]
-    # sparse 비중을 키우면 키워드가 맞는 문서2가 1등
     f2 = fuse(dense, sparse, method="minmax", dense_weight=0.3, sparse_weight=0.7)
     assert int(np.argmax(f2)) == 1
     r = fuse(dense, sparse, method="rrf", dense_weight=0.5, sparse_weight=0.5, rrf_k=60)
-    assert int(np.argmax(r)) == 1  # 양쪽 2등·1등이 한쪽 1등·3등보다 앞
+    assert int(np.argmax(r)) == 1
 
 
 def test_index_text_includes_title_and_context():
@@ -69,10 +65,10 @@ def test_doc_sparse_weights_uses_cache(tmp_path):
     first = doc_sparse_weights(docs, FakeEncoder, path, use_context=False, batch_size=4)
     again = doc_sparse_weights(docs, FakeEncoder, path, use_context=False, batch_size=4)
     assert first == again == [{"1": 2.0}, {"1": 3.0}]
-    assert calls == [2]  # 두 번째는 캐시만 사용
+    assert calls == [2]
     docs[1] = _doc("B-p1-c1", "changed")
     doc_sparse_weights(docs, FakeEncoder, path, use_context=False, batch_size=4)
-    assert calls == [2, 1]  # 바뀐 청크만 다시 계산
+    assert calls == [2, 1]
 
 
 def _retriever(**kw):
@@ -90,15 +86,14 @@ def _retriever(**kw):
 
 def test_hybrid_retriever_scores_and_metadata():
     got = _retriever(top_k=2, method="minmax", dense_weight=0.5, sparse_weight=0.5).invoke("q")
-    assert [d.metadata["chunk_id"] for d in got] == ["B-1", "A-1"]  # dense 2등이지만 키워드가 맞아 1등
+    assert [d.metadata["chunk_id"] for d in got] == ["B-1", "A-1"]
     m = got[0].metadata
     assert m["dense_rank"] == 2 and m["sparse_rank"] == 1 and m["book_id"] == "B"
     only_dense = _retriever(top_k=1, method="minmax", dense_weight=1.0, sparse_weight=0.0).invoke("q")
-    assert only_dense[0].metadata["chunk_id"] == "A-1"  # sparse 비중 0이면 naive와 같은 순서
+    assert only_dense[0].metadata["chunk_id"] == "A-1"
 
 
 def test_chain_style_call(monkeypatch, tmp_path):
-    """chain.py처럼 build_hybrid_retriever(domain=..., difficulty=...)로 부르면 맞는 컬렉션·옵션이 쓰인다."""
     seen = {}
 
     def fake_connect(name):

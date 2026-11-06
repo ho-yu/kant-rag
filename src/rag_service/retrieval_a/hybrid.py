@@ -1,23 +1,3 @@
-"""검색 구현 A — Hybrid RAG (BGE-M3 dense + BGE-M3 sparse, 리랭커 없음).
-
-- dense : Qdrant에 저장된 bge-m3 dense 벡터와 질문 벡터의 내적 (naive와 같은 벡터).
-- sparse: BGE-M3가 만드는 "토큰 : 중요도" 표(lexical weights). 질문과 문서에 함께 있는
-          토큰의 중요도를 곱해서 더한다. 정확한 단어·숫자·코드(SI, VGM, 20GP 등)에 강하다.
-- 합치기: minmax(기본) = 두 점수를 각각 0~1로 맞춘 뒤 0.7·dense + 0.3·sparse
-          rrf          = 점수 대신 순위로 합침  Σ weight / (rrf_k + 순위)
-
-질문은 BGE-M3에 한 번만 넣고, 같은 출력에서 dense([CLS])와 sparse(토큰별 가중치)를 함께 꺼낸다.
-Qdrant 컬렉션에는 dense 벡터만 있으므로, 문서 sparse 가중치는 처음 한 번 계산해
-artifacts/retrieval_a/sparse_cache/ 에 저장해 두고 재사용한다.
-
-반환: LangChain 검색기. `retriever.invoke(question)` → list[Document]
-  - page_content: 청크 원문, metadata["book_id"], metadata["page"]
-  - metadata["hybrid_score"], ["dense_score"], ["sparse_score"], ["dense_rank"], ["sparse_rank"]: 비교용
-
-직접 실행:
-  uv run python -m rag_service.retrieval_a.hybrid "VGM은 언제까지 내야 하나요?" --k 7
-"""
-
 from __future__ import annotations
 
 import argparse
@@ -44,18 +24,10 @@ from rag_service.retrieval_a.naive import (
 
 CONFIG_PATH = REPO_ROOT / "config" / "retrieval_a" / "hybrid.yaml"
 
-Sparse = dict[str, float]  # 토큰 번호(문자열) : 중요도
-
-
-# ── BGE-M3 인코더 (dense + sparse를 한 번에) ─────────────────────────────
+Sparse = dict[str, float]
 
 
 class BGEM3Encoder:
-    """BGE-M3를 한 번 돌려 dense([CLS] 정규화)와 sparse(토큰별 relu(linear(h)))를 함께 만든다.
-
-    FlagEmbedding의 BGEM3FlagModel과 같은 계산이다 (추가 패키지 없이 transformers로 구현).
-    """
-
     def __init__(self, model_name: str = "BAAI/bge-m3", device: str = "auto", max_length: int = 1024):
         import torch
         from huggingface_hub import hf_hub_download
@@ -67,7 +39,6 @@ class BGEM3Encoder:
         dtype = torch.float16 if self.device.startswith("cuda") else torch.float32
         self.tokenizer = AutoTokenizer.from_pretrained(model_name)
         self.model = AutoModel.from_pretrained(model_name, dtype=dtype).to(self.device).eval()
-        # sparse 헤드: hidden(1024) → 중요도 1개. 모델 저장소의 sparse_linear.pt
         self.sparse_linear = torch.nn.Linear(self.model.config.hidden_size, 1)
         state = torch.load(hf_hub_download(model_name, "sparse_linear.pt"), map_location="cpu")
         self.sparse_linear.load_state_dict(state)
@@ -91,17 +62,16 @@ class BGEM3Encoder:
                     max_length=self.max_length,
                     return_tensors="pt",
                 ).to(self.device)
-                hidden = self.model(**batch).last_hidden_state  # (B, T, 1024)
+                hidden = self.model(**batch).last_hidden_state
                 cls = torch.nn.functional.normalize(hidden[:, 0].float(), dim=-1)
                 dense_out.append(cls.cpu().numpy())
-                weights = torch.relu(self.sparse_linear(hidden)).squeeze(-1).float().cpu().numpy()  # (B, T)
+                weights = torch.relu(self.sparse_linear(hidden)).squeeze(-1).float().cpu().numpy()
                 for ids, w in zip(batch["input_ids"].cpu().numpy(), weights, strict=True):
                     sparse_out.append(_token_weights(ids, w, self.skip_ids))
         return np.concatenate(dense_out), sparse_out
 
 
 def _token_weights(ids, weights, skip_ids) -> Sparse:
-    """같은 토큰이 여러 번 나오면 가장 큰 중요도만 남긴다 (FlagEmbedding과 같은 방식)."""
     out: Sparse = {}
     for tid, w in zip(ids, weights, strict=True):
         tid = int(tid)
@@ -115,15 +85,10 @@ def _token_weights(ids, weights, skip_ids) -> Sparse:
 
 @lru_cache(maxsize=2)
 def _encoder(model_name: str, device: str, max_length: int) -> BGEM3Encoder:
-    """모델은 무거우니 한 번만 올린다."""
     return BGEM3Encoder(model_name, device, max_length)
 
 
-# ── 점수 계산과 합치기 ───────────────────────────────────────────────────
-
-
 def sparse_score(q: Sparse, d: Sparse) -> float:
-    """둘 다 있는 토큰만 중요도를 곱해서 더한다."""
     if len(q) > len(d):
         q, d = d, q
     return sum(w * d[t] for t, w in q.items() if t in d)
@@ -135,7 +100,6 @@ def min_max(x: np.ndarray) -> np.ndarray:
 
 
 def ranks_of(scores: np.ndarray) -> np.ndarray:
-    """점수가 높을수록 1등. ranks[i] = 문서 i의 순위."""
     order = np.argsort(-scores, kind="stable")
     ranks = np.empty(len(scores), dtype=int)
     ranks[order] = np.arange(1, len(scores) + 1)
@@ -158,11 +122,7 @@ def fuse(
     raise ValueError(f"fusion.method는 minmax 또는 rrf여야 합니다: {method!r}")
 
 
-# ── 문서 색인 (Qdrant에서 읽기 + sparse 계산/캐시) ───────────────────────
-
-
 def index_text(doc: Document, use_context: bool = True) -> str:
-    """sparse를 계산할 텍스트. dense 색인과 같게 [제목 | 섹션 | pN] + 맥락 + 원문."""
     if not use_context:
         return doc.page_content
     m = doc.metadata
@@ -171,7 +131,6 @@ def index_text(doc: Document, use_context: bool = True) -> str:
 
 
 def load_points(client, collection: str, levels: list[str]) -> tuple[list[Document], np.ndarray]:
-    """Qdrant에서 levels 청크의 원문·메타데이터와 dense 벡터를 모두 읽는다."""
     docs, vecs = [], []
     offset = None
     while True:
@@ -205,7 +164,6 @@ def _doc_key(doc: Document, text: str) -> str:
 def doc_sparse_weights(
     docs: list[Document], encoder_fn, cache_path: Path, *, use_context: bool, batch_size: int
 ) -> list[Sparse]:
-    """문서 sparse 가중치. 캐시에 있으면 꺼내 쓰고, 새 청크·바뀐 청크만 계산한다."""
     cache: dict[str, Sparse] = {}
     if cache_path.exists():
         with open(cache_path, encoding="utf-8") as f:
@@ -225,18 +183,13 @@ def doc_sparse_weights(
     return [cache[k] for k in keys]
 
 
-# ── 검색기 ───────────────────────────────────────────────────────────────
-
-
 class HybridRetriever(BaseRetriever):
-    """BGE-M3 dense + sparse 점수를 합쳐 상위 top_k 청크를 돌려주는 검색기."""
-
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     docs: list[Document]
-    dense_matrix: Any  # (N, 1024) 정규화된 문서 dense 벡터
+    dense_matrix: Any
     doc_sparse: list[Sparse]
-    encode_query: Any  # str -> (dense 벡터, sparse 표)
+    encode_query: Any
     top_k: int = 5
     method: str = "minmax"
     dense_weight: float = 0.7
@@ -279,12 +232,6 @@ def build_hybrid_retriever(
     levels: list[str] | None = None,
     config_path: Path = CONFIG_PATH,
 ) -> BaseRetriever:
-    """Hybrid 검색기 (공통 체인용).
-
-    chain.py에서 `build_hybrid_retriever(domain=domain, difficulty=difficulty)`로 한 번 만들고,
-    질문마다 `retriever.invoke(question)`으로 list[Document]를 받는다.
-    만들 때 Qdrant에서 청크와 dense 벡터를 한 번 읽고, 문서 sparse 가중치를 준비한다(캐시).
-    """
     cfg = load_config(config_path)
     levels = levels or cfg["search"]["levels"]
     name = collection_name(cfg, domain=domain, difficulty=difficulty)

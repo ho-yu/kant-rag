@@ -1,5 +1,3 @@
-"""retrieval_a Naive — 네트워크·모델 없이 확인할 수 있는 부분."""
-
 import pytest
 from qdrant_client import models
 
@@ -36,7 +34,6 @@ def test_level_filter_matches_metadata_level():
 
 
 def test_chain_style_call(monkeypatch):
-    """chain.py처럼 build_naive_retriever(domain=..., difficulty=...)로 부르면 맞는 컬렉션·검색 옵션이 쓰인다."""
     seen = {}
 
     class FakeStore:
@@ -54,5 +51,5 @@ def test_chain_style_call(monkeypatch):
     assert seen["kwargs"]["search_kwargs"]["k"] == load_config()["search"]["top_k"]
     assert seen["kwargs"]["search_kwargs"]["filter"].must[0].match.any == ["para", "table"]
 
-    with pytest.raises(TypeError):  # 위치 인자로 부르면 순서가 헷갈리므로 막아 둔다
+    with pytest.raises(TypeError):
         build_naive_retriever("shipping", "basic")

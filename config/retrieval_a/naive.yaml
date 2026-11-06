@@ -1,18 +1,15 @@
-# 검색 구현 A — Naive RAG (dense 벡터 검색만 사용)
-# 공통 청킹·색인 설정은 config/chunking.yaml. 여기 값은 그 색인을 "읽는" 방법만 정한다.
-
 collection:
-  prefix: kant                  # 컬렉션 이름 = {prefix}_{domain}_{difficulty}_{model_tag}
+  prefix: kant
   domain: shipping
-  difficulty: basic             # basic | intermediate | advanced
+  difficulty: basic
   model_tag: bge-m3
-  vector_name: ""               # 이름 없는 기본 벡터면 빈 문자열
+  vector_name: ""
 
 embedding:
-  model_name: BAAI/bge-m3       # 색인할 때와 같은 모델이어야 한다
-  device: auto                  # auto = GPU 있으면 cuda, 없으면 cpu
+  model_name: BAAI/bge-m3
+  device: auto
   normalize: true
 
 search:
   top_k: 5
-  levels: [para, table]         # 실험 B. page만 쓰려면 [page] (실험 A)
+  levels: [para, table]

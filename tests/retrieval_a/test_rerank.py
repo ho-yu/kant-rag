@@ -1,5 +1,3 @@
-"""retrieval_a Hybrid + Reranker — 네트워크·모델 없이 확인할 수 있는 부분."""
-
 from langchain_core.documents import Document
 from langchain_core.retrievers import BaseRetriever
 
@@ -31,8 +29,8 @@ def test_reranker_reorders_hybrid_candidates():
     got = r.invoke("부작용이 없는 감기약")
     assert [d.metadata["chunk_id"] for d in got] == ["C-1", "A-1"]
     assert got[0].metadata["rerank_score"] == 0.96 and got[0].metadata["hybrid_rank"] == 3
-    assert seen["query"] == "부작용이 없는 감기약" and len(seen["texts"]) == 3  # 후보 전부를 채점
-    assert "rerank_score" not in cands[2].metadata  # 원본 Document는 건드리지 않음
+    assert seen["query"] == "부작용이 없는 감기약" and len(seen["texts"]) == 3
+    assert "rerank_score" not in cands[2].metadata
 
 
 def test_reranker_input_includes_title_when_use_context():
@@ -55,7 +53,6 @@ def test_empty_candidates():
 
 
 def test_chain_style_call(monkeypatch):
-    """chain.py처럼 build_rerank_retriever(domain=..., difficulty=...)로 부르면 Hybrid 후보 50개 → 최종 top_k."""
     seen = {}
 
     def fake_build_hybrid(**kwargs):
