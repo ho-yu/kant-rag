@@ -1,0 +1,28 @@
+# retrieval_a Hybrid = BGE-M3 dense + BGE-M3 sparse → 점수 합치기 (리랭커 없음)
+# 컬렉션·임베딩 설정은 naive.yaml과 같게 둔다 (같은 Qdrant 컬렉션의 dense 벡터를 쓴다)
+collection:
+  prefix: kant
+  domain: shipping
+  difficulty: basic
+  model_tag: bge-m3
+  vector_name: ""
+
+embedding:
+  model_name: BAAI/bge-m3
+  device: auto            # auto = GPU 있으면 cuda, 없으면 cpu
+  max_length: 1024        # 청크(최대 300토큰) + 제목·맥락이 들어갈 만큼
+  batch_size: 16
+
+search:
+  top_k: 5                # 최종으로 돌려줄 개수
+  levels: [para, table]   # naive와 같게 (실험 B)
+
+sparse:
+  use_context: true       # sparse 계산 텍스트에 [제목 | 섹션 | 쪽] + 맥락(context)도 넣기 (dense 색인과 같은 방식)
+  cache_dir: artifacts/retrieval_a/sparse_cache   # 문서별 sparse 가중치 캐시 (청크가 바뀌면 자동으로 다시 계산)
+
+fusion:
+  method: minmax          # minmax = 0~1로 맞춘 뒤 가중합 / rrf = 순위로 합치기
+  dense_weight: 0.7
+  sparse_weight: 0.3
+  rrf_k: 60               # method: rrf 일 때만 사용. 점수 = weight / (rrf_k + 순위)

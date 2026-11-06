@@ -1,0 +1,16 @@
+# retrieval_a Hybrid + Reranker
+# 1단계: hybrid.yaml 설정 그대로 Hybrid 검색 → 후보 candidate_k개
+# 2단계: bge-reranker-v2-m3가 (질문, 후보) 쌍을 함께 읽고 재채점 → 상위 top_k개
+hybrid_config: config/retrieval_a/hybrid.yaml   # 1단계 설정 (컬렉션·가중치 등은 여기서 바꾼다)
+
+search:
+  candidate_k: 50         # Hybrid에서 리랭커로 넘길 후보 개수
+  top_k: 5                # 최종으로 돌려줄 개수 (naive·hybrid와 같게 두고 비교)
+
+reranker:
+  model_name: BAAI/bge-reranker-v2-m3
+  device: auto            # auto = GPU 있으면 cuda, 없으면 cpu
+  fp16: true              # GPU일 때만 적용 (메모리 절반, 속도 향상)
+  max_length: 1024        # 질문 + 청크(최대 300토큰) + 제목·맥락
+  batch_size: 16
+  use_context: true       # 리랭커 입력에 [제목 | 섹션 | 쪽] + 맥락(context)도 넣기 (hybrid와 같은 텍스트)
