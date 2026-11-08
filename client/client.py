@@ -221,13 +221,14 @@ def parse_sources(text):
     return blocks
 
 
+SOURCE_FIELDS = ["file_name", "page", "book_id", "chunk_id", "domain", "difficulty"]  # 출처에 한 줄씩 보여 줄 항목
+
+
 def show_source(b):
-    """출처 하나: 제목(번호·파일·page) → 작은 글씨로 ID 정보 → 원문(인용 상자)"""
-    st.markdown(f"**{b['id']} {b.get('file_name', '?')} · page {b.get('page', '?')}**")
-    st.caption(
-        f"book_id {b.get('book_id', '?')} · chunk_id {b.get('chunk_id', '?')} · "
-        f"{b.get('domain', '?')} / {b.get('difficulty', '?')}"
-    )
+    """출처 하나: [S1] → "항목 : 값"을 한 줄씩 → page_content(인용 상자)"""
+    st.markdown(f"**{b['id']}**")
+    st.markdown("  \n".join(f"{k} : {b[k]}" for k in SOURCE_FIELDS if b.get(k)))  # 줄 끝 공백 2개 = 줄바꿈
+    st.markdown("page_content :")
     st.markdown("\n".join(f"> {line}" for line in b["content"].splitlines()))
 
 
