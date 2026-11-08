@@ -24,7 +24,9 @@ class RagAnswer(BaseModel):
             "needs_clarification이면 필요한 정보를 구체적으로 질문한다. "
             "abstained이면 확인할 수 없는 내용, 보류 이유와 필요한 자료를 설명한다. "
             "일부만 확인되면 확인된 내용과 미확인 내용을 구분한다. "
-            "문서에 근거한 주요 주장에는 [S1]처럼 자료 ID를 표시한다."
+            "문서에 근거한 주요 주장에는 [S1]처럼 자료 ID를 표시한다. "
+            "최종 응답에는 시스템이 답변 뒤에 [출처] 목록(인용한 자료 ID별 page, file_name, book_id, "
+            "chunk_id, domain, difficulty, page_content)을 붙이므로, 출처 목록은 직접 쓰지 않는다."
         )
     )
 
@@ -45,3 +47,31 @@ class RagAnswer(BaseModel):
             "인용할 근거가 없으면 빈 목록을 반환한다."
         )
     )
+
+
+class QueryDecision(BaseModel):
+    """질문 사전 판단 결과 (prompt.query_guard_prompt의 출력 형식)."""
+
+    action: Literal["rag", "direct", "block"] = Field(
+        description="rag: 문서 검색 후 답변, direct: 문서 없이 바로 답변, block: 답변하지 않음"
+    )
+    category: Literal["ok", "injection", "sensitive", "harmful", "meaningless"] = Field(
+        description="block 이유. 차단이 아니면 ok"
+    )
+    search_question: str = Field(
+        description="rag일 때 검색에 쓸 질문. 이전 대화가 필요 없으면 새 질문 그대로, 아니면 빈 문자열"
+    )
+    sub_questions: list[str] = Field(
+        description="search_question이 여러 내용을 물을 때 내용별로 나눈 검색 질문 (최대 3개). 한 가지만 물으면 빈 목록"
+    )
+    reason: str = Field(description="판단 이유 한 문장")
+
+
+class AnswerCheck(BaseModel):
+    """답변 사후 검사 결과 (prompt.answer_guard_prompt의 출력 형식)."""
+
+    verdict: Literal["pass", "block"]
+    category: Literal["ok", "leak", "personal_info", "harmful", "injection_followed"] = Field(
+        description="block 이유. 통과면 ok"
+    )
+    reason: str = Field(description="판단 이유 한 문장")
