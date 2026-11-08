@@ -122,7 +122,7 @@ docs[0].metadata["book_id"], docs[0].metadata["page"], docs[0].metadata["parent_
 ### 3-2. BM25 (하이브리드용)
 
 ```python
-from rag_service.ingestion.corpus import load_chunks
+from rag_service.storage.corpus import load_chunks
 
 chunks = list(load_chunks("basic", levels=["para", "table"]))   # Qdrant와 같은 레벨
 texts = [c.embedding_text() for c in chunks]                    # 검색용 문자열 (Qdrant 임베딩과 같은 입력)
@@ -136,7 +136,7 @@ texts = [c.embedding_text() for c in chunks]                    # 검색용 문�
 ### 3-3. 부모 쪽 원문과 출처 (답변 생성)
 
 ```python
-from rag_service.ingestion.corpus import PageStore
+from rag_service.storage.corpus import PageStore
 
 pages = PageStore("basic")
 m = docs[0].metadata
@@ -162,18 +162,20 @@ source = f"{m['book_id']}.pdf / {m['page']}쪽"        # 출처는 metadata로 �
 
 | 경로 | 파일 | 역할 |
 |---|---|---|
-| `src/rag_service/ingestion/` | `menu.py` | 텍스트 메뉴 (청킹 실행, 되돌리기) |
+| `src/rag_service/ingestion/` **(청킹 전용)** | `menu.py` | 텍스트 메뉴 (청킹 실행, 되돌리기) |
 | | `build_corpus.py` | 명령줄 실행 (메뉴가 내부에서 호출) |
 | | `pdf_reader.py`, `chunker.py`, `context.py`, `writer.py` | PDF 읽기, 청크 만들기, 맥락 생성, jsonl 저장 |
-| | `corpus.py` | jsonl 읽기 `load_chunks`, 부모 쪽 `PageStore` ← **검색·생성 코드에서 사용** |
-| `src/rag_service/storage/` | `qdrant_store.py` | Qdrant 동기화, `level_filter` ← **검색 코드에서 사용** |
+| | `index_sync.py` | Qdrant 업로드 (바뀐 청크만 동기화) |
+| `src/rag_service/storage/` **(공통)** | `corpus.py` | jsonl 읽기 `load_chunks`, 부모 쪽 `PageStore` ← **검색·생성 코드에서 사용** |
+| | `qdrant_store.py` | 컬렉션 이름, 접속, 임베딩, `level_filter` ← **검색 코드에서 사용** |
 | `src/rag_service/contracts/` | `chunk.py` | 청크 형식 (필드 정의) |
 | `config/` | `chunking.yaml` | 청킹·색인·맥락 설정 |
 | `client/` | `client.py` | Streamlit 화면 (검색 방식 라디오: naive / hybrid / hybrid+rerank) |
 | | `client_test.py` | 테스트용 RAG (검색 → 부모 쪽 → 답변·출처). 정식 코드 전까지 임시 |
 | | `client_test2.py` | 골든 데이터셋 평가 (Hit@k, Recall@k, 판단 일치, Judge) → `results/client_test/` |
 | `evaluation/retrieval/` | `check_chunk_coverage.py` | 근거 보존 검사 (평가 전용) |
-| `tests/ingestion/`, `tests/storage/` | 테스트 3개 | `uv run pytest`로 기존 기능 확인 |
+| `tests/ingestion/` | `test_chunking.py`, `test_menu.py`, `test_index_sync.py` | 청킹 코드 확인 (README.md 참고) |
+| `tests/storage/` | `test_qdrant_store.py` | 공통 기능 확인 (README.md 참고) |
 
 ## 6. 자주 묻는 것
 

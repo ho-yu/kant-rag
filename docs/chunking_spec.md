@@ -197,7 +197,7 @@ uv run pytest tests/ingestion tests/storage -q
 검색 코드에서 쓰는 법:
 
 ```python
-from rag_service.ingestion.corpus import load_chunks, PageStore
+from rag_service.storage.corpus import load_chunks, PageStore
 
 chunks = list(load_chunks("basic", levels=["para", "table"]))   # BM25용 (최신 jsonl)
 texts = [c.embedding_text() for c in chunks]
@@ -279,19 +279,22 @@ docs[0].metadata["book_id"], docs[0].metadata["page"], docs[0].metadata["parent_
 ```
 config/chunking.yaml                  청킹·색인·맥락 설정
 src/rag_service/contracts/chunk.py    청크 형식 (pydantic), embedding_text(), point_id
-src/rag_service/ingestion/
+src/rag_service/ingestion/            ← 청킹 전용
   ├─ pdf_reader.py                    PDF → 쪽별 머리글/제목/문단/표(제목·각주)
   ├─ chunker.py                       쪽 → page/para/table/row 청크
   ├─ context.py                       쪽 단위 맥락 생성 (캐시, 숫자 검사)
   ├─ writer.py                        문서별 jsonl 저장 (90MB 분할), history 보관, manifest
-  ├─ corpus.py                        최신 jsonl 읽기 (load_chunks, PageStore), 설정 읽기
+  ├─ index_sync.py                    Qdrant 포인트 단위 동기화 (바뀐 것만, 벡터 재사용)
   ├─ build_corpus.py                  명령줄 실행 진입점 (증분 처리, --restore, Qdrant 동기화 호출)
   └─ menu.py                          텍스트 메뉴 (청킹 실행, 되돌리기)
-src/rag_service/storage/qdrant_store.py   임베딩 + Qdrant 포인트 단위 동기화 (벡터 재사용, level_filter)
+src/rag_service/storage/              ← 공통 (검색·생성 코드도 import)
+  ├─ corpus.py                        최신 jsonl 읽기 (load_chunks, PageStore), 설정 읽기
+  └─ qdrant_store.py                  컬렉션 이름, 접속, bge-m3 임베딩, level_filter
 evaluation/retrieval/check_chunk_coverage.py   근거 보존 검사 (평가 전용)
 tests/ingestion/test_chunking.py      청킹·분할·증분·추가/삭제/되돌리기·맥락(가짜 LLM) 테스트
 tests/ingestion/test_menu.py          메뉴 (입력을 흘려 넣어 화면·결과 확인)
-tests/storage/test_qdrant_store.py    로컬 Qdrant + 가짜 임베딩: 바뀐 것만 동기화, 번호 밀림, 되돌리기, LangChain 읽기
+tests/ingestion/test_index_sync.py    로컬 Qdrant + 가짜 임베딩: 바뀐 것만 동기화, 번호 밀림, 되돌리기
+tests/storage/test_qdrant_store.py    공통 기능: LangChain 읽기, 컬렉션 이름, level_filter, GPU→CPU 대체
 ```
 
 ## 14. 남은 확인사항
