@@ -4,6 +4,8 @@ from langchain_core.runnables import RunnableLambda, RunnablePassthrough
 
 from rag_service.contracts.schemas import RagAnswer
 from rag_service.generation.prompt import answer_prompt
+from rag_service.observability import with_langfuse
+from rag_service.generation.sources import add_sources
 
 from rag_service.retrieval_a import build_hybrid_retriever, build_naive_retriever, build_rerank_retriever
 
@@ -11,9 +13,26 @@ from rag_service.retrieval_a import build_hybrid_retriever, build_naive_retrieve
 def format_docs(docs: list[Document]) -> str:
     return "\n\n".join(
         f"[S{i}] {doc.metadata['book_id']}.pdf "
-        f"/ {doc.metadata['page']}쪽\n{doc.page_content}"
+        f"/ page {doc.metadata['page']}\n{doc.page_content}"
         for i, doc in enumerate(docs, start=1)
     )
+
+
+MAX_DOCS = 8  # 나눠 찾기(sub_questions)로 합친 검색 결과를 LLM에 넘기는 최대 개수
+
+
+def merge_docs(results: list[list[Document]], limit: int = MAX_DOCS) -> list[Document]:
+    """질문별 검색 결과를 순위대로 번갈아 합친다 (각 질문의 1위 → 2위 …). 같은 청크는 한 번만."""
+    merged, seen = [], set()
+    for rank in range(max((len(r) for r in results), default=0)):
+        for docs in results:
+            if rank < len(docs):
+                doc = docs[rank]
+                key = doc.metadata.get("chunk_id") or doc.page_content
+                if key not in seen:
+                    seen.add(key)
+                    merged.append(doc)
+    return merged[:limit]
 
 
 def create_chain(domain, difficulty):
@@ -25,18 +44,33 @@ def create_chain(domain, difficulty):
         "hybrid_rerank": build_rerank_retriever(domain=domain, difficulty=difficulty),
         }
         
-    def retrieve_context(request):
+    def retrieve_docs(request):
+        """question 하나로 검색. sub_questions가 있으면 질문별로 검색해서 번갈아 합친다
+        (여러 내용을 묻는 질문에서 한 내용의 자료가 검색 결과를 독차지하지 않게)."""
         search_question = request.get("question")
         mode = request.get("retrieval_mode", "naive")
-        docs = retrievers[mode].invoke(search_question)
-        return format_docs(docs)
-    
+        sub_questions = [q.strip() for q in request.get("sub_questions") or [] if q and q.strip()]
+        if not sub_questions:
+            return retrievers[mode].invoke(search_question)
+        queries = list(dict.fromkeys([search_question, *sub_questions]))
+        return merge_docs([retrievers[mode].invoke(q) for q in queries])
+
+    def retrieve_context(request):
+        return format_docs(request["docs"])
+
     chain = (
             RunnablePassthrough.assign(
+                docs=RunnableLambda(retrieve_docs)
+            )
+            | RunnablePassthrough.assign(
                 context=RunnableLambda(retrieve_context)
             )
-            | answer_prompt
-            | model.with_structured_output(RagAnswer)
+            | RunnablePassthrough.assign(
+                answer=answer_prompt | model.with_structured_output(RagAnswer)
+            )
+            | RunnableLambda(
+                lambda request: add_sources(request, domain=domain, difficulty=difficulty)
+            )
         )
 
-    return chain
+    return with_langfuse(chain, domain=domain, difficulty=difficulty)
