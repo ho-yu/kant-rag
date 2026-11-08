@@ -57,6 +57,10 @@ RETRIEVAL_MODES = {
 }
 DEFAULT_RETRIEVAL_MODE = "naive"
 
+# page 확장: 찾은 문단·표 대신 그 쪽(page) 전체 원문을 LLM에 넣는다 (같은 파일+page는 한 번만).
+# 사이드바 스위치의 처음 값. 켜면 답에 쓸 내용이 늘지만 토큰·응답 시간도 는다
+DEFAULT_PAGE_CONTEXT = False
+
 # [변경] 도메인별 설명 (판단 프롬프트에 쓰임). 도메인을 열 때 여기에 추가
 DOMAIN_HINTS = {
     "shipping": "해운 예약·서류 제출·VGM·선하증권·마감일·담당 창구 등 업무 문서 내용",
@@ -89,7 +93,7 @@ def get_chain(domain, difficulty):
     return create_chain(domain=domain, difficulty=difficulty)
 
 
-def get_answer(question, history, difficulty, domain, retrieval_mode):  # [변경] retrieval_mode 추가
+def get_answer(question, history, difficulty, domain, retrieval_mode, page_context=False):
     """전체 흐름: 사전 판단 → (차단 / 직접 답변 / RAG) → 답변 검사.
     {"answer", "sources", "route", "search_question"}를 돌려준다."""
     decision = decide_route(question, history, domain)
@@ -99,7 +103,8 @@ def get_answer(question, history, difficulty, domain, retrieval_mode):  # [변�
         result = answer_directly(question, history)
     else:
         result = answer_with_rag(
-            decision["search_question"], decision["sub_questions"], history, difficulty, domain, retrieval_mode
+            decision["search_question"], decision["sub_questions"], history, difficulty, domain, retrieval_mode,
+            page_context,
         )
     result = check_answer(question, result)
     result["route"] = decision["action"] if result.get("route") != "blocked_answer" else "blocked_answer"
@@ -138,16 +143,22 @@ def decide_route(question, history, domain):
     return {"action": d.action, "search_question": search_question, "sub_questions": sub_questions}
 
 
-def answer_with_rag(search_question, sub_questions, history, difficulty, domain, retrieval_mode):
+def answer_with_rag(search_question, sub_questions, history, difficulty, domain, retrieval_mode, page_context=False):
     """RAG 체인을 호출한다. search_question은 사전 판단이 다시 쓴 검색용 질문 (필요 없으면 원래 질문).
     sub_questions는 여러 내용을 묻는 질문을 내용별로 나눈 검색 질문 (없으면 빈 목록 → 기존과 같은 검색).
 
     difficulty, domain으로 어떤 데이터(컬렉션)를 검색할지 정한다.
     retrieval_mode는 "naive" / "hybrid" / "hybrid_rerank" 중 하나 (RETRIEVAL_MODES 참고).
+    page_context가 True면 찾은 청크 대신 그 쪽(page) 전체를 컨텍스트로 넣는다 (pipeline/chain.py의 to_pages).
     돌려줄 형식: {"answer": 답변 문자열(끝에 [출처] 포함), "sources": []}
     """
     result = get_chain(domain, difficulty).invoke(
-        {"question": search_question, "sub_questions": sub_questions, "retrieval_mode": retrieval_mode}
+        {
+            "question": search_question,
+            "sub_questions": sub_questions,
+            "retrieval_mode": retrieval_mode,
+            "page_context": page_context,
+        }
     )
     return {"answer": result.answer, "sources": [], "status": result.status}
 
@@ -193,6 +204,11 @@ def fix_bold(text):
     return re.sub(r"\*\*(?=\S)(.+?)(?<=\S)\*\*", lambda m: f"**\u200b{m.group(1)}\u200b**", text)
 
 
+def strip_marks(text):
+    """답변 본문의 [S1][S3] 같은 출처 번호 표시를 화면에서만 지운다 (출처 상자는 그대로)."""
+    return re.sub(r"\s*\[S\d+\]", "", text)
+
+
 def parse_sources(text):
     """generation/sources.py가 만든 [출처] 글을 출처별 dict 목록으로 나눈다.
     각 출처: [S1] 줄 + "키 : 값" 줄들, page_content는 마지막 항목이라 여러 줄(표 포함)일 수 있다."""
@@ -219,7 +235,7 @@ def show_message(m):
     """메시지 하나를 화면에 그린다. (답변이면 출처, 사용 방식, 응답 시간도 함께)"""
     with st.chat_message(m["role"]):
         body, _, sources_text = m["content"].partition(SOURCES_MARK)
-        st.markdown(fix_bold(body))
+        st.markdown(fix_bold(strip_marks(body)))
         if sources_text:  # 답변 뒤 [출처] 글 → 출처마다 보기 좋게 나눠 보여 준다
             blocks = parse_sources(sources_text)
             with st.expander(f"출처 {len(blocks)}건"):
@@ -230,6 +246,8 @@ def show_message(m):
         info = []
         if m.get("route") == "rag":
             info.append(f"RAG 사용 · {m['mode']}" if m.get("mode") else "RAG 사용")
+            if m.get("page_context"):
+                info.append("page 확장")
         elif m.get("route") == "direct":
             info.append("직접 답변")
         elif m.get("route") == "block":
@@ -272,6 +290,11 @@ with st.sidebar:
         "검색 방식", list(RETRIEVAL_MODES), index=list(RETRIEVAL_MODES).index(DEFAULT_RETRIEVAL_MODE)
     )
     retrieval_mode = RETRIEVAL_MODES[mode_label]
+    # page 확장 켜고 끄기. 바꿔도 대화는 유지해서 같은 질문을 켜고 끈 상태로 비교할 수 있다
+    page_context = st.toggle(
+        "page 확장", value=DEFAULT_PAGE_CONTEXT,
+        help="찾은 문단·표 대신 그 쪽(page) 전체를 LLM에 넣는다. 같은 파일+page는 한 번만",
+    )
     if st.button("새 채팅", use_container_width=True):
         reset_chat()
         st.rerun()
@@ -288,7 +311,7 @@ if question := st.chat_input("질문을 입력하세요"):
         try:
             started = time.time()
             with trace_request(question) as trace:  # 질문 한 건을 Langfuse 기록 하나로 묶는다
-                result = get_answer(question, history, difficulty, domain, retrieval_mode)
+                result = get_answer(question, history, difficulty, domain, retrieval_mode, page_context)
                 trace.update(output=result)
             elapsed = time.time() - started
         except OpenAIError as e:
@@ -307,8 +330,9 @@ if question := st.chat_input("질문을 입력하세요"):
         "sub_questions": result.get("sub_questions", []),
         "question": question,
         "mode": mode_label,
+        "page_context": page_context,
         "elapsed": elapsed,
     }
     show_message(reply)
     st.session_state.messages.append({"role": "user", "content": question})
-    st.session_state.messages.append(reply)
+    st.session_state.messages.append(reply)

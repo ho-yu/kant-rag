@@ -4,6 +4,7 @@
 - get_client(cfg): .env의 QDRANT_URL·QDRANT_API_KEY로 접속 (비어 있으면 로컬 폴더 index.local_path)
 - Embedder: bge-m3 dense 임베딩 (정규화 → cosine, 기본 GPU fp16, 없으면 CPU)
 - level_filter(["para", "table"]): 검색할 레벨만 고르는 필터
+- get_pages(컬렉션, ["SB11-p5", ...]): page 청크(쪽 전체)를 chunk_id로 꺼낸다 (page 확장용)
 
 Qdrant에 올리기(동기화)는 청킹 담당 전용이라 rag_service/ingestion/index_sync.py에 있다.
 
@@ -21,6 +22,7 @@ from __future__ import annotations
 
 import logging
 import os
+from functools import lru_cache
 
 from rag_service.storage.corpus import repo_root
 
@@ -83,6 +85,34 @@ class Embedder:
         vecs = self.model.encode(texts, batch_size=self.batch_size, normalize_embeddings=True,
                                  show_progress_bar=len(texts) > self.batch_size)
         return [v.tolist() for v in vecs]
+
+
+@lru_cache(maxsize=1)
+def _read_client():
+    """읽기 전용 접속 (.env의 QDRANT_URL·QDRANT_API_KEY). 처음 한 번만 접속한다."""
+    from qdrant_client import QdrantClient
+
+    return QdrantClient(url=os.getenv("QDRANT_URL"), api_key=os.getenv("QDRANT_API_KEY") or None, timeout=60)
+
+
+def get_pages(collection: str, page_ids: list[str]) -> dict[str, dict]:
+    """page 청크를 chunk_id로 꺼낸다 → {chunk_id: payload}. Qdrant에 없는 쪽은 빠진다.
+
+    page 청크 chunk_id = {book_id}-p{page} (예: SB11-p5), 포인트 ID = chunk_point_id(chunk_id).
+    payload = {"page_content": 쪽 전체 원문, "metadata": {...}}
+    """
+    from rag_service.contracts.chunk import chunk_point_id
+
+    if not page_ids:
+        return {}
+    points = _read_client().retrieve(
+        collection, ids=[chunk_point_id(p) for p in page_ids], with_payload=True, with_vectors=False
+    )
+    pages = {}
+    for point in points:
+        payload = point.payload or {}
+        pages[payload.get("metadata", {}).get("chunk_id")] = payload
+    return pages
 
 
 def level_filter(levels: list[str], negate: bool = False):
