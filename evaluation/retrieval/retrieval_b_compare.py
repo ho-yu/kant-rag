@@ -107,7 +107,7 @@ def git_commit() -> str | None:
 
 
 def print_table(results: dict[str, Any], ks: Sequence[int]) -> None:
-    head = f"{'mode':<10} {'k':>3} {'n':>3} {'docHit':>7} {'pageHit':>8} {'pageRec':>8} {'pageGrp':>8}"
+    head = f"{'mode':<10} {'k':>3} {'n':>3} {'docHit':>7} {'pageHit':>8} {'pageRec':>8} {'pageGrp':>8} {'pageMRR':>8}"
     print(head)
     print("-" * len(head))
     for mode, res in results.items():
@@ -121,10 +121,11 @@ def print_table(results: dict[str, Any], ks: Sequence[int]) -> None:
                 s["page_hit"],
                 s["page_recall"],
                 s["page_group_recall"],
+                s.get("page_mrr"),
             ]
             text = " ".join(
                 f"{'-' if v is None else f'{v:.3f}':>{w}}"
-                for v, w in zip(cells, (7, 8, 8, 8), strict=True)
+                for v, w in zip(cells, (7, 8, 8, 8, 8), strict=True)
             )
             print(f"{mode:<10} {k:>3} {s['n']:>3} {text}")
         lat = res["latency_ms"]

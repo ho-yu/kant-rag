@@ -29,6 +29,7 @@ from rag_service.retrieval_b.metrics import (
     hit_recall,
     load_golden,
     page_groups,
+    reciprocal_rank,
     score_question,
 )
 from rag_service.storage.corpus import repo_root
@@ -123,6 +124,53 @@ def test_union_and_group_recall_on_or_group():
     s = score_question(q, [doc("SB01", 1)], k=5)
     assert s["page_recall"] == 0.5
     assert s["page_group_recall"] == 1.0
+
+
+# ---------- MRR ----------
+
+
+@pytest.mark.parametrize(
+    ("keys", "expected"),
+    [(["A", "B"], 1.0), (["X", "A"], 0.5), (["X", "Y", "B"], 1 / 3), (["X", "Y"], 0.0)],
+)
+def test_reciprocal_rank_hand_calculation(keys, expected):
+    assert reciprocal_rank(keys, {"A", "B"}) == pytest.approx(expected)
+
+
+def test_reciprocal_rank_empty_gold_is_none():
+    assert reciprocal_rank(["A"], set()) is None
+
+
+def test_mrr_uses_first_gold_rank_only():
+    """정답 두 개가 2등, 3등이면 처음 나온 2등만 본다 → 0.5"""
+    q = item([[("SB01", 1)], [("SB02", 2)]])
+    docs = [doc("SB09", 1), doc("SB01", 1), doc("SB02", 2)]
+    assert score_question(q, docs, k=3)["page_mrr"] == 0.5
+
+
+def test_mrr_doc_and_page_differ():
+    """같은 문서의 다른 쪽이 1등, 정답 쪽이 3등 → 문서 MRR 1.0, 쪽 MRR 1/3"""
+    q = item([[("SB01", 2)]])
+    docs = [doc("SB01", 5), doc("SB03", 1), doc("SB01", 2)]
+    s = score_question(q, docs, k=3)
+    assert s["doc_mrr"] == 1.0
+    assert s["page_mrr"] == pytest.approx(1 / 3)
+
+
+def test_mrr_respects_k_cut():
+    """정답이 3등인데 k=2로 자르면 0"""
+    q = item([[("SB01", 2)]])
+    docs = [doc("SB03", 1), doc("SB04", 1), doc("SB01", 2)]
+    assert score_question(q, docs, k=2)["page_mrr"] == 0.0
+    assert score_question(q, docs, k=3)["page_mrr"] == pytest.approx(1 / 3)
+
+
+def test_mrr_is_averaged_by_summarize():
+    """질문 둘: 1등(1.0)과 2등(0.5) → 평균 0.75"""
+    items = [item([[("A", 1)]], qid="Q1"), item([[("B", 1)]], qid="Q2")]
+    answers = {"Q1 질문": [doc("A", 1)], "Q2 질문": [doc("X", 1), doc("B", 1)]}
+    res = evaluate(RunnableLambda(lambda q: answers[q]), items, ks=(5,))
+    assert res["summary"]["5"]["page_mrr"] == 0.75
 
 
 def test_no_gold_question_scores_none():

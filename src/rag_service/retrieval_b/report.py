@@ -25,6 +25,8 @@ METRIC_LABELS = {
     "page_hit": "쪽 Hit",
     "page_recall": "쪽 Recall",
     "page_group_recall": "쪽 묶음 Recall",
+    "doc_mrr": "문서 MRR",
+    "page_mrr": "쪽 MRR",
 }
 ACTION_LABELS = {"answer": "답변", "clarify": "되묻기", "abstain": "답변 보류"}
 GROUP_LABELS = {
@@ -110,17 +112,19 @@ def _metric_rows(
         summaries = {m: r["summary"][str(k)] for m, r in ok.items()}
         best = {}
         for name in metrics:
-            values = [s[name] for s in summaries.values() if s[name] is not None]
+            # 예전 결과 JSON에는 MRR 같은 새 지표가 없을 수 있어 .get으로 읽는다
+            values = [
+                s.get(name) for s in summaries.values() if s.get(name) is not None
+            ]
             if len(values) > 1 and max(values) != min(values):
                 best[name] = max(values)
         for j, (mode, s) in enumerate(summaries.items()):
             cls = ' class="sep"' if i and not j else ""
             cells = []
             for name in metrics:
-                mark = " best" if name in best and s[name] == best[name] else ""
-                cells.append(
-                    f'<td class="num{mark}">{_num(s[name])}{_bar(s[name])}</td>'
-                )
+                value = s.get(name)
+                mark = " best" if name in best and value == best[name] else ""
+                cells.append(f'<td class="num{mark}">{_num(value)}{_bar(value)}</td>')
             rows.append(
                 f"<tr{cls}><td>{escape(mode)}</td><td class='num'>{k}</td>"
                 f"<td class='num'>{s['n']}</td>{''.join(cells)}</tr>"

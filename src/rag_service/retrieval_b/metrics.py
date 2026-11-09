@@ -9,6 +9,10 @@ Recall은 두 방식으로 센다. 대표 값은 팀과 정한다.
 - 묶음 방식(group_recall): evidence_groups의 묶음 하나는 "이 중 하나면 충분"(OR)이다.
   묶음마다 후보를 하나라도 찾으면 그 묶음을 채운 것으로 보고, 채운 묶음의 비율을 센다.
 
+MRR(doc_mrr, page_mrr): 상위 k개 안에서 처음 나온 정답의 순위 r로 1/r을 내고 평균한다.
+Hit는 "있나"만 보고, MRR은 "얼마나 위에 있나"까지 본다 (k 안에 없으면 0).
+eval_retrieval.py의 MRR은 "모든 묶음을 찾은 순위" 기준이라 값이 다를 수 있다.
+
 주의: 튜터 답변(11/6)대로 골든셋에 없는 쪽이라도 실제 근거면 정답이다.
 그래서 이 점수는 검색 성능을 낮게 볼 수 있다. 답변 단위 판정(LLM 채점)과 같이 본다.
 
@@ -37,6 +41,8 @@ METRICS = (
     "page_hit",
     "page_recall",
     "page_group_recall",
+    "doc_mrr",
+    "page_mrr",
 )
 
 Page = tuple[str, int]
@@ -136,6 +142,30 @@ def group_recall(found: set, groups: Sequence[set]) -> float | None:
     return sum(1 for g in groups if found & g) / len(groups)
 
 
+def reciprocal_rank(keys: Sequence[Any], gold: set) -> float | None:
+    """처음 나온 정답의 순위 r로 1/r을 돌려준다 (1등 1.0, 2등 0.5, 없으면 0.0).
+
+    keys는 상위 k개 청크를 순서대로 문서·쪽 키로 바꾼 목록이다. 정답이 비어 있으면 None.
+    """
+    if not gold:
+        return None
+    for rank, key in enumerate(keys, start=1):
+        if key in gold:
+            return 1 / rank
+    return 0.0
+
+
+def _doc_key(d: Document) -> str | None:
+    return d.metadata.get("book_id") or None
+
+
+def _page_key(d: Document) -> Page | None:
+    m = d.metadata
+    if not m.get("book_id") or m.get("page") is None:
+        return None
+    return (m["book_id"], int(m["page"]))
+
+
 def score_question(
     item: dict[str, Any], docs: Sequence[Document], k: int
 ) -> dict[str, Any]:
@@ -155,6 +185,8 @@ def score_question(
         "page_hit": None if page_hr is None else page_hr[0],
         "page_recall": None if page_hr is None else page_hr[1],
         "page_group_recall": group_recall(f_pages, page_groups(item)),
+        "doc_mrr": reciprocal_rank([_doc_key(d) for d in top], gold_docs(item)),
+        "page_mrr": reciprocal_rank([_page_key(d) for d in top], g_pages),
         "found_chunk_ids": [d.metadata.get("chunk_id") for d in top],
         "missing_pages": sorted([list(p) for p in g_pages - f_pages]),
     }

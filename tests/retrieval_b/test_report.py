@@ -191,3 +191,14 @@ def test_page_link_returns_file_uri_and_opens_only_when_asked(tmp_path, monkeypa
     assert opened == []
     assert page_link(path, open_browser=True) == uri
     assert opened == [uri]
+
+
+def test_mrr_columns_shown_and_old_json_without_mrr_still_renders():
+    """MRR이 있으면 값이 보이고, MRR이 없던 예전 결과 JSON은 '-'로 보인다."""
+    report = make_report()
+    report["results"]["bm25"]["summary"]["5"].update(doc_mrr=1.0, page_mrr=0.75)
+    page = render_html(report, ITEMS)
+    assert "<th class='num'>문서 MRR</th>" in page
+    assert "<th class='num'>쪽 MRR</th>" in page
+    assert ">0.750<" in page
+    assert render_html(make_report(), ITEMS)  # MRR 키가 없어도 KeyError 없이 만들어진다
