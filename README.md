@@ -30,7 +30,7 @@
 
 ## 1. 진행 현황 (발제 필수 과제 기준)
 
-> 기준: main `7eca27f` (2026-11-09). ✅ 구현됨 · 🟡 일부 구현 · ⬜ 아직 없음
+> 기준: main `8e78d89` (2026-11-09). ✅ 구현됨 · 🟡 일부 구현 · ⬜ 아직 없음
 
 | 필수 과제 | 항목 | 상태 | 위치 |
 |---|---|---|---|
@@ -42,14 +42,14 @@
 | | 채팅 화면 (Streamlit) | ✅ | `client/client.py` |
 | **2. 세 가지 RAG 방식 비교** | Naive / Hybrid / Hybrid + Rerank 검색기 | ✅ 두 가지 구현 | `retrieval_a/`, `retrieval_b/` (아래 3장) |
 | | 같은 질문으로 검색 성능 비교 | ✅ 검색 지표 | `evaluation/retrieval/retrieval_b_compare.py` |
-| | 같은 질문으로 답변 품질 비교 | ⬜ | — |
+| | 같은 질문으로 답변 품질 비교 | 🟡 retrieval_a 3방식 RAGAS | `retrieval_a/eval_ragas.py` |
 | **3. FastAPI · LangChain · Langfuse** | LangChain 체인 (검색 → 프롬프트 → gpt-6-luna → 출처) | ✅ | `pipeline/chain.py` |
 | | Langfuse 실행 기록 (질문·검색 문서·모델 입출력) | ✅ | `observability/tracing.py` |
 | | FastAPI (`/health`, `/query`, 요청·응답 검증, 오류 구분) | ⬜ | `src/rag_service/api/` (예정) |
 | | 처리 오류를 `error` 상태로 구분 | ⬜ | — |
-| **4. 평가와 결과 설명** | 검색: Hit@k · Recall@k (+ MRR) | ✅ | `retrieval_b/metrics.py` |
+| **4. 평가와 결과 설명** | 검색: Hit@k · Recall@k (+ MRR) | ✅ | `retrieval_b/metrics.py`, `retrieval_a/eval_retrieval.py` |
 | | 평가 질문을 Langfuse 데이터셋으로 등록 | ✅ | `evaluation/upload_langfuse_datasets.py` |
-| | 답변: RAGAS Faithfulness | ⬜ | `evaluation/answer/` (예정) |
+| | 답변: RAGAS Faithfulness | 🟡 retrieval_a 기준 (+ Answer Relevancy, Context Precision·Recall) | `retrieval_a/eval_ragas.py` |
 | | 답변: LLM-as-a-Judge (사실·조건·근거·판단) | ⬜ | `evaluation/answer/` (예정) |
 | | 보안 답변 4개 (기본 vs 방어 프롬프트) | ⬜ | `evaluation/security/` (예정) |
 | | 운영 지표 (응답 시간·오류율·입출력 토큰) | ⬜ | `evaluation/benchmark/` (예정) |
@@ -91,8 +91,8 @@
 |---|---|---|
 | 분야 / 난이도 | 해운(shipping) / Basic → Intermediate → Advanced 순서로 진행 | `data/README.md` |
 | 답변 생성 모델 | `gpt-6-luna` | `pipeline/chain.py`, `generation/guard.py` |
-| 임베딩 모델 | `BAAI/bge-m3` | `config/chunking.yaml` |
-| 리랭커 | `BAAI/bge-reranker-v2-m3` | `config/retrieval_a/rerank.yaml`, `retrieval_b/rerank.py` |
+| 임베딩 모델 | `BAAI/bge-m3` | `config/chunking.yaml` (색인), `config/retrieval_a/models.yaml` (retrieval_a 검색) |
+| 리랭커 | `BAAI/bge-reranker-v2-m3` | `config/retrieval_a/models.yaml`, `retrieval_b/rerank.py` |
 | 벡터 저장소 | Qdrant Cloud (팀 공용 클러스터), `QDRANT_URL`이 비면 로컬 폴더 | `config/chunking.yaml` |
 | 컬렉션 이름 | `kant_shipping_{난이도}_bge-m3` | `config/chunking.yaml` |
 | 청크 | 최대 300토큰, overlap 0, 레벨 page / para / table | `config/chunking.yaml` |
@@ -107,10 +107,15 @@
 | 방식 | retrieval_a (`config/retrieval_a/*.yaml`) | retrieval_b (`src/rag_service/retrieval_b/`) |
 |---|---|---|
 | Naive | bge-m3 Dense, top_k 5 | bge-m3 Dense, k 5 |
-| 키워드 검색 | bge-m3 Sparse | BM25 (Kiwi 형태소 토큰화) |
+| 모델 설정 | `models.yaml` 프로필 (기본: 난이도 이름 `basic`·`intermediate`) | 코드에 고정 |
+| 키워드 검색 | bge-m3 Sparse (프로필 `bge-m3-bm25`는 BM25 + Kiwi) | BM25 (Kiwi 형태소 토큰화) |
 | Hybrid | Dense 0.7 + Sparse 0.3, min-max 정규화 합산 | Dense·BM25 각 30개 후보 → RRF(k=60) |
 | Hybrid + Rerank | Hybrid 후보 50개 → 리랭커 → 상위 5개 | Hybrid 후보 50개 → 리랭커 → 상위 5개 |
 | 체인 연결 | ✅ (`naive`, `hybrid`, `hybrid_rerank`) | 검색 평가 실행기에서 사용 |
+
+- retrieval_a 모델은 `config/retrieval_a/models.yaml`의 프로필로 고릅니다. 지금 프로필은 `basic`, `intermediate`, `bge-m3`(모두 bge-m3 + bge-m3 Sparse + bge-reranker-v2-m3)와 `bge-m3-bm25`(Hybrid 키워드 검색만 BM25 + Kiwi)입니다. 프로필을 안 고르면 난이도 이름의 프로필을 씁니다.
+- 체인에서도 `create_chain(domain, difficulty, profile=None)`으로 프로필을 고를 수 있습니다. `None`이면 기존과 같습니다.
+- 어느 프로필이든 임베딩이 bge-m3이면 같은 컬렉션 `kant_shipping_{난이도}_bge-m3`을 씁니다.
 
 ---
 
@@ -225,12 +230,22 @@ FastAPI 코드(`src/rag_service/api/`)가 추가되면 아래처럼 실행하고
 uv run uvicorn rag_service.api.main:app --reload
 ```
 
-### 5-4. 검색기만 바로 확인 (retrieval_b)
+### 5-4. 검색기만 바로 확인
+
+retrieval_b:
 
 ```bash
 uv run python -m rag_service.retrieval_b "부산에서 LA로 보내는 일반 건화물의 서류 제출 마감은 언제인가요?"
 uv run python -m rag_service.retrieval_b "질문" --mode hybrid          # naive | bm25 | hybrid | rerank
 uv run python -m rag_service.retrieval_b "질문" --difficulty intermediate --k 3
+```
+
+retrieval_a (Basic 자료, bge-m3):
+
+```bash
+uv run python -m rag_service.retrieval_a.basic_bge_m3 "질문"                 # naive·hybrid·rerank 모두
+uv run python -m rag_service.retrieval_a.basic_bge_m3 "질문" --mode rerank --k 3
+uv run python -m rag_service.retrieval_a.naive "질문" --difficulty basic --profile bge-m3
 ```
 
 ### 5-5. 청킹·색인 (문서 준비)
@@ -272,7 +287,34 @@ uv run python evaluation/retrieval/retrieval_b_compare.py --split additional --o
 - 예전에 저장한 JSON을 HTML로 바꾸기: `uv run python evaluation/reporting/retrieval_report.py <json 경로>`
 - 청킹 후 근거 문장이 청크에 남았는지 점검: `uv run python evaluation/retrieval/check_chunk_coverage.py --difficulty basic`
 
-### 6-2. 답변 평가: RAGAS Faithfulness · LLM-as-a-Judge ⬜ (예정)
+retrieval_a 채점 (LLM 호출 없음):
+
+```bash
+uv run python -m rag_service.retrieval_a.eval_retrieval --golden data/basic/shipping/evaluation/development.json
+uv run python -m rag_service.retrieval_a.eval_retrieval --golden data/basic/shipping/evaluation/development.json --profile bge-m3-bm25 --show-misses
+```
+
+- 결과: `artifacts/retrieval_a/eval_{프로필}[_{난이도}]/`
+- 이 채점기는 발제의 문서 단위보다 엄격합니다. 검색된 청크가 근거와 **같은 쪽**이고 근거 문장(`quote`)을 담고 있어야 맞힌 것으로 보고, `evidence_groups`가 여럿이면 모든 그룹을 찾아야 합니다. Hit@1·Hit@k·MRR을 내고, 방식끼리 어느 문항을 맞혔는지도 비교합니다.
+- 두 채점기의 기준을 하나로 맞추는 일은 아직 정하지 않았습니다. 발제가 요구하는 기준은 위의 문서 단위 Hit@k·Recall@k입니다.
+
+### 6-2. 답변 평가: RAGAS Faithfulness · LLM-as-a-Judge 🟡 (RAGAS만 일부 구현)
+
+**지금 있는 것: retrieval_a RAGAS 채점** (`src/rag_service/retrieval_a/eval_ragas.py`)
+
+```bash
+uv run python -m rag_service.retrieval_a.eval_ragas --golden data/basic/shipping/evaluation/development.json --limit 5   # 먼저 몇 문항만
+uv run python -m rag_service.retrieval_a.eval_ragas --golden data/basic/shipping/evaluation/development.json data/basic/shipping/evaluation/additional.json --modes naive hybrid rerank
+```
+
+- retrieval_a의 naive·hybrid·rerank로 검색한 청크를 답변 프롬프트에 넣어 gpt-6-luna로 답변을 만든 뒤, RAGAS 네 지표로 채점합니다: Faithfulness, Answer Relevancy, Context Precision, Context Recall. 참고 정답(`reference_answer`)은 채점에만 씁니다.
+- `evidence_groups`가 비어 있는 문항(되묻기 문항 등)은 빼고, 뺀 문항 ID를 `summary.json`의 `skipped`에 남깁니다.
+- 결과: `artifacts/retrieval_a/ragas_{프로필}[_{난이도}]/`에 `answers_{모드}.jsonl`, `scores_{모드}.jsonl`, `summary.json`, `per_question.csv`. 다시 실행하면 저장된 답변과 점수는 건너뜁니다. 처음부터 다시 하려면 이 폴더를 지우거나 `--out`으로 다른 폴더를 주세요.
+- 답변 생성과 채점 모두 OpenAI API를 호출하므로 비용이 듭니다. 실행이 끝나면 답변용·채점용 토큰을 따로 보여 줍니다.
+- `artifacts/retrieval_a/` 아래 결과 폴더는 `.gitignore`에 들어 있지 않습니다. 커밋할 때 `git status`로 확인하고 빼 주세요.
+- 발제 기준과 아직 다른 점: 채팅 체인(`chain.py`)의 질문 사전 판단·쪽 확장을 거치지 않고 검색 결과를 바로 답변 프롬프트에 넣습니다. retrieval_b는 연결되어 있지 않습니다. 해당 없음·평가 불가 건수를 따로 세지 않습니다. LLM-as-a-Judge는 아직 없습니다.
+
+**발제 기준 (최종 평가에서 맞출 것)**
 
 - 같은 질문을 세 방식으로 실행하고 답변·상태·인용·**실제 최종 문맥**을 저장한 뒤 채점합니다.
 - RAGAS Faithfulness: 질문 → `user_input`, 답변 → `response`, 실제 최종 문맥 → `retrieved_contexts`
@@ -351,7 +393,7 @@ kant-rag/
 ├── client/                    # Streamlit 채팅 화면
 ├── config/
 │   ├── chunking.yaml          # 청킹·색인 설정
-│   └── retrieval_a/           # retrieval_a 검색 설정 (naive, hybrid, rerank)
+│   └── retrieval_a/           # retrieval_a 검색 설정 (models.yaml 모델 프로필, naive, hybrid, rerank)
 ├── data/                      # 원본 데이터 (shipping만 사용)
 │   └── {basic,intermediate,advanced}/shipping/
 │       ├── documents/         # PDF (Basic 15, Intermediate 50, Advanced 120)
@@ -363,7 +405,7 @@ kant-rag/
 │   ├── ingestion/             # PDF → 청크 → 맥락 → jsonl → Qdrant 동기화
 │   ├── storage/               # Qdrant 접속, 청크 읽기 (공통)
 │   ├── contracts/             # 청크·답변·가드 데이터 형식
-│   ├── retrieval_a/           # 검색기 구현 A (체인에 연결됨)
+│   ├── retrieval_a/           # 검색기 구현 A (체인에 연결됨) + 검색·RAGAS 채점
 │   ├── retrieval_b/           # 검색기 구현 B + Hit@k·Recall@k 채점
 │   ├── generation/            # 프롬프트, 가드, 출처 붙이기
 │   ├── pipeline/              # LangChain 체인 (create_chain)
@@ -391,7 +433,7 @@ kant-rag/
 |---|---|
 | 이정원 | PDF 추출·청킹·맥락 생성, Qdrant 색인, Streamlit 채팅 화면, 질문·답변 가드, 출처 표시와 쪽 확장, FastAPI(예정) |
 | 임윤성 | LangChain 체인 구조, 답변 스키마·프롬프트, Langfuse 추적, 평가 질문 Langfuse 데이터셋 등록 |
-| 최완위 | 검색기 구현 A (Naive / bge-m3 Sparse Hybrid / Rerank)와 체인 연결 |
+| 최완위 | 검색기 구현 A (Naive / bge-m3 Sparse Hybrid / Rerank), 모델 프로필(`models.yaml`), 체인 연결, 검색·RAGAS 채점 |
 | 유원호 | 개발 환경(uv)·README, 검색기 구현 B (Naive / BM25 / RRF Hybrid / Rerank), Hit@k·Recall@k·MRR 채점과 비교 리포트 |
 
 ---
