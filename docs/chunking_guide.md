@@ -85,12 +85,8 @@ for lv in ("page", "para", "table"):
 | Dense 검색 (Naive RAG) | 3-1 코드 | 검색 담당 |
 | BM25 (하이브리드) | 3-2 코드 | 검색 담당 |
 | 답변 생성에 부모 쪽 원문 넣기, 출처 표기 | 3-3 코드 | 생성 담당 |
-| 테스트용 RAG로 질문 하나 해보기 | `uv run python client/client_test.py "질문" --mode hybrid_rerank` | 모두 |
 | 화면(클라이언트)에서 RAG로 답 받기 | `uv run streamlit run client/client.py` → 검색 방식 라디오 선택 | 모두 |
-| 골든 데이터셋으로 세 검색 방식 비교 | `uv run python client/client_test2.py --no-answer` (검색 지표만) / `--limit 5 --judge` (답변 채점까지) | 검색·평가 담당 |
 | 어떤 코드든 고친 뒤 기존 기능 확인 | `uv run pytest` (전부 통과해야 함) | 고친 사람 |
-
-- `client/client_test.py`는 정식 검색 코드(retrieval_a/b)가 나오기 전까지 쓰는 **임시** 구현이다. 정식 코드가 나오면 `client.py`의 호출부만 바꾸면 된다.
 
 ## 3. 검색·생성 코드에서 쓰는 법
 
@@ -171,8 +167,6 @@ source = f"{m['book_id']}.pdf / {m['page']}쪽"        # 출처는 metadata로 �
 | `src/rag_service/contracts/` | `chunk.py` | 청크 형식 (필드 정의) |
 | `config/` | `chunking.yaml` | 청킹·색인·맥락 설정 |
 | `client/` | `client.py` | Streamlit 화면 (검색 방식 라디오: naive / hybrid / hybrid+rerank) |
-| | `client_test.py` | 테스트용 RAG (검색 → 부모 쪽 → 답변·출처). 정식 코드 전까지 임시 |
-| | `client_test2.py` | 골든 데이터셋 평가 (Hit@k, Recall@k, 판단 일치, Judge) → `results/client_test/` |
 | `evaluation/retrieval/` | `check_chunk_coverage.py` | 근거 보존 검사 (평가 전용) |
 | `tests/ingestion/` | `test_chunking.py`, `test_menu.py`, `test_index_sync.py` | 청킹 코드 확인 (README.md 참고) |
 | `tests/storage/` | `test_qdrant_store.py` | 공통 기능 확인 (README.md 참고) |

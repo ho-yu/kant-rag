@@ -31,6 +31,8 @@ from rag_service.observability import (
     create_traced_openai_client,
     trace_request,
 )
+from langfuse import get_client as get_langfuse_client
+from langfuse.langchain import CallbackHandler
 
 load_dotenv()
 
@@ -77,13 +79,17 @@ def get_client():
 @st.cache_resource
 def get_query_guard():
     from rag_service.generation.guard import create_query_guard
-    return create_query_guard()
+    return create_query_guard().with_config(
+        callbacks=[CallbackHandler()], run_name="query-guard"
+    )
 
 
 @st.cache_resource
 def get_answer_guard():
     from rag_service.generation.guard import create_answer_guard
-    return create_answer_guard()
+    return create_answer_guard().with_config(
+        callbacks=[CallbackHandler()], run_name="answer-guard"
+    )
 
 
 @st.cache_resource(show_spinner="RAG 준비 중 (난이도·도메인마다 처음 한 번)...")
@@ -311,9 +317,17 @@ if question := st.chat_input("질문을 입력하세요"):
     with st.spinner("답변 생성 중..."):
         try:
             started = time.time()
-            with trace_request(question) as trace:  # 질문 한 건을 Langfuse 기록 하나로 묶는다
+            with trace_request(question) as trace:
+                trace.update(metadata={  # tracing.py 대신 여기서 메타데이터 추가
+                    "retrieval_mode": retrieval_mode,
+                    "difficulty": difficulty,
+                    "domain": domain,
+                    "page_context": page_context,
+                })
                 result = get_answer(question, history, difficulty, domain, retrieval_mode, page_context)
                 trace.update(output=result)
+                request_id = trace.trace_id  # 요청 ID
+            get_langfuse_client().flush()  # tracing.py 대신 여기서 전송
             elapsed = time.time() - started
         except OpenAIError as e:
             st.error(f"OpenAI 호출 실패: {e}")
@@ -336,4 +350,4 @@ if question := st.chat_input("질문을 입력하세요"):
     }
     show_message(reply)
     st.session_state.messages.append({"role": "user", "content": question})
-    st.session_state.messages.append(reply)
+    st.session_state.messages.append(reply)
