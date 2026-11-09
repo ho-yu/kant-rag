@@ -157,8 +157,9 @@ def main(argv: list[str] | None = None) -> int:
             log.error("맥락 생성 준비 실패 (%s). .env의 OPENAI_API_KEY를 확인하거나 --no-context로 실행하세요.", e)
             return 1
 
-    result = {"added": [], "changed": [], "same_output": [], "skipped": [], "removed": []}
+    result = {"added": [], "changed": [], "same_output": [], "skipped": [], "removed": [], "failed": []}
     token_usage: Counter = Counter()
+    token_by_doc: dict[str, dict] = {}   # 문서별 맥락 생성 토큰 (Langfuse 기록용)
     started = time.time()
     for i, pdf in enumerate(pdfs, 1):
         book_id = pdf.stem
@@ -170,8 +171,14 @@ def main(argv: list[str] | None = None) -> int:
             continue
 
         t0 = time.time()
-        doc = pdf_reader.read_pdf(pdf)
-        chunks = chunk_document(doc, args.difficulty, args.domain, cs)
+        try:
+            doc = pdf_reader.read_pdf(pdf)
+            chunks = chunk_document(doc, args.difficulty, args.domain, cs)
+        except Exception as e:  # noqa: BLE001 — PDF 하나가 깨져도 나머지 문서는 계속 처리한다
+            # 이전 결과(jsonl·manifest 항목)는 그대로 둔다 → 다음 실행 때 지문이 달라 다시 시도함
+            result["failed"].append({"book_id": book_id, "error": f"{type(e).__name__}: {e}"[:300]})
+            log.error("[%d/%d] %s 읽기·청킹 실패: %s: %s", i, len(pdfs), book_id, type(e).__name__, e)
+            continue
         ctx_info: dict = {"enabled": xs.enabled}
         if generator is not None:
             st = generator.fill(chunks)
@@ -180,6 +187,10 @@ def main(argv: list[str] | None = None) -> int:
                             prompt_tokens=st.prompt_tokens, completion_tokens=st.completion_tokens,
                             errors=st.errors[:5], rejected_samples=st.rejected_samples[:5])
             token_usage.update(prompt=st.prompt_tokens, completion=st.completion_tokens)
+            if st.pages_called:
+                token_by_doc[book_id] = {"prompt_tokens": st.prompt_tokens, "completion_tokens": st.completion_tokens,
+                                         "pages_called": st.pages_called, "pages_cached": st.pages_cached,
+                                         "errors": len(st.errors)}
         lines = serialize(chunks)
         info = {"file_name": pdf.name, "title": doc.title, "pages": len(doc.pages), "fingerprint": fp,
                 "chunks": dict(Counter(c.level for c in chunks)), "context": ctx_info}
@@ -222,7 +233,7 @@ def main(argv: list[str] | None = None) -> int:
         "code_hash": c_hash, "config_hash": cfg_hash, "git_commit": git_commit(), "settings": settings_snapshot,
     })
     touched = result["added"] + result["changed"] + result["removed"]
-    if touched or result["same_output"]:
+    if touched or result["same_output"] or result["failed"]:
         manifest.setdefault("runs", []).append({
             "at": now(), **{k: v for k, v in result.items() if v and k != "skipped"},
             "context_tokens": dict(token_usage),
@@ -230,13 +241,53 @@ def main(argv: list[str] | None = None) -> int:
     write_manifest(base, manifest)
 
     total = sum(sum(d["chunks"].values()) for d in docs.values())
-    log.info("완료 (%.0f초): 추가 %d, 변경 %d, 결과 같음 %d, 건너뜀 %d, 삭제 %d / 전체 문서 %d, 청크 %d → %s",
+    log.info("완료 (%.0f초): 추가 %d, 변경 %d, 결과 같음 %d, 건너뜀 %d, 삭제 %d, 실패 %d / 전체 문서 %d, 청크 %d → %s",
              time.time() - started, len(result["added"]), len(result["changed"]), len(result["same_output"]),
-             len(result["skipped"]), len(result["removed"]), len(docs), total, base)
+             len(result["skipped"]), len(result["removed"]), len(result["failed"]), len(docs), total, base)
+    if result["failed"]:
+        log.warning("읽기·청킹에 실패한 문서: %s (manifest.json의 runs에 오류 기록)",
+                    ", ".join(f["book_id"] for f in result["failed"]))
+    if token_usage:
+        log.info("맥락 생성 토큰: 입력 %d, 출력 %d", token_usage["prompt"], token_usage["completion"])
+    report_to_langfuse(args, generator.model if generator else None, token_by_doc, result)
     missing = sum(d.get("context", {}).get("missing", 0) for d in docs.values())
     if xs.enabled and missing:
         log.warning("맥락이 비어 있는 청크 %d개. 다시 실행하면 그 문서만 다시 시도합니다.", missing)
     return run_index(args, cfg)
+
+
+def report_to_langfuse(args, model: str | None, token_by_doc: dict[str, dict], result: dict) -> None:
+    """이번 실행의 맥락 생성 토큰을 Langfuse에 기록 하나(ingestion-run)로 남긴다.
+    문서마다 generation 하나(해당 문서의 LLM 호출 토큰 합계). LLM을 부르지 않았으면 기록하지 않는다.
+    Langfuse 오류는 경고만 하고 청킹 결과에는 영향을 주지 않는다."""
+    if not token_by_doc and not result["failed"]:
+        return
+    try:
+        from langfuse import get_client as get_langfuse_client
+
+        langfuse = get_langfuse_client()
+        total_in = sum(d["prompt_tokens"] for d in token_by_doc.values())
+        total_out = sum(d["completion_tokens"] for d in token_by_doc.values())
+        with langfuse.start_as_current_observation(
+            as_type="span", name="ingestion-run",
+            input={"difficulty": args.difficulty, "domain": args.domain, "model": model},
+            metadata={"kind": "ingestion"},
+        ) as run:
+            for book_id, d in token_by_doc.items():
+                with langfuse.start_as_current_observation(
+                    as_type="generation", name=f"context-{book_id}", model=model,
+                    usage_details={"input": d["prompt_tokens"], "output": d["completion_tokens"]},
+                    metadata=d,
+                ):
+                    pass
+            run.update(output={
+                "input_tokens": total_in, "output_tokens": total_out, "docs_with_llm_calls": len(token_by_doc),
+                **{k: len(v) for k, v in result.items()}, "failed_docs": result["failed"],
+            })
+        langfuse.flush()   # 스크립트가 바로 끝나므로 전송을 기다린다
+        log.info("Langfuse에 ingestion-run 기록을 남겼습니다.")
+    except Exception as e:  # noqa: BLE001 — 기록 실패로 청킹이 실패하면 안 된다
+        log.warning("Langfuse 기록 실패 (청킹 결과는 정상): %s: %s", type(e).__name__, e)
 
 
 def _history_entry(entry: dict, moved: list[str], reason: str) -> dict:
