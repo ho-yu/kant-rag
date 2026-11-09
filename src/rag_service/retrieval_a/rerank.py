@@ -11,7 +11,13 @@ from langchain_core.retrievers import BaseRetriever
 from pydantic import ConfigDict
 
 from rag_service.retrieval_a.hybrid import build_hybrid_retriever, index_text
-from rag_service.retrieval_a.naive import REPO_ROOT, _resolve_device, load_config
+from rag_service.retrieval_a.naive import (
+    REPO_ROOT,
+    _resolve_device,
+    load_config,
+    model_profile,
+    resolve_scope,
+)
 
 CONFIG_PATH = REPO_ROOT / "config" / "retrieval_a" / "rerank.yaml"
 
@@ -32,11 +38,11 @@ def _cross_encoder(model_name: str, device: str, fp16: bool, max_length: int):
     )
 
 
-def make_scorer(cfg: dict[str, Any]):
+def make_scorer(cfg: dict[str, Any], model_name: str):
     rr = cfg["reranker"]
 
     def score(query: str, texts: list[str]) -> list[float]:
-        model = _cross_encoder(rr["model_name"], rr["device"], rr.get("fp16", True), rr.get("max_length", 1024))
+        model = _cross_encoder(model_name, rr["device"], rr.get("fp16", True), rr.get("max_length", 1024))
         scores = model.predict(
             [(query, t) for t in texts],
             batch_size=rr.get("batch_size", 16),
@@ -77,20 +83,24 @@ def build_rerank_retriever(
     top_k: int | None = None,
     candidate_k: int | None = None,
     levels: list[str] | None = None,
+    profile: str | None = None,
     config_path: Path = CONFIG_PATH,
 ) -> BaseRetriever:
     cfg = load_config(config_path)
     search = cfg["search"]
+    hybrid_path = REPO_ROOT / cfg["hybrid_config"]
+    domain, difficulty = resolve_scope(load_config(hybrid_path), domain, difficulty)
     hybrid = build_hybrid_retriever(
         domain=domain,
         difficulty=difficulty,
         top_k=candidate_k or search["candidate_k"],
         levels=levels,
-        config_path=REPO_ROOT / cfg["hybrid_config"],
+        profile=profile,
+        config_path=hybrid_path,
     )
     return HybridRerankRetriever(
         hybrid=hybrid,
-        score_fn=make_scorer(cfg),
+        score_fn=make_scorer(cfg, model_profile(profile or difficulty)["reranker"]),
         top_k=top_k or search["top_k"],
         use_context=cfg["reranker"].get("use_context", True),
     )
@@ -106,10 +116,15 @@ def _main() -> None:
     parser.add_argument("--difficulty", default=None)
     parser.add_argument("--k", type=int, default=None)
     parser.add_argument("--candidates", type=int, default=None, help="리랭커로 넘길 Hybrid 후보 개수")
+    parser.add_argument("--profile", default=None, help="models.yaml의 모델 설정 이름 (기본: 난이도 이름)")
     args = parser.parse_args()
 
     retriever = build_rerank_retriever(
-        domain=args.domain, difficulty=args.difficulty, top_k=args.k, candidate_k=args.candidates
+        domain=args.domain,
+        difficulty=args.difficulty,
+        top_k=args.k,
+        candidate_k=args.candidates,
+        profile=args.profile,
     )
     for i, doc in enumerate(retriever.invoke(args.question), start=1):
         m = doc.metadata

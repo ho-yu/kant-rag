@@ -16,10 +16,13 @@ from pydantic import ConfigDict
 from rag_service.retrieval_a.naive import (
     REPO_ROOT,
     _connect_client,
+    _embeddings,
     _resolve_device,
     collection_name,
     level_filter,
     load_config,
+    model_profile,
+    resolve_scope,
 )
 
 CONFIG_PATH = REPO_ROOT / "config" / "retrieval_a" / "hybrid.yaml"
@@ -86,6 +89,26 @@ def _token_weights(ids, weights, skip_ids) -> Sparse:
 @lru_cache(maxsize=2)
 def _encoder(model_name: str, device: str, max_length: int) -> BGEM3Encoder:
     return BGEM3Encoder(model_name, device, max_length)
+
+
+_KEEP_TAGS = ("NN", "NR", "NP", "VV", "VA", "XR", "SL", "SN", "SH", "MAG")
+
+
+@lru_cache(maxsize=1)
+def _kiwi():
+    from kiwipiepy import Kiwi
+
+    return Kiwi()
+
+
+def tokenize(text: str) -> list[str]:
+    return [t.form.lower() for t in _kiwi().tokenize(text) if t.tag.startswith(_KEEP_TAGS)]
+
+
+def build_bm25(docs: list[Document], *, use_context: bool):
+    from rank_bm25 import BM25Okapi
+
+    return BM25Okapi([tokenize(index_text(d, use_context)) for d in docs])
 
 
 def sparse_score(q: Sparse, d: Sparse) -> float:
@@ -188,8 +211,7 @@ class HybridRetriever(BaseRetriever):
 
     docs: list[Document]
     dense_matrix: Any
-    doc_sparse: list[Sparse]
-    encode_query: Any
+    score_query: Any
     top_k: int = 5
     method: str = "minmax"
     dense_weight: float = 0.7
@@ -197,9 +219,9 @@ class HybridRetriever(BaseRetriever):
     rrf_k: int = 60
 
     def _get_relevant_documents(self, query: str, *, run_manager: CallbackManagerForRetrieverRun) -> list[Document]:
-        q_dense, q_sparse = self.encode_query(query)
+        q_dense, sparse = self.score_query(query)
         dense = self.dense_matrix @ np.asarray(q_dense, dtype=np.float32)
-        sparse = np.array([sparse_score(q_sparse, d) for d in self.doc_sparse], dtype=np.float32)
+        sparse = np.asarray(sparse, dtype=np.float32)
         fused = fuse(
             dense,
             sparse,
@@ -230,38 +252,49 @@ def build_hybrid_retriever(
     difficulty: str | None = None,
     top_k: int | None = None,
     levels: list[str] | None = None,
+    profile: str | None = None,
     config_path: Path = CONFIG_PATH,
 ) -> BaseRetriever:
     cfg = load_config(config_path)
     levels = levels or cfg["search"]["levels"]
-    name = collection_name(cfg, domain=domain, difficulty=difficulty)
+    domain, difficulty = resolve_scope(cfg, domain, difficulty)
+    name = collection_name(cfg, domain=domain, difficulty=difficulty, profile=profile)
+    profile = model_profile(profile or difficulty)
     docs, dense_matrix = load_points(_connect_client(name), name, levels)
 
     emb = cfg["embedding"]
-
-    def encoder() -> BGEM3Encoder:
-        return _encoder(emb["model_name"], emb["device"], emb.get("max_length", 1024))
-
     sp = cfg["sparse"]
-    level_tag = "-".join(levels)
-    doc_sparse = doc_sparse_weights(
-        docs,
-        encoder,
-        REPO_ROOT / sp["cache_dir"] / f"{name}_{level_tag}.json",
-        use_context=sp.get("use_context", True),
-        batch_size=emb.get("batch_size", 16),
-    )
+    use_context = sp.get("use_context", True)
 
-    def encode_query(q: str):
-        dense, sparse = encoder().encode([q])
-        return dense[0], sparse[0]
+    if profile["sparse"] == "bge-m3":
+
+        def encoder() -> BGEM3Encoder:
+            return _encoder(profile["embedding"], emb["device"], emb.get("max_length", 1024))
+
+        doc_sparse = doc_sparse_weights(
+            docs,
+            encoder,
+            REPO_ROOT / sp["cache_dir"] / f"{name}_{'-'.join(levels)}.json",
+            use_context=use_context,
+            batch_size=emb.get("batch_size", 16),
+        )
+
+        def score_query(q: str):
+            dense, sparse = encoder().encode([q])
+            return dense[0], [sparse_score(sparse[0], d) for d in doc_sparse]
+
+    else:
+        bm25 = build_bm25(docs, use_context=use_context)
+        embedder = _embeddings(profile["embedding"], emb["device"], True, profile["query_prefix"])
+
+        def score_query(q: str):
+            return embedder.embed_query(q), bm25.get_scores(tokenize(q))
 
     fusion = cfg["fusion"]
     return HybridRetriever(
         docs=docs,
         dense_matrix=dense_matrix,
-        doc_sparse=doc_sparse,
-        encode_query=encode_query,
+        score_query=score_query,
         top_k=top_k or cfg["search"]["top_k"],
         method=fusion.get("method", "minmax"),
         dense_weight=fusion["dense_weight"],
@@ -279,9 +312,12 @@ def _main() -> None:
     parser.add_argument("--domain", default=None)
     parser.add_argument("--difficulty", default=None)
     parser.add_argument("--k", type=int, default=None)
+    parser.add_argument("--profile", default=None, help="models.yaml의 모델 설정 이름 (기본: 난이도 이름)")
     args = parser.parse_args()
 
-    retriever = build_hybrid_retriever(domain=args.domain, difficulty=args.difficulty, top_k=args.k)
+    retriever = build_hybrid_retriever(
+        domain=args.domain, difficulty=args.difficulty, top_k=args.k, profile=args.profile
+    )
     for i, doc in enumerate(retriever.invoke(args.question), start=1):
         m = doc.metadata
         print(

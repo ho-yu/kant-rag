@@ -60,8 +60,11 @@ def test_chain_style_call(monkeypatch):
         return _Fixed(docs=[_doc("A-1", "a")])
 
     monkeypatch.setattr(rerank, "build_hybrid_retriever", fake_build_hybrid)
-    r = build_rerank_retriever(domain="shipping", difficulty="intermediate")
-    assert seen["domain"] == "shipping" and seen["difficulty"] == "intermediate"
+    made = {}
+    monkeypatch.setattr(rerank, "make_scorer", lambda cfg, model: made.setdefault("model", model))
+    r = build_rerank_retriever(domain="shipping", difficulty="basic", profile="bge-m3-bm25")
+    assert seen["domain"] == "shipping" and seen["difficulty"] == "basic" and seen["profile"] == "bge-m3-bm25"
+    assert made["model"] == rerank.model_profile("bge-m3-bm25")["reranker"]
     assert seen["top_k"] == 50
     assert seen["config_path"].name == "hybrid.yaml"
     assert r.top_k == rerank.load_config()["search"]["top_k"]
