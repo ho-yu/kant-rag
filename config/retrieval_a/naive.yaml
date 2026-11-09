@@ -2,11 +2,9 @@ collection:
   prefix: kant
   domain: shipping
   difficulty: basic
-  model_tag: bge-m3
   vector_name: ""
 
 embedding:
-  model_name: BAAI/bge-m3
   device: auto
   normalize: true
 

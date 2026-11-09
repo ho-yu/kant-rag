@@ -5,7 +5,6 @@ search:
   top_k: 5
 
 reranker:
-  model_name: BAAI/bge-reranker-v2-m3
   device: auto
   fp16: true
   max_length: 1024

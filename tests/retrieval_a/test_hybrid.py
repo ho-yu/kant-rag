@@ -5,6 +5,7 @@ from rag_service.retrieval_a import hybrid
 from rag_service.retrieval_a.hybrid import (
     HybridRetriever,
     _token_weights,
+    build_bm25,
     build_hybrid_retriever,
     doc_sparse_weights,
     fuse,
@@ -12,7 +13,9 @@ from rag_service.retrieval_a.hybrid import (
     min_max,
     ranks_of,
     sparse_score,
+    tokenize,
 )
+from rag_service.retrieval_a.naive import model_slug
 
 
 def _doc(cid, text="", **meta):
@@ -74,14 +77,11 @@ def test_doc_sparse_weights_uses_cache(tmp_path):
 def _retriever(**kw):
     docs = [_doc("A-1", "a"), _doc("B-1", "b"), _doc("C-1", "c")]
     dense_matrix = np.array([[1.0, 0.0], [0.8, 0.6], [0.0, 1.0]], dtype=np.float32)
-    doc_sparse = [{}, {"7": 1.0}, {}]
 
-    def encode_query(q):
-        return np.array([1.0, 0.0]), {"7": 0.5}
+    def score_query(q):
+        return np.array([1.0, 0.0]), [0.0, 0.5, 0.0]
 
-    return HybridRetriever(
-        docs=docs, dense_matrix=dense_matrix, doc_sparse=doc_sparse, encode_query=encode_query, **kw
-    )
+    return HybridRetriever(docs=docs, dense_matrix=dense_matrix, score_query=score_query, **kw)
 
 
 def test_hybrid_retriever_scores_and_metadata():
@@ -111,9 +111,51 @@ def test_chain_style_call(monkeypatch, tmp_path):
     monkeypatch.setattr(hybrid, "_connect_client", fake_connect)
     monkeypatch.setattr(hybrid, "load_points", fake_load)
     monkeypatch.setattr(hybrid, "doc_sparse_weights", fake_sparse)
-    r = build_hybrid_retriever(domain="shipping", difficulty="intermediate")
-    assert seen["name"] == "kant_shipping_intermediate_bge-m3"
+    r = build_hybrid_retriever(domain="shipping", difficulty="basic")
+    assert seen["name"] == "kant_shipping_basic_bge-m3"
     assert seen["levels"] == ["para", "table"]
-    assert seen["cache"] == "kant_shipping_intermediate_bge-m3_para-table.json"
+    assert seen["cache"] == "kant_shipping_basic_bge-m3_para-table.json"
     assert r.top_k == hybrid.load_config(hybrid.CONFIG_PATH)["search"]["top_k"]
     assert (r.method, r.dense_weight, r.sparse_weight) == ("minmax", 0.7, 0.3)
+
+
+def test_tokenize_drops_particles_and_endings():
+    toks = tokenize("서류 제출 마감은 언제인가요? SI 20GP")
+    assert {"서류", "제출", "마감", "si"} <= set(toks)
+    assert "은" not in toks and "?" not in toks
+
+
+def test_bm25_prefers_keyword_match():
+    docs = [
+        _doc("A-1", "VGM은 컨테이너 총중량 검증 신고다."),
+        _doc("B-1", "SI 마감은 출항 이틀 전 낮 12시다."),
+        _doc("C-1", "운임 청구서 발행 절차."),
+        _doc("D-1", "반입 일정은 터미널 공지를 따른다."),
+    ]
+    scores = build_bm25(docs, use_context=False).get_scores(tokenize("SI 마감 시각"))
+    assert int(scores.argmax()) == 1
+
+
+def test_non_bge_m3_profile_uses_bm25(monkeypatch):
+    seen = {}
+
+    class FakeEmb:
+        def embed_query(self, q):
+            return [1.0, 0.0]
+
+    def fake_embeddings(model, device, normalize, prefix):
+        seen["model"], seen["prefix"] = model, prefix
+        return FakeEmb()
+
+    docs = [_doc("A-1", "VGM 신고"), _doc("B-1", "SI 마감 안내"), _doc("C-1", "운임 청구"), _doc("D-1", "반입 일정")]
+    vecs = np.array([[1.0, 0.0], [0.9, 0.1], [0.0, 1.0], [0.1, 0.9]], dtype=np.float32)
+    monkeypatch.setattr(hybrid, "_connect_client", lambda name: seen.setdefault("name", name))
+    monkeypatch.setattr(hybrid, "load_points", lambda c, n, l: (docs, vecs))
+    monkeypatch.setattr(hybrid, "_embeddings", fake_embeddings)
+    monkeypatch.setattr(hybrid, "doc_sparse_weights", lambda *a, **k: (_ for _ in ()).throw(AssertionError("bm25 경로")))
+    r = build_hybrid_retriever(domain="shipping", difficulty="basic", profile="qwen3")
+    profile = hybrid.model_profile("qwen3")
+    assert seen["model"] == profile["embedding"] and seen["prefix"] == profile["query_prefix"]
+    assert seen["name"] == f"kant_shipping_basic_{model_slug(profile['embedding'])}"
+    got = r.invoke("SI 마감")
+    assert got[0].metadata["sparse_rank"] == 1 and got[0].metadata["chunk_id"] == "B-1"
