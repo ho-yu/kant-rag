@@ -65,7 +65,7 @@ def main(argv=None) -> int:
 
     cfg = load_config()
     levels = args.levels or [lv for lv in cfg["index"]["levels"] if lv != "page"]
-    eval_dir = repo_root() / cfg["paths"]["data_dir"] / args.difficulty / args.domain / "intermediate"
+    eval_dir = repo_root() / cfg["paths"]["data_dir"] / args.difficulty / args.domain / "evaluation"
     quotes = collect_quotes(eval_dir, args.split)
 
     pages = {}
