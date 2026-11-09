@@ -55,16 +55,16 @@ def to_pages(docs: list[Document], collection: str) -> list[Document]:
     return out
 
 
-def create_chain(domain, difficulty):
+def create_chain(domain, difficulty, profile=None):
     model = ChatOpenAI(model="gpt-6-luna")
-    
+
     retrievers = {
-        "naive": build_naive_retriever(domain=domain, difficulty=difficulty),
-        "hybrid": build_hybrid_retriever(domain=domain, difficulty=difficulty),
-        "hybrid_rerank": build_rerank_retriever(domain=domain, difficulty=difficulty),
+        "naive": build_naive_retriever(domain=domain, difficulty=difficulty, profile=profile),
+        "hybrid": build_hybrid_retriever(domain=domain, difficulty=difficulty, profile=profile),
+        "hybrid_rerank": build_rerank_retriever(domain=domain, difficulty=difficulty, profile=profile),
         }
-        
-    collection = collection_name(load_config(), domain=domain, difficulty=difficulty)  # page 확장에서 쪽을 꺼낼 컬렉션
+
+    collection = collection_name(load_config(), domain=domain, difficulty=difficulty, profile=profile)  # page 확장에서 쪽을 꺼낼 컬렉션
 
     def retrieve_docs(request):
         """question 하나로 검색. sub_questions가 있으면 질문별로 검색해서 번갈아 합친다

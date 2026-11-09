@@ -15,8 +15,6 @@ log = logging.getLogger("eval_retrieval")
 
 MODES = ("naive", "hybrid", "rerank")
 PAIRS = (("naive", "hybrid"), ("naive", "rerank"), ("hybrid", "rerank"))
-DEFAULT_CORPUS = "artifacts/corpus/basic/*/*.jsonl"
-DEFAULT_OUT = "artifacts/retrieval_a/eval_bge_m3"
 _STRIP = re.compile(r"[\s\W_]+", re.UNICODE)
 _CLI_LINE = re.compile(r"^\[S(\d+)\]\s+(.+?)\.pdf\s+(\d+)쪽\s+\(([^)]*)\)")
 
@@ -152,13 +150,21 @@ def load_raw(path: Path) -> dict[str, list[dict]]:
     return done
 
 
-def _build(mode: str, k: int):
-    from rag_service.retrieval_a import basic_bge_m3
+def _build(mode: str, k: int, profile: str = "bge-m3", difficulty: str = "basic", domain: str = "shipping"):
+    from rag_service.retrieval_a import build_hybrid_retriever, build_naive_retriever, build_rerank_retriever
 
-    return basic_bge_m3.BUILDERS[mode](top_k=k)
+    builder = {"naive": build_naive_retriever, "hybrid": build_hybrid_retriever, "rerank": build_rerank_retriever}[mode]
+    return builder(domain=domain, difficulty=difficulty, profile=profile, top_k=k)
 
 
-def retrieve_mode(mode: str, items: list[dict], k: int, raw_path: Path, fresh: bool) -> dict[str, list[dict]]:
+def default_out(profile: str, difficulty: str) -> str:
+    name = profile if difficulty == "basic" else f"{profile}_{difficulty}"
+    return f"artifacts/retrieval_a/eval_{name}"
+
+
+def retrieve_mode(
+    mode: str, items: list[dict], k: int, raw_path: Path, fresh: bool, build=None
+) -> dict[str, list[dict]]:
     raw_path.parent.mkdir(parents=True, exist_ok=True)
     if fresh and raw_path.exists():
         raw_path.unlink()
@@ -166,7 +172,7 @@ def retrieve_mode(mode: str, items: list[dict], k: int, raw_path: Path, fresh: b
     todo = [q for q in items if q["id"] not in done]
     log.info("[%s] 저장된 결과 %d문항, 새로 검색 %d문항", mode, len(items) - len(todo), len(todo))
     if todo:
-        retriever = _build(mode, k)
+        retriever = (build or _build)(mode, k)
         with open(raw_path, "a", encoding="utf-8") as fh:
             for i, q in enumerate(todo, start=1):
                 docs = retriever.invoke(q["question"])
@@ -219,11 +225,17 @@ def evaluate(args) -> dict:
     log.info("청크 원문 %d개 불러옴", len(texts))
     log.info("채점 문항 %d개, 근거 없어 제외 %d개 %s", len(items), len(skipped), skipped)
 
-    out = Path(args.out) if os.path.isabs(args.out) else REPO_ROOT / args.out
+    out_arg = args.out or default_out(args.profile, args.difficulty)
+    out = Path(out_arg) if os.path.isabs(out_arg) else REPO_ROOT / out_arg
+    log.info("모델 설정 %s · 난이도 %s · 결과 폴더 %s", args.profile, args.difficulty, out)
+
+    def build(mode, k):
+        return _build(mode, k, args.profile, args.difficulty, args.domain)
+
     per_mode: dict[str, dict[str, dict]] = {}
     missing = set()
     for mode in args.modes:
-        raw = retrieve_mode(mode, items, args.k, out / "raw" / f"{mode}_k{args.k}.jsonl", args.fresh)
+        raw = retrieve_mode(mode, items, args.k, out / "raw" / f"{mode}_k{args.k}.jsonl", args.fresh, build)
         per_mode[mode] = {}
         for q in items:
             hits = raw[q["id"]][: args.k]
@@ -243,6 +255,8 @@ def evaluate(args) -> dict:
 
     summary = {
         "k": args.k,
+        "profile": args.profile,
+        "difficulty": args.difficulty,
         "questions": len(items),
         "skipped": len(skipped),
         "skipped_ids": skipped,
@@ -271,7 +285,7 @@ def evaluate(args) -> dict:
 def print_report(summary: dict, show_misses: bool) -> None:
     k, n = summary["k"], summary["questions"]
     names = list(next(iter(summary["metrics"].values())).keys())
-    print(f"\n채점 {n}문항 (근거 없어 제외 {summary['skipped']}문항), top-{k}")
+    print(f"\n[{summary.get('profile')} · {summary.get('difficulty')}] 채점 {n}문항 (근거 없어 제외 {summary['skipped']}문항), top-{k}")
     print("| 모드 | " + " | ".join(names) + " |")
     print("|---|" + "---|" * len(names))
     for mode, m in summary["metrics"].items():
@@ -303,19 +317,32 @@ def _main() -> None:
     for noisy in ("httpx", "huggingface_hub", "sentence_transformers", "transformers"):
         logging.getLogger(noisy).setLevel(logging.WARNING)
 
-    p = argparse.ArgumentParser(description="bge-m3 검색 3방식 골든 데이터셋 채점 (LLM 없음)")
+    p = argparse.ArgumentParser(description="검색 3방식 골든 데이터셋 채점 (LLM 없음)")
     p.add_argument("--golden", nargs="+", required=True)
-    p.add_argument("--corpus", default=DEFAULT_CORPUS)
+    p.add_argument("--profile", default="bge-m3", help="models.yaml의 모델 설정 (bge-m3, qwen3 …)")
+    p.add_argument("--difficulty", default="basic")
+    p.add_argument("--domain", default="shipping")
+    p.add_argument("--corpus", default=None, help="기본: artifacts/corpus/<난이도>/*/*.jsonl")
     p.add_argument("--modes", nargs="+", default=list(MODES), choices=MODES)
     p.add_argument("--k", type=int, default=5)
     p.add_argument("--limit", type=int, default=0)
     p.add_argument("--threshold", type=float, default=0.6)
     p.add_argument("--page-tolerance", type=int, default=0)
-    p.add_argument("--out", default=DEFAULT_OUT)
+    p.add_argument("--out", default=None, help="기본: artifacts/retrieval_a/eval_<모델>[_<난이도>]")
     p.add_argument("--fresh", action="store_true")
     p.add_argument("--show-misses", action="store_true")
     args = p.parse_args()
+    args.corpus = args.corpus or f"artifacts/corpus/{args.difficulty}/*/*.jsonl"
     print_report(evaluate(args), args.show_misses)
+
+    import gc
+
+    from rag_service.retrieval_a.naive import local_client
+
+    if local_client.cache_info().currsize:
+        local_client().close()
+        local_client.cache_clear()
+        gc.collect()
 
 
 if __name__ == "__main__":
