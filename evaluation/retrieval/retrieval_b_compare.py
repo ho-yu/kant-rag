@@ -1,7 +1,7 @@
 """검색 방식별 Hit@k·Recall@k 비교 실행기.
 
 같은 골든셋, 같은 k, 같은 레벨로 여러 검색기를 채점하고 결과를 JSON으로 저장한다.
-retrieval_b(내 구현)와 retrieval_a(최완위 님 구현)를 같은 기준으로 채점할 수 있다.
+retrieval_b(내 구현)와 retrieval_a(팀원 구현)를 같은 기준으로 채점할 수 있다.
 
 실행 (레포 맨 위에서)
     uv run python evaluation/retrieval/retrieval_b_compare.py
@@ -66,6 +66,14 @@ def _b_hybrid(domain: str, difficulty: str, k: int, levels: list[str]):
     )
 
 
+def _b_rerank(domain: str, difficulty: str, k: int, levels: list[str]):
+    from rag_service.retrieval_b import build_rerank_retriever
+
+    return build_rerank_retriever(
+        domain=domain, difficulty=difficulty, k=k, levels=levels
+    )
+
+
 def _a_naive(domain: str, difficulty: str, k: int, levels: list[str]):
     from rag_service.retrieval_a import build_naive_retriever
 
@@ -90,11 +98,12 @@ def _a_rerank(domain: str, difficulty: str, k: int, levels: list[str]):
     )
 
 
-# 이름 → 검색기 만드는 함수. Rerank(retrieval_b)를 만들면 여기에 한 줄 추가한다.
+# 이름 → 검색기 만드는 함수
 MODES: dict[str, Builder] = {
     "naive": _b_naive,
     "bm25": _b_bm25,
     "hybrid": _b_hybrid,
+    "rerank": _b_rerank,
     "a_naive": _a_naive,
     "a_hybrid": _a_hybrid,
     "a_rerank": _a_rerank,

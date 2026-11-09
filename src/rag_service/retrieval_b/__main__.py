@@ -4,6 +4,7 @@
     uv run python -m rag_service.retrieval_b "부산에서 LA로 보내는 일반 건화물의 서류 제출 마감은 언제인가요?"
     uv run python -m rag_service.retrieval_b "질문" --k 3 --levels page
     uv run python -m rag_service.retrieval_b "질문" --mode hybrid
+    uv run python -m rag_service.retrieval_b "질문" --mode rerank   (처음엔 모델 내려받기)
 """
 
 from __future__ import annotations
@@ -17,12 +18,14 @@ from rag_service.retrieval_b.retrievers import (
     build_bm25_retriever,
     build_hybrid_retriever,
     build_naive_retriever,
+    build_rerank_retriever,
 )
 
 BUILDERS = {
     "naive": build_naive_retriever,
     "bm25": build_bm25_retriever,
     "hybrid": build_hybrid_retriever,
+    "rerank": build_rerank_retriever,
 }
 
 
@@ -42,8 +45,11 @@ def main(argv: list[str] | None = None) -> None:
     for rank, doc in enumerate(retriever.invoke(args.question), 1):
         m = doc.metadata
         text = doc.page_content[:80].replace("\n", " ")
+        # rerank는 리랭크 전 Hybrid 순위를 같이 보여 준다
+        prev = f" (hybrid #{m['prev_rank']})" if "prev_rank" in m else ""
         print(
-            f"{rank}. {m['chunk_id']} {m['book_id']} p{m['page']} {m['score']:.4f} {text}"
+            f"{rank}. {m['chunk_id']} {m['book_id']} p{m['page']} {m['score']:.4f}"
+            f"{prev} {text}"
         )
 
 
