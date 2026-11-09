@@ -5,7 +5,7 @@ retrieval_b(내 구현)와 retrieval_a(최완위 님 구현)를 같은 기준으
 
 실행 (레포 맨 위에서)
     uv run python evaluation/retrieval/retrieval_b_compare.py
-    uv run python evaluation/retrieval/retrieval_b_compare.py --modes naive bm25 a_naive
+    uv run python evaluation/retrieval/retrieval_b_compare.py --modes naive bm25 hybrid a_hybrid
     uv run python evaluation/retrieval/retrieval_b_compare.py --split additional --levels page
 
 결과: results/comparison/retrieval_b/{난이도}_{split}_{levels}.json
@@ -58,6 +58,14 @@ def _b_bm25(domain: str, difficulty: str, k: int, levels: list[str]):
     )
 
 
+def _b_hybrid(domain: str, difficulty: str, k: int, levels: list[str]):
+    from rag_service.retrieval_b import build_hybrid_retriever
+
+    return build_hybrid_retriever(
+        domain=domain, difficulty=difficulty, k=k, levels=levels
+    )
+
+
 def _a_naive(domain: str, difficulty: str, k: int, levels: list[str]):
     from rag_service.retrieval_a import build_naive_retriever
 
@@ -82,10 +90,11 @@ def _a_rerank(domain: str, difficulty: str, k: int, levels: list[str]):
     )
 
 
-# 이름 → 검색기 만드는 함수. Hybrid·Rerank(retrieval_b)를 만들면 여기에 한 줄씩 추가한다.
+# 이름 → 검색기 만드는 함수. Rerank(retrieval_b)를 만들면 여기에 한 줄 추가한다.
 MODES: dict[str, Builder] = {
     "naive": _b_naive,
     "bm25": _b_bm25,
+    "hybrid": _b_hybrid,
     "a_naive": _a_naive,
     "a_hybrid": _a_hybrid,
     "a_rerank": _a_rerank,

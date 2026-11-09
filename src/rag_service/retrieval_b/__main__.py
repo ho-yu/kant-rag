@@ -3,6 +3,7 @@
 실행 (레포 맨 위에서)
     uv run python -m rag_service.retrieval_b "부산에서 LA로 보내는 일반 건화물의 서류 제출 마감은 언제인가요?"
     uv run python -m rag_service.retrieval_b "질문" --k 3 --levels page
+    uv run python -m rag_service.retrieval_b "질문" --mode hybrid
 """
 
 from __future__ import annotations
@@ -13,21 +14,29 @@ import sys
 from rag_service.retrieval_b.retrievers import (
     DEFAULT_K,
     DEFAULT_LEVELS,
+    build_bm25_retriever,
+    build_hybrid_retriever,
     build_naive_retriever,
 )
+
+BUILDERS = {
+    "naive": build_naive_retriever,
+    "bm25": build_bm25_retriever,
+    "hybrid": build_hybrid_retriever,
+}
 
 
 def main(argv: list[str] | None = None) -> None:
     parser = argparse.ArgumentParser(description="retrieval_b 검색 결과 확인")
     parser.add_argument("question")
-    parser.add_argument("--mode", choices=["naive"], default="naive")
+    parser.add_argument("--mode", choices=sorted(BUILDERS), default="naive")
     parser.add_argument("--domain", default="shipping")
     parser.add_argument("--difficulty", default="basic")
     parser.add_argument("--k", type=int, default=DEFAULT_K)
     parser.add_argument("--levels", nargs="+", default=DEFAULT_LEVELS)
     args = parser.parse_args(argv)
 
-    retriever = build_naive_retriever(
+    retriever = BUILDERS[args.mode](
         domain=args.domain, difficulty=args.difficulty, k=args.k, levels=args.levels
     )
     for rank, doc in enumerate(retriever.invoke(args.question), 1):

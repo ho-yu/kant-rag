@@ -13,9 +13,15 @@ import os
 
 import pytest
 from dotenv import load_dotenv
+from langchain_core.documents import Document
 from langchain_core.retrievers import BaseRetriever
 
-from rag_service.retrieval_b import build_naive_retriever, retrievers
+from rag_service.retrieval_b import (
+    build_hybrid_retriever,
+    build_naive_retriever,
+    retrievers,
+)
+from rag_service.retrieval_b.bm25 import BM25Index
 from rag_service.storage.corpus import repo_root
 
 load_dotenv(repo_root() / ".env")
@@ -114,6 +120,71 @@ def test_team_naive_retriever_like_chain():
     assert all(d.metadata["level"] in ("para", "table") for d in docs)
 
 
+# ---------- Hybrid: Dense + BM25 → RRF ----------
+
+# 질문 "gamma"=[1,0]. Dense 순위: A(1.0) > B(0.8) > C(0.0) ...
+# BM25(띄어쓰기 토큰): "gamma"가 들어간 건 B뿐 → B가 두 검색기 모두에 나와 1위가 된다.
+HYBRID_ROWS = [
+    ("alpha beta", [1.0, 0.0], meta("SB01-p1-c1", "para", 1)),
+    ("beta gamma", [0.8, 0.6], meta("SB01-p2-c1", "para", 2)),
+    ("delta", [0.0, 1.0], meta("SB01-p3-c1", "para", 3)),
+    ("epsilon", [0.0, 1.0], meta("SB01-p4-c1", "para", 4)),
+    ("zeta", [0.0, 1.0], meta("SB01-p5-c1", "para", 5)),
+    ("page all", [1.0, 0.0], meta("SB01-p1", "page", 1)),
+]
+
+
+@pytest.fixture
+def fake_hybrid(make_store, monkeypatch):
+    """get_store는 메모리 Qdrant, get_bm25_index는 작은 색인으로 바꾼다."""
+    store = make_store(HYBRID_ROWS, {"gamma": [1.0, 0.0]})
+    calls = []
+
+    def _get_bm25_index(domain, difficulty, levels):
+        calls.append((domain, difficulty, levels))
+        docs = [
+            Document(page_content=text, metadata=m)
+            for text, _, m in HYBRID_ROWS
+            if m["level"] in levels
+        ]
+        return BM25Index(docs, tokenizer=str.split)
+
+    monkeypatch.setattr(retrievers, "get_store", lambda domain, difficulty: store)
+    monkeypatch.setattr(retrievers, "get_bm25_index", _get_bm25_index)
+    return calls
+
+
+def test_hybrid_is_langchain_retriever(fake_hybrid):
+    assert isinstance(build_hybrid_retriever(), BaseRetriever)
+
+
+def test_hybrid_fuses_dense_and_bm25(fake_hybrid):
+    docs = build_hybrid_retriever(k=2).invoke("gamma")
+    assert ids(docs) == ["SB01-p2-c1", "SB01-p1-c1"]
+    top = docs[0].metadata
+    assert (top["dense_rank"], top["bm25_rank"]) == (2, 1)
+    assert docs[1].metadata["bm25_rank"] is None
+    for key in ("chunk_id", "book_id", "page", "level", "score"):
+        assert key in top
+
+
+def test_hybrid_uses_same_levels_for_both(fake_hybrid):
+    docs = build_hybrid_retriever(k=10).invoke("gamma")
+    assert all(d.metadata["level"] == "para" for d in docs)
+    assert fake_hybrid == [("shipping", "basic", ("para", "table"))]
+
+
+def test_hybrid_candidate_k_never_below_k(fake_hybrid):
+    retriever = build_hybrid_retriever(k=4, candidate_k=1)
+    assert len(retriever.invoke("gamma")) == 4
+
+
+def test_hybrid_chain_style_defaults(fake_hybrid):
+    retriever = build_hybrid_retriever(domain="shipping", difficulty="basic")
+    assert (retriever.k, retriever.candidate_k, retriever.rrf_k) == (5, 30, 60)
+    assert retriever.levels == ["para", "table"]
+
+
 # ---------- __main__: 명령줄 확인 도구 ----------
 
 
@@ -123,3 +194,11 @@ def test_main_prints_ranked_lines(fake_get_store, capsys):
     main(["q", "--k", "1", "--levels", "page", "para", "table"])
     out = capsys.readouterr().out.strip().splitlines()
     assert out == ["1. SB01-p1 SB01 p1 1.0000 p"]
+
+
+def test_main_hybrid_mode(fake_hybrid, capsys):
+    from rag_service.retrieval_b.__main__ import main
+
+    main(["gamma", "--mode", "hybrid", "--k", "1"])
+    out = capsys.readouterr().out.strip().splitlines()
+    assert out == ["1. SB01-p2-c1 SB01 p2 0.0325 beta gamma"]

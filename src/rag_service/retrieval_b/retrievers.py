@@ -1,4 +1,4 @@
-"""chain.py가 쓰는 검색기(retriever)를 만든다. 지금은 Naive(dense)와 BM25가 있다.
+"""chain.py가 쓰는 검색기(retriever)를 만든다. Naive(dense), BM25, Hybrid(RRF)가 있다.
 
 chain.py는 build_naive_retriever(domain=, difficulty=)로 검색기를 만들고
 .invoke(질문)을 불러 Document 목록(chunk_id, book_id, page, score 포함)을 받는다.
@@ -13,9 +13,12 @@ from langchain_qdrant import QdrantVectorStore
 
 from rag_service.retrieval_b.bm25 import BM25Index, as_levels, get_bm25_index
 from rag_service.retrieval_b.dense import dense_search, get_store
+from rag_service.retrieval_b.fusion import RRF_K, rrf_fuse
 
 DEFAULT_K = 5
 DEFAULT_LEVELS = ["para", "table"]
+# Hybrid가 Dense·BM25에서 각각 먼저 뽑는 후보 수 (k보다 작으면 k를 쓴다)
+CANDIDATE_K = 30
 
 
 class DenseRetriever(BaseRetriever):
@@ -68,4 +71,45 @@ def build_bm25_retriever(
     return BM25Retriever(
         index=get_bm25_index(domain, difficulty, as_levels(levels)),
         k=k,
+    )
+
+
+class HybridRetriever(BaseRetriever):
+    """Dense와 BM25에서 후보를 candidate_k개씩 뽑고 RRF로 합쳐 상위 k개를 돌려준다."""
+
+    store: QdrantVectorStore
+    index: BM25Index
+    k: int = DEFAULT_K
+    levels: list[str] = DEFAULT_LEVELS
+    candidate_k: int = CANDIDATE_K
+    rrf_k: int = RRF_K
+
+    def _get_relevant_documents(
+        self, query: str, *, run_manager: CallbackManagerForRetrieverRun
+    ) -> list[Document]:
+        n = max(self.candidate_k, self.k)
+        rankings = {
+            "dense": dense_search(self.store, query, k=n, levels=self.levels),
+            "bm25": self.index.search(query, k=n),
+        }
+        return rrf_fuse(rankings, k=self.k, rrf_k=self.rrf_k)
+
+
+def build_hybrid_retriever(
+    domain: str = "shipping",
+    difficulty: str = "basic",
+    k: int = DEFAULT_K,
+    levels: list[str] | None = None,
+    candidate_k: int = CANDIDATE_K,
+    rrf_k: int = RRF_K,
+) -> HybridRetriever:
+    """Hybrid(Dense + BM25, RRF) 검색기. Dense와 BM25는 같은 levels의 청크만 본다."""
+    levels = list(DEFAULT_LEVELS if levels is None else levels)
+    return HybridRetriever(
+        store=get_store(domain, difficulty),
+        index=get_bm25_index(domain, difficulty, as_levels(levels)),
+        k=k,
+        levels=levels,
+        candidate_k=candidate_k,
+        rrf_k=rrf_k,
     )
