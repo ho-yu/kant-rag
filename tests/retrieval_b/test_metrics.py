@@ -342,6 +342,8 @@ def test_compare_writes_report(
     # 한 방식이 실패해도 나머지는 저장
     assert "모델 없음" in report["results"]["a_naive"]["error"]
     assert "naive" in capsys.readouterr().out
+    # 같은 이름의 결과 페이지도 만든다
+    assert (tmp_path / "r.html").exists()
 
 
 def test_compare_default_output_name(compare_module, monkeypatch, tmp_path):

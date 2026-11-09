@@ -9,6 +9,7 @@ retrieval_b(내 구현)와 retrieval_a(최완위 님 구현)를 같은 기준으
     uv run python evaluation/retrieval/retrieval_b_compare.py --split additional --levels page
 
 결과: results/comparison/retrieval_b/{난이도}_{split}_{levels}.json
+      같은 이름의 .html도 만든다 (브라우저로 여는 결과 페이지, --open이면 바로 열림).
 """
 
 from __future__ import annotations
@@ -32,6 +33,7 @@ from rag_service.retrieval_b.metrics import (
     golden_path,
     load_golden,
 )
+from rag_service.retrieval_b.report import page_link, write_html
 from rag_service.storage.corpus import repo_root
 
 WARMUP_QUESTION = "부산에서 LA로 컨테이너를 예약할 때 필요한 정보는?"
@@ -143,6 +145,9 @@ def main(argv: list[str] | None = None) -> Path:
     parser.add_argument(
         "--out", type=Path, default=None, help="저장 파일 경로 (기본: results/...)"
     )
+    parser.add_argument(
+        "--open", action="store_true", help="끝나면 결과 페이지를 브라우저로 바로 연다"
+    )
     args = parser.parse_args(argv)
 
     load_dotenv(repo_root() / ".env")
@@ -194,10 +199,12 @@ def main(argv: list[str] | None = None) -> Path:
         "results": results,
     }
     out.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
+    page = write_html(report, out.with_suffix(".html"), items)
 
     print()
     print_table(results, ks)
     print(f"\n저장: {out}")
+    print(f"결과 페이지 (Ctrl+클릭): {page_link(page, open_browser=args.open)}")
     return out
 
 
