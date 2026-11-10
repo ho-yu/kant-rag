@@ -116,3 +116,15 @@ def test_validate_scope_rejects(domain, difficulty, error):
 
 def test_check_levels_keeps_order_and_drops_duplicates():
     assert check_levels(["table", "PARA", "table"]) == ("table", "para")
+
+
+def test_settings_tag_only_lists_changed_values():
+    from rag_service.retrieval_b.settings import settings_tag
+
+    assert settings_tag(Settings()) == ""
+    assert settings_tag(Settings(k=3)) == "_k3"
+    assert settings_tag(Settings(rerank_n=100, candidate_k=50)) == "_cand50_n100"
+    assert settings_tag(Settings(levels=("page",))) == "_lvpage"
+    assert (
+        settings_tag(Settings(rerank_batch_size=4)) == ""
+    )  # 점수를 안 바꾸는 값은 뺀다

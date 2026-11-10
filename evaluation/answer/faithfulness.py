@@ -20,11 +20,15 @@ gpt-6-luna는 RAGAS가 추론 모델로 보고 temperature 1.0, max_completion_t
     uv run python evaluation/answer/faithfulness.py
     uv run python evaluation/answer/faithfulness.py --summary-only        # 채점 없이 요약만 다시
 
-결과
-    results/answer/retrieval_b/{난이도}_{split}/faithfulness_{방식}.jsonl   한 줄 = 문항 하나의 점수·상태
-    results/answer/retrieval_b/{난이도}_{split}/grading_usage.jsonl       채점 호출 토큰 (서비스 지표와 따로)
-    results/answer/retrieval_b/{난이도}_{split}/faithfulness_summary.json 방식별 평균과 건수
-    results/answer/retrieval_b/{난이도}_{split}/faithfulness_per_question.csv
+    uv run python evaluation/answer/faithfulness.py --run basic_development_k3   # 폴더를 직접 고르기
+
+결과 ({폴더}는 run_answers.py와 같은 규칙: {난이도}_{split}{바꾼 설정}{_tag})
+    results/answer/retrieval_b/{폴더}/faithfulness_{방식}.jsonl   한 줄 = 문항 하나의 점수·상태
+    results/answer/retrieval_b/{폴더}/grading_usage.jsonl       채점 호출 토큰 (서비스 지표와 따로)
+    results/answer/retrieval_b/{폴더}/faithfulness_summary.json 방식별 평균과 건수
+    results/answer/retrieval_b/{폴더}/faithfulness_per_question.csv
+폴더는 run_answers.py를 돌릴 때와 같은 RETRIEVAL_B_* 환경변수·--tag로 실행하면 알아서 찾는다.
+환경변수를 이미 지웠다면 --run에 폴더 이름을 그대로 준다. 못 찾으면 있는 폴더 목록을 보여 주고 멈춘다.
 """
 
 from __future__ import annotations
@@ -60,8 +64,30 @@ Record = dict[str, Any]
 # ---------- 파일 ----------
 
 
-def out_dir_for(difficulty: str, split: str) -> Path:
-    return repo_root() / OUT_DIR / f"{difficulty}_{split}"
+def run_name(difficulty: str, split: str, *, tag: str = "") -> str:
+    """run_answers.py와 같은 규칙의 폴더 이름. 같은 RETRIEVAL_B_* 환경변수로 실행해야 같은 폴더가 된다."""
+    from rag_service.retrieval_b.settings import get_settings, settings_tag
+
+    name = f"{difficulty}_{split}{settings_tag(get_settings())}"
+    return f"{name}_{tag}" if tag else name
+
+
+def out_dir_for(difficulty: str, split: str, *, run: str = "", tag: str = "") -> Path:
+    """--run으로 폴더 이름을 직접 주면 그 폴더, 아니면 지금 설정으로 이름을 만든다."""
+    return repo_root() / OUT_DIR / (run or run_name(difficulty, split, tag=tag))
+
+
+def available_runs(difficulty: str, split: str) -> list[str]:
+    """같은 난이도·split의 답변 폴더 이름들 (폴더를 못 찾았을 때 안내용)."""
+    base = repo_root() / OUT_DIR
+    if not base.is_dir():
+        return []
+    prefix = f"{difficulty}_{split}"
+    return sorted(
+        p.name
+        for p in base.iterdir()
+        if p.is_dir() and p.name.startswith(prefix) and any(p.glob("answers_*.jsonl"))
+    )
 
 
 def read_jsonl(path: Path) -> list[Record]:
@@ -377,9 +403,21 @@ def main(argv: Sequence[str] | None = None) -> None:
     p.add_argument(
         "--summary-only", action="store_true", help="채점 없이 저장된 결과로 요약만"
     )
+    p.add_argument(
+        "--run", default="", help="채점할 답변 폴더 이름 (예: basic_development_k3)"
+    )
+    p.add_argument("--tag", default="", help="run_answers.py에 준 --tag와 같게")
     args = p.parse_args(argv)
 
-    out_dir = out_dir_for(args.difficulty, args.split)
+    out_dir = out_dir_for(args.difficulty, args.split, run=args.run, tag=args.tag)
+    rel = out_dir.relative_to(repo_root())
+    if not any(out_dir.glob("answers_*.jsonl")):
+        runs = available_runs(args.difficulty, args.split)
+        raise SystemExit(
+            f"답변 폴더 {rel}가 없습니다. run_answers.py와 같은 RETRIEVAL_B_* 설정으로 실행하거나 "
+            f"--run으로 폴더를 고르세요. 있는 폴더: {', '.join(runs) or '없음'}"
+        )
+    print(f"[답변 폴더] {rel}", flush=True)
     if not args.summary_only:
         for mode in args.modes:
             records = read_jsonl(out_dir / f"answers_{mode}.jsonl")

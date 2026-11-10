@@ -312,3 +312,48 @@ def test_real_ragas_no_statements_is_na():
     scorer = fa.make_scorer("gpt-6-luna", fa.UsageCounter(), client=client)
     row = asyncio.run(fa.score_one(_rec(answer="어떤 장비인지 알려 주세요."), scorer))
     assert row["state"] == "na" and row["cause"] == "no_claims"
+
+
+def test_out_dir_matches_run_answers_and_run_overrides(monkeypatch, tmp_path):
+    from rag_service.retrieval_b import settings as settings_mod
+
+    for var in ("K", "LEVELS", "CANDIDATE_K", "RRF_K", "RERANK_N", "RERANK_MAX_LENGTH"):
+        monkeypatch.setenv(f"RETRIEVAL_B_{var}", "")
+    monkeypatch.setenv("RETRIEVAL_B_K", "3")
+    settings_mod.get_settings.cache_clear()
+    try:
+        assert fa.run_name("basic", "development") == "basic_development_k3"
+        assert (
+            fa.run_name("basic", "development", tag="r2") == "basic_development_k3_r2"
+        )
+        assert fa.out_dir_for("basic", "development", run="mine").name == "mine"
+    finally:
+        settings_mod.get_settings.cache_clear()
+
+
+def test_available_runs_lists_only_answer_folders(monkeypatch, tmp_path):
+    monkeypatch.setattr(fa, "repo_root", lambda: tmp_path)
+    base = tmp_path / fa.OUT_DIR
+    for name, has_answers in [
+        ("basic_development", True),
+        ("basic_development_k3", True),
+        ("basic_development_empty", False),
+        ("basic_additional", True),
+    ]:
+        (base / name).mkdir(parents=True)
+        if has_answers:
+            (base / name / "answers_naive.jsonl").write_text("", encoding="utf-8")
+    assert fa.available_runs("basic", "development") == [
+        "basic_development",
+        "basic_development_k3",
+    ]
+
+
+def test_main_stops_when_answer_folder_missing(monkeypatch, tmp_path):
+    monkeypatch.setattr(fa, "repo_root", lambda: tmp_path)
+    (tmp_path / fa.OUT_DIR / "basic_development_k3").mkdir(parents=True)
+    (tmp_path / fa.OUT_DIR / "basic_development_k3" / "answers_naive.jsonl").write_text(
+        "", encoding="utf-8"
+    )
+    with pytest.raises(SystemExit, match="basic_development_k3"):
+        fa.main(["--run", "nope"])

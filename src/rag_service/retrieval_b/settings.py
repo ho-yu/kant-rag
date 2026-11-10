@@ -136,6 +136,29 @@ def load_settings(env: Mapping[str, str]) -> Settings:
         ) from error
 
 
+# 결과 이름에 붙일 짧은 이름. 배치 크기는 점수를 바꾸지 않아서 뺀다.
+TAG_NAMES = {
+    "k": "k",
+    "levels": "lv",
+    "candidate_k": "cand",
+    "rrf_k": "rrf",
+    "rerank_n": "n",
+    "rerank_max_length": "len",
+}
+
+
+def settings_tag(settings: Settings) -> str:
+    """기본값과 다른 튜닝 값만 이어 붙인 이름 꼬리 (예: _k3_n100, _lvpage). 모두 기본값이면 ""."""
+    default = Settings()
+    parts = []
+    for name, short in TAG_NAMES.items():
+        value = getattr(settings, name)
+        if value != getattr(default, name):
+            text = "-".join(value) if isinstance(value, tuple) else str(value)
+            parts.append(f"_{short}{text}")
+    return "".join(parts)
+
+
 @lru_cache(maxsize=1)
 def get_settings() -> Settings:
     """.env와 환경변수를 읽어 프로세스당 한 번만 만든다. 값을 바꿨으면 get_settings.cache_clear()."""

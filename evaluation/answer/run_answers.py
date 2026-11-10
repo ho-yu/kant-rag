@@ -13,8 +13,13 @@
     uv run python evaluation/answer/run_answers.py                           # 30문항 × 3방식
 
 결과 (results/는 .gitignore에 없으니 커밋하지 않는다)
-    results/answer/retrieval_b/{난이도}_{split}/answers_{방식}.jsonl   한 줄 = 요청 하나
-    results/answer/retrieval_b/{난이도}_{split}/config.json            세 방식에 같게 둔 설정
+    results/answer/retrieval_b/{폴더}/answers_{방식}.jsonl   한 줄 = 요청 하나
+    results/answer/retrieval_b/{폴더}/config.json            세 방식에 같게 둔 설정
+    {폴더} = {난이도}_{split}{바꾼 설정}{_tag}. RETRIEVAL_B_* 값이 기본값과 다르면 자동으로 붙는다.
+      예: RETRIEVAL_B_K=3 → basic_development_k3,  --tag r2 → basic_development_r2
+
+[2026-11-10 추가] 이유: 결과 폴더가 {난이도}_{split}로 고정이라 설정을 바꿀 때마다 폴더 이름을 손으로 바꿔야 했음
+→ 효과: 바꾼 설정이 폴더 이름에 붙어 실험마다 따로 쌓이고, faithfulness.py도 같은 폴더를 찾는다.
 """
 
 from __future__ import annotations
@@ -52,8 +57,26 @@ Record = dict[str, Any]
 # ---------- 경로와 질문 ----------
 
 
-def out_dir_for(difficulty: str, split: str) -> Path:
-    return repo_root() / OUT_DIR / f"{difficulty}_{split}"
+def run_name(difficulty: str, split: str, *, model: str = MODEL, tag: str = "") -> str:
+    """결과 폴더 이름: {난이도}_{split}{바꾼 설정}{_모델}{_tag}.
+
+    retrieval_b 튜닝 값(RETRIEVAL_B_*)이 기본값과 다르면 이름에 붙는다 (예: basic_development_k3).
+    모두 기본값이면 예전과 같은 basic_development. 같은 설정 반복은 --tag로 구분한다 (예: _r2).
+    """
+    from rag_service.retrieval_b.settings import get_settings, settings_tag
+
+    name = f"{difficulty}_{split}{settings_tag(get_settings())}"
+    if model != MODEL:
+        name += f"_{model}"
+    if tag:
+        name += f"_{tag}"
+    return name
+
+
+def out_dir_for(
+    difficulty: str, split: str, *, model: str = MODEL, tag: str = ""
+) -> Path:
+    return repo_root() / OUT_DIR / run_name(difficulty, split, model=model, tag=tag)
 
 
 def answers_path(out_dir: Path, mode: str) -> Path:
@@ -358,6 +381,9 @@ def main(argv: Sequence[str] | None = None) -> None:
     p.add_argument("--difficulty", default="basic")
     p.add_argument("--model", default=MODEL)
     p.add_argument("--limit", type=int, default=0, help="앞에서 N문항만 (0이면 전부)")
+    p.add_argument(
+        "--tag", default="", help="폴더 이름 끝에 붙일 말 (같은 설정 반복 구분, 예: r2)"
+    )
     args = p.parse_args(argv)
 
     questions = load_questions(
@@ -365,7 +391,8 @@ def main(argv: Sequence[str] | None = None) -> None:
     )
     if args.limit:
         questions = questions[: args.limit]
-    out_dir = out_dir_for(args.difficulty, args.split)
+    out_dir = out_dir_for(args.difficulty, args.split, model=args.model, tag=args.tag)
+    print(f"[결과 폴더] {out_dir.relative_to(repo_root())}", flush=True)
     check_or_write_config(
         out_dir,
         run_config(

@@ -318,3 +318,27 @@ def test_run_config_records_same_settings_for_all_modes(monkeypatch):
     assert cfg["retrieval"]["embedding_model"] == "my-embedding"
     assert cfg["retrieval"]["k"] >= 1
     assert "사전 판단" in cfg["pipeline"]
+
+
+def test_out_dir_name_follows_changed_settings(monkeypatch):
+    from rag_service.retrieval_b import settings as settings_mod
+
+    for var in ("K", "LEVELS", "CANDIDATE_K", "RRF_K", "RERANK_N", "RERANK_MAX_LENGTH"):
+        monkeypatch.setenv(f"RETRIEVAL_B_{var}", "")  # 빈 값 = 기본값 (.env보다 먼저)
+    settings_mod.get_settings.cache_clear()
+    try:
+        assert ra.run_name("basic", "development") == "basic_development"
+        assert ra.run_name("basic", "development", tag="r2") == "basic_development_r2"
+        assert (
+            ra.run_name("basic", "development", model="other")
+            == "basic_development_other"
+        )
+        monkeypatch.setenv("RETRIEVAL_B_K", "3")
+        monkeypatch.setenv("RETRIEVAL_B_RERANK_N", "100")
+        settings_mod.get_settings.cache_clear()
+        assert ra.run_name("basic", "development") == "basic_development_k3_n100"
+        assert (
+            ra.out_dir_for("basic", "development").name == "basic_development_k3_n100"
+        )
+    finally:
+        settings_mod.get_settings.cache_clear()
