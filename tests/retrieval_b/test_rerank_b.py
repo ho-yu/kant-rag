@@ -5,6 +5,8 @@ integration 테스트: 실제 bge-reranker-v2-m3를 내려받아 점수가 0~1�
 
 실행 (레포 맨 위에서)
     uv run pytest tests/retrieval_b/test_rerank_b.py -q
+
+[2026-11-10 리팩토링] 이유: 리랭커 숫자 설정이 Settings로 옮겨지고 domain·difficulty가 필수가 됨 → 효과: 설정값 적용과 rerank_n ≥ k 검사가 설정을 거쳐도 지켜지는지 확인됨.
 """
 
 from __future__ import annotations
@@ -173,13 +175,16 @@ def fake_hybrid(make_store, monkeypatch):
     )
 
 
+SCOPE = {"domain": "shipping", "difficulty": "basic"}
+
+
 def zeta_first(question, texts):
     """본문에 zeta가 있으면 1점, 아니면 0점."""
     return [1.0 if "zeta" in t else 0.0 for t in texts]
 
 
 def test_rerank_retriever_reorders_hybrid_candidates(fake_hybrid):
-    retriever = build_rerank_retriever(k=3, score_fn=zeta_first)
+    retriever = build_rerank_retriever(**SCOPE, k=3, score_fn=zeta_first)
     assert isinstance(retriever, BaseRetriever)
     docs = retriever.invoke("gamma")
     # zeta(Hybrid 5위)가 1위로, 나머지는 0점 동점이라 chunk_id 순
@@ -189,7 +194,7 @@ def test_rerank_retriever_reorders_hybrid_candidates(fake_hybrid):
 
 
 def test_rerank_retriever_asks_hybrid_for_rerank_n(fake_hybrid):
-    retriever = build_rerank_retriever(k=2, rerank_n=4, score_fn=zeta_first)
+    retriever = build_rerank_retriever(**SCOPE, k=2, rerank_n=4, score_fn=zeta_first)
     assert (retriever.k, retriever.hybrid.k) == (2, 4)
     # 후보가 4개(B, A, C, D)뿐이라 zeta(5위)는 리랭커에 안 간다
     assert "SB01-p5-c1" not in ids(retriever.invoke("gamma"))
@@ -197,7 +202,14 @@ def test_rerank_retriever_asks_hybrid_for_rerank_n(fake_hybrid):
 
 def test_rerank_n_below_k_raises(fake_hybrid):
     with pytest.raises(ValueError):
-        build_rerank_retriever(k=5, rerank_n=3, score_fn=zeta_first)
+        build_rerank_retriever(**SCOPE, k=5, rerank_n=3, score_fn=zeta_first)
+
+
+def test_rerank_n_below_settings_k_raises(fake_hybrid, default_settings):
+    """k를 설정(RETRIEVAL_B_K)에서 가져와도 rerank_n과 비교한다."""
+    default_settings(k=8, rerank_n=10)
+    with pytest.raises(ValueError):
+        build_rerank_retriever(**SCOPE, rerank_n=6, score_fn=zeta_first)
 
 
 def test_chain_style_defaults_do_not_load_model(fake_hybrid, monkeypatch):
@@ -205,9 +217,39 @@ def test_chain_style_defaults_do_not_load_model(fake_hybrid, monkeypatch):
         raise AssertionError("만들 때는 모델을 불러오지 않는다")
 
     monkeypatch.setattr(rerank_mod, "load_cross_encoder", boom)
-    retriever = build_rerank_retriever(domain="shipping", difficulty="basic")
+    retriever = build_rerank_retriever(
+        domain="shipping", difficulty="basic", profile=None
+    )
     assert (retriever.k, retriever.hybrid.k) == (5, 50)
     assert retriever.hybrid.levels == ["para", "table"]
+
+
+def test_scorer_uses_settings_for_max_length_and_batch(monkeypatch, default_settings):
+    """cross_encoder_scorer()를 인자 없이 부르면 (rerank_diagnose.py) 설정값을 쓴다."""
+    default_settings(rerank_max_length=512, rerank_batch_size=4)
+    seen = {}
+
+    class FakeModel:
+        def predict(self, pairs, batch_size, **kwargs):
+            seen["batch_size"] = batch_size
+            return [0.5] * len(pairs)
+
+    def fake_load(name, max_length):
+        seen["max_length"] = max_length
+        return FakeModel()
+
+    monkeypatch.setattr(rerank_mod, "load_cross_encoder", fake_load)
+    assert rerank_mod.cross_encoder_scorer()("q", ["a", "b"]) == [0.5, 0.5]
+    assert seen == {"max_length": 512, "batch_size": 4}
+    rerank_mod.cross_encoder_scorer(max_length=256, batch_size=2)("q", ["a"])
+    assert seen == {"max_length": 256, "batch_size": 2}
+
+
+def test_scorer_rejects_bad_values():
+    with pytest.raises(ValueError):
+        rerank_mod.cross_encoder_scorer(max_length=0)
+    with pytest.raises(ValueError):
+        rerank_mod.cross_encoder_scorer(batch_size=-1)
 
 
 def test_main_rerank_mode(fake_hybrid, monkeypatch, capsys):

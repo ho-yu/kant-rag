@@ -1,10 +1,24 @@
 """chain.py가 쓰는 검색기(retriever)를 만든다. Naive(dense), BM25, Hybrid(RRF), Rerank가 있다.
 
-chain.py는 build_naive_retriever(domain=, difficulty=)로 검색기를 만들고
-.invoke(질문)을 불러 Document 목록(chunk_id, book_id, page, score 포함)을 받는다.
+chain.py와의 약속 (retrieval_a와 같은 모양이라 import 한 줄만 바꾸면 갈아 끼울 수 있다)
+    build_naive_retriever(domain=, difficulty=, profile=)   ← create_chain이 받은 값을 그대로 넘긴다
+    retriever.invoke(질문) → Document 목록 (metadata에 chunk_id, book_id, page, level, score)
+
+값을 정하는 곳 (settings.py 참고)
+- domain, difficulty: 호출하는 쪽이 꼭 넘긴다. 기본값이 없어서 빠뜨리면 바로 오류가 난다.
+- k, levels, candidate_k, rrf_k, rerank_n …: 인자로 넘기면 그 값, 안 넘기면 Settings(환경변수) 값.
+- profile: retrieval_a 호환용. retrieval_b는 모델 하나(EMBEDDING_MODEL)만 써서 값은 쓰지 않는다.
+
+무거운 자원(Qdrant 연결, BM25 색인, 리랭커)은 (domain, difficulty, levels)마다 한 번만 만들고
+검색기끼리 같이 쓴다. 그래서 chain.py가 검색기 3개를 한꺼번에 만들어도 색인은 한 번만 만든다.
+
+[2026-11-10 리팩토링] 이유: profile 인자가 없어 chain.py와 호환되지 않고 domain·difficulty 누락 시 shipping/basic으로 조용히 검색함 → 효과: import 한 줄로 retrieval_a와 교체 가능, 잘못된 입력은 Qdrant 접속 전에 차단.
 """
 
 from __future__ import annotations
+
+import warnings
+from collections.abc import Iterable
 
 from langchain_core.callbacks import CallbackManagerForRetrieverRun
 from langchain_core.documents import Document
@@ -14,27 +28,42 @@ from pydantic import ConfigDict
 
 from rag_service.retrieval_b.bm25 import BM25Index, as_levels, get_bm25_index
 from rag_service.retrieval_b.dense import dense_search, get_store
-from rag_service.retrieval_b.fusion import RRF_K, rrf_fuse
-from rag_service.retrieval_b.rerank import (
-    MAX_LENGTH,
-    RERANK_N,
-    ScoreFn,
-    cross_encoder_scorer,
-    rerank,
+from rag_service.retrieval_b.fusion import rrf_fuse
+from rag_service.retrieval_b.rerank import ScoreFn, cross_encoder_scorer, rerank
+from rag_service.retrieval_b.settings import (
+    Settings,
+    check_int,
+    check_levels,
+    get_settings,
+    validate_scope,
 )
 
-DEFAULT_K = 5
-DEFAULT_LEVELS = ["para", "table"]
-# Hybrid가 Dense·BM25에서 각각 먼저 뽑는 후보 수 (k보다 작으면 k를 쓴다)
-CANDIDATE_K = 30
+
+def _pick(name: str, value: int | None, default: int, minimum: int = 1) -> int:
+    """넘긴 값이 있으면 그 값을, 없으면 설정값을 쓴다. 어느 쪽이든 범위를 검사한다."""
+    return check_int(name, default if value is None else value, minimum)
+
+
+def _pick_levels(levels: Iterable[str] | None, s: Settings) -> list[str]:
+    """새 list로 돌려줘서 넘긴 목록을 나중에 바꿔도 검색기 설정은 그대로다."""
+    return list(s.levels if levels is None else check_levels(levels))
+
+
+def _ignore_profile(profile: str | None) -> None:
+    if profile is not None:
+        warnings.warn(
+            f"retrieval_b는 profile을 쓰지 않습니다 (받은 값: {profile!r}). "
+            "모델은 EMBEDDING_MODEL, RERANKER_MODEL 환경변수로 정합니다.",
+            stacklevel=3,
+        )
 
 
 class DenseRetriever(BaseRetriever):
     """dense_search를 .invoke(질문) → Document 목록 모양으로 감싼다."""
 
     store: QdrantVectorStore
-    k: int = DEFAULT_K
-    levels: list[str] = DEFAULT_LEVELS
+    k: int
+    levels: list[str]
 
     def _get_relevant_documents(
         self, query: str, *, run_manager: CallbackManagerForRetrieverRun
@@ -43,16 +72,21 @@ class DenseRetriever(BaseRetriever):
 
 
 def build_naive_retriever(
-    domain: str = "shipping",
-    difficulty: str = "basic",
-    k: int = DEFAULT_K,
+    *,
+    domain: str,
+    difficulty: str,
+    profile: str | None = None,
+    k: int | None = None,
     levels: list[str] | None = None,
 ) -> DenseRetriever:
-    """Naive RAG 검색기. chain.py가 build_naive_retriever(domain=, difficulty=)로 부른다."""
+    """Naive RAG 검색기. chain.py가 build_naive_retriever(domain=, difficulty=, profile=)로 부른다."""
+    domain, difficulty = validate_scope(domain, difficulty)
+    _ignore_profile(profile)
+    s = get_settings()
     return DenseRetriever(
         store=get_store(domain, difficulty),
-        k=k,
-        levels=list(DEFAULT_LEVELS if levels is None else levels),
+        k=_pick("k", k, s.k),
+        levels=_pick_levels(levels, s),
     )
 
 
@@ -60,7 +94,7 @@ class BM25Retriever(BaseRetriever):
     """BM25Index.search를 .invoke(질문) → Document 목록 모양으로 감싼다."""
 
     index: BM25Index
-    k: int = DEFAULT_K
+    k: int
 
     def _get_relevant_documents(
         self, query: str, *, run_manager: CallbackManagerForRetrieverRun
@@ -69,16 +103,20 @@ class BM25Retriever(BaseRetriever):
 
 
 def build_bm25_retriever(
-    domain: str = "shipping",
-    difficulty: str = "basic",
-    k: int = DEFAULT_K,
+    *,
+    domain: str,
+    difficulty: str,
+    profile: str | None = None,
+    k: int | None = None,
     levels: list[str] | None = None,
 ) -> BM25Retriever:
     """BM25 단독 검색기. 만들 때 jsonl을 읽어 색인까지 끝낸다 (Naive와 같은 인자)."""
-    levels = DEFAULT_LEVELS if levels is None else levels
+    domain, difficulty = validate_scope(domain, difficulty)
+    _ignore_profile(profile)
+    s = get_settings()
     return BM25Retriever(
-        index=get_bm25_index(domain, difficulty, as_levels(levels)),
-        k=k,
+        index=get_bm25_index(domain, difficulty, as_levels(_pick_levels(levels, s))),
+        k=_pick("k", k, s.k),
     )
 
 
@@ -87,10 +125,10 @@ class HybridRetriever(BaseRetriever):
 
     store: QdrantVectorStore
     index: BM25Index
-    k: int = DEFAULT_K
-    levels: list[str] = DEFAULT_LEVELS
-    candidate_k: int = CANDIDATE_K
-    rrf_k: int = RRF_K
+    k: int
+    levels: list[str]
+    candidate_k: int
+    rrf_k: int
 
     def _get_relevant_documents(
         self, query: str, *, run_manager: CallbackManagerForRetrieverRun
@@ -104,22 +142,27 @@ class HybridRetriever(BaseRetriever):
 
 
 def build_hybrid_retriever(
-    domain: str = "shipping",
-    difficulty: str = "basic",
-    k: int = DEFAULT_K,
+    *,
+    domain: str,
+    difficulty: str,
+    profile: str | None = None,
+    k: int | None = None,
     levels: list[str] | None = None,
-    candidate_k: int = CANDIDATE_K,
-    rrf_k: int = RRF_K,
+    candidate_k: int | None = None,
+    rrf_k: int | None = None,
 ) -> HybridRetriever:
     """Hybrid(Dense + BM25, RRF) 검색기. Dense와 BM25는 같은 levels의 청크만 본다."""
-    levels = list(DEFAULT_LEVELS if levels is None else levels)
+    domain, difficulty = validate_scope(domain, difficulty)
+    _ignore_profile(profile)
+    s = get_settings()
+    levels = _pick_levels(levels, s)
     return HybridRetriever(
         store=get_store(domain, difficulty),
         index=get_bm25_index(domain, difficulty, as_levels(levels)),
-        k=k,
+        k=_pick("k", k, s.k),
         levels=levels,
-        candidate_k=candidate_k,
-        rrf_k=rrf_k,
+        candidate_k=_pick("candidate_k", candidate_k, s.candidate_k),
+        rrf_k=_pick("rrf_k", rrf_k, s.rrf_k, minimum=0),
     )
 
 
@@ -130,7 +173,7 @@ class RerankRetriever(BaseRetriever):
 
     hybrid: HybridRetriever
     score_fn: ScoreFn
-    k: int = DEFAULT_K
+    k: int
 
     def _get_relevant_documents(
         self, query: str, *, run_manager: CallbackManagerForRetrieverRun
@@ -142,15 +185,17 @@ class RerankRetriever(BaseRetriever):
 
 
 def build_rerank_retriever(
-    domain: str = "shipping",
-    difficulty: str = "basic",
-    k: int = DEFAULT_K,
+    *,
+    domain: str,
+    difficulty: str,
+    profile: str | None = None,
+    k: int | None = None,
     levels: list[str] | None = None,
-    rerank_n: int = RERANK_N,
-    candidate_k: int = CANDIDATE_K,
-    rrf_k: int = RRF_K,
+    rerank_n: int | None = None,
+    candidate_k: int | None = None,
+    rrf_k: int | None = None,
     model_name: str | None = None,
-    max_length: int = MAX_LENGTH,
+    max_length: int | None = None,
     score_fn: ScoreFn | None = None,
 ) -> RerankRetriever:
     """Hybrid + Rerank 검색기. Hybrid에서 rerank_n개(기본 50)를 받아 리랭커로 k개를 고른다.
@@ -158,6 +203,11 @@ def build_rerank_retriever(
     rerank_n < k 이면 ValueError. 모델은 첫 검색 때 불러온다.
     score_fn을 넘기면 실제 모델 대신 그 함수를 쓴다 (테스트용).
     """
+    domain, difficulty = validate_scope(domain, difficulty)
+    _ignore_profile(profile)
+    s = get_settings()
+    k = _pick("k", k, s.k)
+    rerank_n = _pick("rerank_n", rerank_n, s.rerank_n)
     if rerank_n < k:
         raise ValueError(f"rerank_n({rerank_n})은 k({k}) 이상이어야 합니다.")
     hybrid = build_hybrid_retriever(
@@ -168,8 +218,10 @@ def build_rerank_retriever(
         candidate_k=candidate_k,
         rrf_k=rrf_k,
     )
-    return RerankRetriever(
-        hybrid=hybrid,
-        score_fn=score_fn or cross_encoder_scorer(model_name, max_length),
-        k=k,
-    )
+    if score_fn is None:
+        score_fn = cross_encoder_scorer(
+            model_name,
+            max_length=_pick("max_length", max_length, s.rerank_max_length),
+            batch_size=s.rerank_batch_size,
+        )
+    return RerankRetriever(hybrid=hybrid, score_fn=score_fn, k=k)

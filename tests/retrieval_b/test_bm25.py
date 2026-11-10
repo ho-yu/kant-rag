@@ -5,6 +5,8 @@
 
 실행 (레포 맨 위에서)
     uv run pytest tests/retrieval_b/test_bm25.py -q
+
+[2026-11-10 리팩토링] 이유: build_bm25_retriever가 domain·difficulty를 꼭 받게 바뀜 → 효과: 색인 캐시 테스트도 실제 호출과 같은 인자로 확인함.
 """
 
 from __future__ import annotations
@@ -172,8 +174,9 @@ def test_build_bm25_retriever_uses_team_chunks(fake_chunks):
 
 
 def test_index_is_built_once_per_setting(fake_chunks):
-    first = build_bm25_retriever(levels=["table", "para"])
-    second = build_bm25_retriever(levels=["para", "table"])
+    scope = {"domain": "shipping", "difficulty": "basic"}
+    first = build_bm25_retriever(**scope, levels=["table", "para"])
+    second = build_bm25_retriever(**scope, levels=["para", "table"])
     assert first.index is second.index
     assert len(fake_chunks) == 1
 

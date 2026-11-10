@@ -5,6 +5,8 @@
     uv run python -m rag_service.retrieval_b "질문" --k 3 --levels page
     uv run python -m rag_service.retrieval_b "질문" --mode hybrid
     uv run python -m rag_service.retrieval_b "질문" --mode rerank   (처음엔 모델 내려받기)
+
+[2026-11-10 리팩토링] 이유: --k·--levels 기본값이 삭제된 상수(DEFAULT_K·DEFAULT_LEVELS)에 묶여 있었음 → 효과: 옵션을 생략하면 서버 설정(RETRIEVAL_B_*)을 그대로 따름.
 """
 
 from __future__ import annotations
@@ -13,8 +15,6 @@ import argparse
 import sys
 
 from rag_service.retrieval_b.retrievers import (
-    DEFAULT_K,
-    DEFAULT_LEVELS,
     build_bm25_retriever,
     build_hybrid_retriever,
     build_naive_retriever,
@@ -35,8 +35,15 @@ def main(argv: list[str] | None = None) -> None:
     parser.add_argument("--mode", choices=sorted(BUILDERS), default="naive")
     parser.add_argument("--domain", default="shipping")
     parser.add_argument("--difficulty", default="basic")
-    parser.add_argument("--k", type=int, default=DEFAULT_K)
-    parser.add_argument("--levels", nargs="+", default=DEFAULT_LEVELS)
+    parser.add_argument(
+        "--k", type=int, default=None, help="결과 수 (기본: RETRIEVAL_B_K 또는 5)"
+    )
+    parser.add_argument(
+        "--levels",
+        nargs="+",
+        default=None,
+        help="검색할 청크 레벨 (기본: RETRIEVAL_B_LEVELS 또는 para table)",
+    )
     args = parser.parse_args(argv)
 
     retriever = BUILDERS[args.mode](

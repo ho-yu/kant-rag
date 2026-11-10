@@ -3,6 +3,9 @@
 - TableEmbeddings: 진짜 모델 대신 "글자 → 벡터" 표를 그대로 돌려주는 가짜 임베딩
 - make_store: 메모리 Qdrant(":memory:")에 가짜 문서를 넣은 검색 창구. 팀 Qdrant는 건드리지 않는다
 - integration 마커: 팀 Qdrant(읽기 전용)와 bge-m3가 필요한 테스트. 팀 push 전 점검은 -m "not integration"
+- default_settings: 모든 테스트에서 검색기가 기본 Settings를 쓰게 한다 (.env의 RETRIEVAL_B_* 무시)
+
+[2026-11-10 리팩토링] 이유: 설정을 환경변수에서 읽게 되어 개인 .env에 따라 테스트 결과가 달라질 수 있음 → 효과: 누구 PC에서든 같은 기본 설정으로 테스트가 돎.
 """
 
 from __future__ import annotations
@@ -12,11 +15,28 @@ from langchain_core.documents import Document
 from langchain_core.embeddings import Embeddings
 from langchain_qdrant import QdrantVectorStore
 
+from rag_service.retrieval_b import rerank, retrievers
+from rag_service.retrieval_b.settings import Settings
+
 
 def pytest_configure(config):
     config.addinivalue_line(
         "markers", "integration: 팀 Qdrant·실제 모델이 필요한 테스트"
     )
+
+
+@pytest.fixture(autouse=True)
+def default_settings(monkeypatch):
+    """검색기·리랭커가 읽는 설정을 기본값으로 고정한다. 바꾸려면 set_settings(k=7, ...)."""
+
+    def set_settings(**values) -> Settings:
+        s = Settings(**values)
+        monkeypatch.setattr(retrievers, "get_settings", lambda: s)
+        monkeypatch.setattr(rerank, "get_settings", lambda: s)
+        return s
+
+    set_settings()
+    return set_settings
 
 
 class TableEmbeddings(Embeddings):
