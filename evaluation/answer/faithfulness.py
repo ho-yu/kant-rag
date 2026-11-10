@@ -36,6 +36,7 @@ from __future__ import annotations
 import argparse
 import asyncio
 import csv
+import importlib.util
 import json
 import math
 import time
@@ -391,6 +392,23 @@ def report(summary: dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
+def refresh_board() -> None:
+    """실험 비교판(results/experiment_board.html)을 다시 만든다.
+
+    실제 일은 evaluation/reporting/experiment_board.py의 refresh()가 한다. 여기서는 불러오기만 한다.
+    실패해도 경고 한 줄만 찍고 실행 결과는 그대로 둔다.
+    """
+    path = repo_root() / "evaluation" / "reporting" / "experiment_board.py"
+    try:
+        spec = importlib.util.spec_from_file_location("experiment_board", path)
+        board = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(board)
+    except Exception as e:  # noqa: BLE001 — 비교판 문제로 실행 결과를 버리지 않는다
+        print(f"[경고] 비교판 갱신 실패: {type(e).__name__}: {e}")
+        return
+    board.refresh(repo_root())
+
+
 def main(argv: Sequence[str] | None = None) -> None:
     load_dotenv(repo_root() / ".env")
     p = argparse.ArgumentParser(description="답변 평가 2단계: RAGAS Faithfulness")
@@ -407,6 +425,11 @@ def main(argv: Sequence[str] | None = None) -> None:
         "--run", default="", help="채점할 답변 폴더 이름 (예: basic_development_k3)"
     )
     p.add_argument("--tag", default="", help="run_answers.py에 준 --tag와 같게")
+    p.add_argument(
+        "--no-board",
+        action="store_true",
+        help="끝난 뒤 실험 비교판을 다시 만들지 않는다",
+    )
     args = p.parse_args(argv)
 
     out_dir = out_dir_for(args.difficulty, args.split, run=args.run, tag=args.tag)
@@ -456,6 +479,8 @@ def main(argv: Sequence[str] | None = None) -> None:
     print()
     print(report(summary))
     print(f"\n저장: {(out_dir / 'faithfulness_summary.json').relative_to(repo_root())}")
+    if not args.no_board:
+        refresh_board()
 
 
 if __name__ == "__main__":

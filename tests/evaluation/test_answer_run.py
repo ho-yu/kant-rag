@@ -342,3 +342,28 @@ def test_out_dir_name_follows_changed_settings(monkeypatch):
         )
     finally:
         settings_mod.get_settings.cache_clear()
+
+
+# ---------- 실험 비교판 자동 갱신 ----------
+
+
+def test_main_refreshes_board_unless_no_board(monkeypatch, tmp_path):
+    monkeypatch.setattr(ra, "repo_root", lambda: tmp_path)
+    monkeypatch.setattr(ra, "load_questions", lambda path: [])
+    monkeypatch.setattr(ra, "out_dir_for", lambda *a, **k: tmp_path / "out")
+    monkeypatch.setattr(ra, "check_or_write_config", lambda *a, **k: None)
+    monkeypatch.setattr(ra, "run_config", lambda **k: {})
+    monkeypatch.setattr(ra, "make_answer_chain", lambda model: None)
+    monkeypatch.setattr(ra, "run_mode", lambda *a, **k: None)
+    calls = []
+    monkeypatch.setattr(ra, "refresh_board", lambda: calls.append(1))
+    ra.main(["--modes", "naive"])
+    assert calls == [1]
+    ra.main(["--modes", "naive", "--no-board"])
+    assert calls == [1]
+
+
+def test_refresh_board_failure_does_not_raise(monkeypatch, tmp_path, capsys):
+    monkeypatch.setattr(ra, "repo_root", lambda: tmp_path)
+    ra.refresh_board()
+    assert "비교판 갱신 실패" in capsys.readouterr().out

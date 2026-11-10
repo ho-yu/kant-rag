@@ -357,3 +357,42 @@ def test_main_stops_when_answer_folder_missing(monkeypatch, tmp_path):
     )
     with pytest.raises(SystemExit, match="basic_development_k3"):
         fa.main(["--run", "nope"])
+
+
+# ---------- 실험 비교판 자동 갱신 ----------
+
+
+def _answers_folder(tmp_path):
+    folder = tmp_path / fa.OUT_DIR / "basic_development_x"
+    folder.mkdir(parents=True)
+    (folder / "answers_naive.jsonl").write_text(
+        json.dumps({"id": "Q1", "mode": "naive", "status": "answered"}) + "\n",
+        encoding="utf-8",
+    )
+    return folder
+
+
+def test_main_refreshes_board_unless_no_board(monkeypatch, tmp_path):
+    monkeypatch.setattr(fa, "repo_root", lambda: tmp_path)
+    _answers_folder(tmp_path)
+    calls = []
+    monkeypatch.setattr(fa, "refresh_board", lambda: calls.append(1))
+    fa.main(["--run", "basic_development_x", "--modes", "naive", "--summary-only"])
+    assert calls == [1]
+    fa.main(
+        [
+            "--run",
+            "basic_development_x",
+            "--modes",
+            "naive",
+            "--summary-only",
+            "--no-board",
+        ]
+    )
+    assert calls == [1]
+
+
+def test_refresh_board_failure_does_not_raise(monkeypatch, tmp_path, capsys):
+    monkeypatch.setattr(fa, "repo_root", lambda: tmp_path)  # 비교판 스크립트가 없는 곳
+    fa.refresh_board()
+    assert "비교판 갱신 실패" in capsys.readouterr().out

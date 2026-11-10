@@ -32,6 +32,7 @@ Hybrid에서 몇 위였고, 리랭커가 순서를 바꾼 뒤 몇 위가 됐는�
 from __future__ import annotations
 
 import argparse
+import importlib.util
 import json
 import sys
 import unicodedata
@@ -257,6 +258,23 @@ def print_details(rows: Sequence[dict[str, Any]], only: Sequence[str]) -> None:
 # ---------- 실행 ----------
 
 
+def refresh_board() -> None:
+    """실험 비교판(results/experiment_board.html)을 다시 만든다.
+
+    실제 일은 evaluation/reporting/experiment_board.py의 refresh()가 한다. 여기서는 불러오기만 한다.
+    실패해도 경고 한 줄만 찍고 실행 결과는 그대로 둔다.
+    """
+    path = repo_root() / "evaluation" / "reporting" / "experiment_board.py"
+    try:
+        spec = importlib.util.spec_from_file_location("experiment_board", path)
+        board = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(board)
+    except Exception as e:  # noqa: BLE001 — 비교판 문제로 실행 결과를 버리지 않는다
+        print(f"[경고] 비교판 갱신 실패: {type(e).__name__}: {e}")
+        return
+    board.refresh(repo_root())
+
+
 def main(argv: list[str] | None = None) -> Path:
     parser = argparse.ArgumentParser(description="Rerank vs Hybrid 질문별 진단")
     parser.add_argument("--domain", default="shipping")
@@ -278,6 +296,11 @@ def main(argv: list[str] | None = None) -> Path:
         help="자세히 보여줄 분류 (아무것도 안 주면 상세 생략)",
     )
     parser.add_argument("--out", type=Path, default=None)
+    parser.add_argument(
+        "--no-board",
+        action="store_true",
+        help="끝난 뒤 실험 비교판을 다시 만들지 않는다",
+    )
     args = parser.parse_args(argv)
     if args.k < 1 or args.rerank_n < args.k:
         parser.error("k는 1 이상, rerank-n은 k 이상이어야 합니다.")
@@ -347,6 +370,8 @@ def main(argv: list[str] | None = None) -> Path:
     }
     out.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
     print(f"\n저장: {out}")
+    if not args.no_board:
+        refresh_board()
     return out
 
 

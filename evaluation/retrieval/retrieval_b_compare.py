@@ -8,13 +8,21 @@ retrieval_b(내 구현)와 retrieval_a(팀원 구현)를 같은 기준으로 채
     uv run python evaluation/retrieval/retrieval_b_compare.py --modes naive bm25 hybrid a_hybrid
     uv run python evaluation/retrieval/retrieval_b_compare.py --split additional --levels page
 
-결과: results/comparison/retrieval_b/{난이도}_{split}_{levels}.json
+결과: results/comparison/retrieval_b/{난이도}_{split}_{levels}{설정}.json
       같은 이름의 .html도 만든다 (브라우저로 여는 결과 페이지, --open이면 바로 열림).
+      {설정}은 RETRIEVAL_B_* 튜닝 값이 기본값과 다를 때만 붙는다 (예: _n20, _cand50_rrf20).
+      그래서 설정을 바꿔 돌려도 기본 설정 결과를 덮어쓰지 않는다.
+      실제로 쓴 튜닝 값은 JSON의 settings.retrieval_b에 남는다 (실험 비교판이 읽는다).
+      끝나면 results/experiment_board.html(실험 비교판)도 다시 만든다. --no-board면 건너뛴다.
+
+[2026-11-10 추가] 이유: 환경변수로 바꾼 후보 수·RRF 상수·리랭커 후보 수가 결과에 남지 않고,
+같은 이름으로 덮어써져 실험끼리 비교할 수 없었음 → 효과: 설정이 결과 파일 이름과 JSON에 남는다.
 """
 
 from __future__ import annotations
 
 import argparse
+import importlib.util
 import json
 import subprocess
 import sys
@@ -34,12 +42,53 @@ from rag_service.retrieval_b.metrics import (
     load_golden,
 )
 from rag_service.retrieval_b.report import page_link, write_html
+from rag_service.retrieval_b.settings import Settings, get_settings
 from rag_service.storage.corpus import repo_root
 
 WARMUP_QUESTION = "부산에서 LA로 컨테이너를 예약할 때 필요한 정보는?"
 OUT_DIR = Path("results") / "comparison" / "retrieval_b"
 
 Builder = Callable[[str, str, int, list[str]], Any]
+
+# retrieval_b 튜닝 값 → 파일 이름에 붙일 짧은 이름. k·levels는 이 스크립트의 인자로 따로 정한다.
+# 배치 크기는 점수를 바꾸지 않으므로 기록만 하고 이름에는 안 붙인다.
+TUNING_TAGS: dict[str, str | None] = {
+    "candidate_k": "cand",
+    "rrf_k": "rrf",
+    "rerank_n": "n",
+    "rerank_max_length": "len",
+    "rerank_batch_size": None,
+}
+
+
+def tuning_values() -> dict[str, int]:
+    """retrieval_b 검색기가 이번 실행에서 실제로 쓰는 튜닝 값 (.env와 환경변수 반영)."""
+    s = get_settings()
+    return {name: getattr(s, name) for name in TUNING_TAGS}
+
+
+def tuning_tag(values: dict[str, Any]) -> str:
+    """기본값과 다른 튜닝 값만 이어 붙인 파일 이름 꼬리. 모두 기본값이면 빈 문자열."""
+    default = Settings()
+    return "".join(
+        f"_{short}{values[name]}"
+        for name, short in TUNING_TAGS.items()
+        if short and name in values and values[name] != getattr(default, name)
+    )
+
+
+def refresh_board() -> Path | None:
+    """실험 비교판(results/experiment_board.html)을 다시 만든다. 실패해도 비교 실행은 성공으로 끝낸다."""
+    root = repo_root()
+    path = root / "evaluation" / "reporting" / "experiment_board.py"
+    try:
+        spec = importlib.util.spec_from_file_location("experiment_board", path)
+        board = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(board)
+    except Exception as e:  # noqa: BLE001 — 비교판 문제로 실험 결과를 버리지 않는다
+        print(f"[경고] 비교판 갱신 실패: {type(e).__name__}: {e}")
+        return None
+    return board.refresh(root)
 
 
 def _b_naive(domain: str, difficulty: str, k: int, levels: list[str]):
@@ -167,9 +216,22 @@ def main(argv: list[str] | None = None) -> Path:
     parser.add_argument(
         "--open", action="store_true", help="끝나면 결과 페이지를 브라우저로 바로 연다"
     )
+    parser.add_argument(
+        "--no-board",
+        action="store_true",
+        help="끝난 뒤 실험 비교판(results/experiment_board.html)을 다시 만들지 않는다",
+    )
     args = parser.parse_args(argv)
 
     load_dotenv(repo_root() / ".env")
+    tuning = tuning_values()
+    tag = tuning_tag(tuning)
+    print(
+        "[설정] "
+        + " ".join(f"{name}={value}" for name, value in tuning.items())
+        + (f" (기본값과 다름: {tag[1:]})" if tag else " (모두 기본값)"),
+        flush=True,
+    )
     ks = sorted(set(args.ks))
     items = load_golden(
         golden_path(args.split, domain=args.domain, difficulty=args.difficulty)
@@ -200,7 +262,9 @@ def main(argv: list[str] | None = None) -> Path:
     levels_tag = "-".join(args.levels)
     out = (
         args.out
-        or repo_root() / OUT_DIR / f"{args.difficulty}_{args.split}_{levels_tag}.json"
+        or repo_root()
+        / OUT_DIR
+        / f"{args.difficulty}_{args.split}_{levels_tag}{tag}.json"
     )
     out.parent.mkdir(parents=True, exist_ok=True)
     report = {
@@ -214,6 +278,8 @@ def main(argv: list[str] | None = None) -> Path:
             "ks": ks,
             "limit": args.limit,
             "modes": list(args.modes),
+            # b 방식(naive·bm25·hybrid·rerank)이 쓴 값. a_ 방식은 config/retrieval_a 설정을 쓴다.
+            "retrieval_b": tuning,
         },
         "results": results,
     }
@@ -224,6 +290,8 @@ def main(argv: list[str] | None = None) -> Path:
     print_table(results, ks)
     print(f"\n저장: {out}")
     print(f"결과 페이지 (Ctrl+클릭): {page_link(page, open_browser=args.open)}")
+    if not args.no_board:
+        refresh_board()
     return out
 
 

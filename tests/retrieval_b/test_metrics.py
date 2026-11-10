@@ -348,6 +348,9 @@ def compare_module():
     spec = importlib.util.spec_from_file_location("retrieval_b_compare", path)
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
+    # 테스트가 진짜 레포의 비교판을 다시 쓰지 않게 기본은 끈다 (비교판 테스트는 아래에서 따로)
+    module.real_refresh_board = module.refresh_board
+    module.refresh_board = lambda: None
     return module
 
 
@@ -394,17 +397,67 @@ def test_compare_writes_report(
     assert (tmp_path / "r.html").exists()
 
 
+def _default_tuning(compare_module) -> dict:
+    default = compare_module.Settings()
+    return {name: getattr(default, name) for name in compare_module.TUNING_TAGS}
+
+
 def test_compare_default_output_name(compare_module, monkeypatch, tmp_path):
     """--out을 안 주면 results/comparison/retrieval_b/{난이도}_{split}_{levels}.json (진짜 레포에는 안 씀)."""
     monkeypatch.setitem(
         compare_module.MODES, "naive", lambda *a: RunnableLambda(lambda q: [])
     )
     monkeypatch.setattr(compare_module, "repo_root", lambda: tmp_path)
+    # 내 .env의 RETRIEVAL_B_* 값과 상관없이 기본값일 때의 이름을 본다
+    monkeypatch.setattr(
+        compare_module, "tuning_values", lambda: _default_tuning(compare_module)
+    )
     out = compare_module.main(["--limit", "1", "--levels", "page"])
     expected = tmp_path / "results" / "comparison" / "retrieval_b"
     assert out == expected / "basic_development_page.json"
     report = json.loads(out.read_text(encoding="utf-8"))
     assert report["git_commit"] is None  # tmp_path는 git 폴더가 아님
+    assert report["settings"]["retrieval_b"] == _default_tuning(compare_module)
+
+
+def test_tuning_tag(compare_module):
+    """기본값과 다른 튜닝 값만 파일 이름 꼬리가 된다. 배치 크기는 점수와 상관없어 안 붙인다."""
+    values = _default_tuning(compare_module)
+    assert compare_module.tuning_tag(values) == ""
+    values.update(candidate_k=50, rerank_n=20, rerank_batch_size=8)
+    assert compare_module.tuning_tag(values) == "_cand50_n20"
+
+
+def test_compare_records_env_tuning(compare_module, monkeypatch, tmp_path, capsys):
+    """RETRIEVAL_B_RERANK_N=20으로 돌리면 기본 결과를 덮어쓰지 않고 _n20 파일에 값이 남는다."""
+    monkeypatch.setitem(
+        compare_module.MODES, "naive", lambda *a: RunnableLambda(lambda q: [])
+    )
+    monkeypatch.setattr(compare_module, "repo_root", lambda: tmp_path)
+    monkeypatch.setattr(
+        compare_module,
+        "tuning_values",
+        lambda: {**_default_tuning(compare_module), "rerank_n": 20},
+    )
+    out = compare_module.main(["--limit", "1"])
+    assert out.name == "basic_development_para-table_n20.json"
+    report = json.loads(out.read_text(encoding="utf-8"))
+    assert report["settings"]["retrieval_b"]["rerank_n"] == 20
+    assert "기본값과 다름: n20" in capsys.readouterr().out
+
+
+def test_tuning_values_reads_env(compare_module, monkeypatch):
+    from rag_service.retrieval_b.settings import get_settings
+
+    monkeypatch.setenv("RETRIEVAL_B_RERANK_N", "20")
+    monkeypatch.setenv("RETRIEVAL_B_CANDIDATE_K", "40")
+    get_settings.cache_clear()
+    try:
+        values = compare_module.tuning_values()
+    finally:
+        monkeypatch.undo()
+        get_settings.cache_clear()
+    assert values["rerank_n"] == 20 and values["candidate_k"] == 40
 
 
 # ---------- integration: 팀 Qdrant (읽기 전용) + bge-m3 ----------
@@ -423,3 +476,51 @@ def test_team_naive_baseline_on_development(dev_items):
     # k가 크면 줄지 않는다
     assert s["1"]["page_hit"] <= s["5"]["page_hit"] <= s["10"]["page_hit"]
     assert s["10"]["doc_hit"] >= s["10"]["page_hit"]  # 문서 기준이 더 느슨하다
+
+
+# ---------- 실험 비교판 자동 갱신 ----------
+
+
+def _fake_naive(compare_module, monkeypatch):
+    monkeypatch.setitem(
+        compare_module.MODES, "naive", lambda *a: RunnableLambda(lambda q: [])
+    )
+
+
+def test_compare_refreshes_board_unless_no_board(compare_module, monkeypatch, tmp_path):
+    """끝나면 비교판을 다시 만들고, --no-board면 건너뛴다."""
+    _fake_naive(compare_module, monkeypatch)
+    calls = []
+    monkeypatch.setattr(compare_module, "refresh_board", lambda: calls.append(1))
+    compare_module.main(["--limit", "1", "--out", str(tmp_path / "a.json")])
+    assert calls == [1]
+    compare_module.main(
+        ["--limit", "1", "--out", str(tmp_path / "b.json"), "--no-board"]
+    )
+    assert calls == [1]
+
+
+def test_refresh_board_writes_board_in_repo_root(
+    compare_module, monkeypatch, tmp_path, capsys
+):
+    """비교판 스크립트를 불러 repo_root/results/experiment_board.html을 만들고 주소를 찍는다."""
+    reporting = tmp_path / "evaluation" / "reporting"
+    reporting.mkdir(parents=True)
+    real = repo_root() / "evaluation" / "reporting" / "experiment_board.py"
+    (reporting / "experiment_board.py").write_text(
+        real.read_text(encoding="utf-8"), encoding="utf-8"
+    )
+    monkeypatch.setattr(compare_module, "repo_root", lambda: tmp_path)
+    out = compare_module.real_refresh_board()
+    assert out == tmp_path / "results" / "experiment_board.html"
+    assert out.exists()
+    assert "비교판 갱신: file:" in capsys.readouterr().out
+
+
+def test_refresh_board_failure_does_not_raise(
+    compare_module, monkeypatch, tmp_path, capsys
+):
+    """비교판 스크립트가 없거나 깨져도 경고 한 줄만 찍고 None을 돌려준다."""
+    monkeypatch.setattr(compare_module, "repo_root", lambda: tmp_path)
+    assert compare_module.real_refresh_board() is None
+    assert "비교판 갱신 실패" in capsys.readouterr().out

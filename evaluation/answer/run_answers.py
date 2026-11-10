@@ -25,6 +25,7 @@
 from __future__ import annotations
 
 import argparse
+import importlib.util
 import json
 import os
 import time
@@ -370,6 +371,23 @@ def check_or_write_config(out_dir: Path, config: dict[str, Any]) -> None:
 # ---------- 진입점 ----------
 
 
+def refresh_board() -> None:
+    """실험 비교판(results/experiment_board.html)을 다시 만든다.
+
+    실제 일은 evaluation/reporting/experiment_board.py의 refresh()가 한다. 여기서는 불러오기만 한다.
+    실패해도 경고 한 줄만 찍고 실행 결과는 그대로 둔다.
+    """
+    path = repo_root() / "evaluation" / "reporting" / "experiment_board.py"
+    try:
+        spec = importlib.util.spec_from_file_location("experiment_board", path)
+        board = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(board)
+    except Exception as e:  # noqa: BLE001 — 비교판 문제로 실행 결과를 버리지 않는다
+        print(f"[경고] 비교판 갱신 실패: {type(e).__name__}: {e}")
+        return
+    board.refresh(repo_root())
+
+
 def main(argv: Sequence[str] | None = None) -> None:
     load_dotenv(repo_root() / ".env")
     p = argparse.ArgumentParser(
@@ -383,6 +401,11 @@ def main(argv: Sequence[str] | None = None) -> None:
     p.add_argument("--limit", type=int, default=0, help="앞에서 N문항만 (0이면 전부)")
     p.add_argument(
         "--tag", default="", help="폴더 이름 끝에 붙일 말 (같은 설정 반복 구분, 예: r2)"
+    )
+    p.add_argument(
+        "--no-board",
+        action="store_true",
+        help="끝난 뒤 실험 비교판을 다시 만들지 않는다",
     )
     args = p.parse_args(argv)
 
@@ -415,6 +438,8 @@ def main(argv: Sequence[str] | None = None) -> None:
             answer_chain=answer_chain,
         )
         print(f"저장: {path.relative_to(repo_root())}")
+    if not args.no_board:
+        refresh_board()
 
 
 if __name__ == "__main__":
