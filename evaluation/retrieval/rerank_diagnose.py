@@ -258,21 +258,34 @@ def print_details(rows: Sequence[dict[str, Any]], only: Sequence[str]) -> None:
 # ---------- 실행 ----------
 
 
-def refresh_board() -> None:
-    """실험 비교판(results/experiment_board.html)을 다시 만든다.
+def _paths():
+    """evaluation/experiment_paths.py를 불러온다 (실험 이름 규칙·결과 폴더가 거기 한 곳에 있다)."""
+    path = Path(__file__).resolve().parents[1] / "experiment_paths.py"
+    spec = importlib.util.spec_from_file_location("experiment_paths", path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
 
-    실제 일은 evaluation/reporting/experiment_board.py의 refresh()가 한다. 여기서는 불러오기만 한다.
-    실패해도 경고 한 줄만 찍고 실행 결과는 그대로 둔다.
-    """
-    path = repo_root() / "evaluation" / "reporting" / "experiment_board.py"
+
+def results_base(exp: str | None = None) -> Path:
+    """결과 최상위 폴더. --exp가 없으면 results/, 있으면 results/experiments/<이름>/."""
+    return _paths().results_dir(repo_root(), exp)
+
+
+def check_exp_arg(parser: argparse.ArgumentParser, exp: str | None) -> str | None:
+    """--exp 값 검사. 틀리면 argparse 오류로 멈추고, 맞으면 "[실험] ..." 한 줄을 찍는다."""
+    paths = _paths()
     try:
-        spec = importlib.util.spec_from_file_location("experiment_board", path)
-        board = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(board)
-    except Exception as e:  # noqa: BLE001 — 비교판 문제로 실행 결과를 버리지 않는다
-        print(f"[경고] 비교판 갱신 실패: {type(e).__name__}: {e}")
-        return
-    board.refresh(repo_root())
+        exp = paths.check_exp(exp)
+    except ValueError as e:
+        parser.error(str(e))
+    print(paths.exp_banner(exp), flush=True)
+    return exp
+
+
+def refresh_board(exp: str | None = None) -> Path | None:
+    """실험 비교판(로컬 도구)이 있으면 그 실험의 비교판을 다시 만든다. 없으면 조용히 건너뛴다."""
+    return _paths().refresh_board(repo_root(), exp)
 
 
 def main(argv: list[str] | None = None) -> Path:
@@ -301,7 +314,13 @@ def main(argv: list[str] | None = None) -> Path:
         action="store_true",
         help="끝난 뒤 실험 비교판을 다시 만들지 않는다",
     )
+    parser.add_argument(
+        "--exp",
+        default=None,
+        help="실험 이름. 주면 results/experiments/<이름>/에 따로 저장",
+    )
     args = parser.parse_args(argv)
+    exp = check_exp_arg(parser, args.exp)
     if args.k < 1 or args.rerank_n < args.k:
         parser.error("k는 1 이상, rerank-n은 k 이상이어야 합니다.")
     probe_n = max(args.probe_n, args.rerank_n)
@@ -349,8 +368,8 @@ def main(argv: list[str] | None = None) -> Path:
         print_details(rows, args.only)
 
     out = args.out or (
-        repo_root()
-        / OUT_DIR
+        results_base(exp)
+        / OUT_DIR.relative_to("results")
         / f"rerank_{args.difficulty}_{args.split}_k{args.k}_n{args.rerank_n}.json"
     )
     out.parent.mkdir(parents=True, exist_ok=True)
@@ -364,6 +383,7 @@ def main(argv: list[str] | None = None) -> Path:
             "probe_n": probe_n,
             "hybrid_k": max(COMPARE_HYBRID_K, args.k),
             "limit": args.limit,
+            "exp": exp,
         },
         "summary": summary,
         "items": rows,
@@ -371,7 +391,7 @@ def main(argv: list[str] | None = None) -> Path:
     out.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
     print(f"\n저장: {out}")
     if not args.no_board:
-        refresh_board()
+        refresh_board(exp)
     return out
 
 

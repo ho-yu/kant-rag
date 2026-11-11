@@ -376,7 +376,7 @@ def test_main_refreshes_board_unless_no_board(monkeypatch, tmp_path):
     monkeypatch.setattr(fa, "repo_root", lambda: tmp_path)
     _answers_folder(tmp_path)
     calls = []
-    monkeypatch.setattr(fa, "refresh_board", lambda: calls.append(1))
+    monkeypatch.setattr(fa, "refresh_board", lambda *a: calls.append(1))
     fa.main(["--run", "basic_development_x", "--modes", "naive", "--summary-only"])
     assert calls == [1]
     fa.main(
@@ -392,7 +392,26 @@ def test_main_refreshes_board_unless_no_board(monkeypatch, tmp_path):
     assert calls == [1]
 
 
-def test_refresh_board_failure_does_not_raise(monkeypatch, tmp_path, capsys):
+def test_refresh_board_is_silent_without_board_file(monkeypatch, tmp_path, capsys):
     monkeypatch.setattr(fa, "repo_root", lambda: tmp_path)  # 비교판 스크립트가 없는 곳
-    fa.refresh_board()
-    assert "비교판 갱신 실패" in capsys.readouterr().out
+    assert fa.refresh_board() is None
+    assert capsys.readouterr().out == ""
+
+
+def test_out_dir_and_available_runs_with_exp(monkeypatch, tmp_path):
+    monkeypatch.setattr(fa, "repo_root", lambda: tmp_path)
+    exp_answers = (
+        tmp_path / "results" / "experiments" / "page_k" / "answer" / "retrieval_b"
+    )
+    (exp_answers / "basic_development_k9").mkdir(parents=True)
+    (exp_answers / "basic_development_k9" / "answers_naive.jsonl").write_text(
+        "", encoding="utf-8"
+    )
+    assert (
+        fa.out_dir_for("basic", "development", run="basic_development_k9", exp="page_k")
+        == exp_answers / "basic_development_k9"
+    )
+    assert fa.available_runs("basic", "development", "page_k") == [
+        "basic_development_k9"
+    ]
+    assert fa.available_runs("basic", "development") == []  # 기본 폴더에는 없음

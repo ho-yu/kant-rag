@@ -356,14 +356,45 @@ def test_main_refreshes_board_unless_no_board(monkeypatch, tmp_path):
     monkeypatch.setattr(ra, "make_answer_chain", lambda model: None)
     monkeypatch.setattr(ra, "run_mode", lambda *a, **k: None)
     calls = []
-    monkeypatch.setattr(ra, "refresh_board", lambda: calls.append(1))
+    monkeypatch.setattr(ra, "refresh_board", lambda *a: calls.append(1))
     ra.main(["--modes", "naive"])
     assert calls == [1]
     ra.main(["--modes", "naive", "--no-board"])
     assert calls == [1]
 
 
-def test_refresh_board_failure_does_not_raise(monkeypatch, tmp_path, capsys):
+def test_refresh_board_is_silent_without_board_file(monkeypatch, tmp_path, capsys):
+    monkeypatch.setattr(ra, "repo_root", lambda: tmp_path)  # 비교판 스크립트가 없는 곳
+    assert ra.refresh_board() is None
+    assert capsys.readouterr().out == ""
+
+
+def test_out_dir_with_exp(monkeypatch, tmp_path):
     monkeypatch.setattr(ra, "repo_root", lambda: tmp_path)
-    ra.refresh_board()
-    assert "비교판 갱신 실패" in capsys.readouterr().out
+    monkeypatch.setattr(ra, "run_name", lambda *a, **k: "basic_development_k9")
+    out = ra.out_dir_for("basic", "development", exp="page_k")
+    assert (
+        out
+        == tmp_path
+        / "results"
+        / "experiments"
+        / "page_k"
+        / "answer"
+        / "retrieval_b"
+        / "basic_development_k9"
+    )
+    assert (
+        ra.out_dir_for("basic", "development")
+        == tmp_path / "results" / "answer" / "retrieval_b" / "basic_development_k9"
+    )
+
+
+def test_run_config_records_exp(monkeypatch):
+    cfg = ra.run_config(
+        split="development",
+        domain="shipping",
+        difficulty="basic",
+        model="m",
+        exp="page_k",
+    )
+    assert cfg["exp"] == "page_k"
