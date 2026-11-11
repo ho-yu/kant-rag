@@ -68,6 +68,7 @@ def _load(rel: str, name: str):
 
 quality = _load("answer/quality.py", "answer_quality")
 retrieval_scores = _load("retrieval/retrieval_scores.py", "retrieval_scores")
+score_configs = _load("register_score_configs.py", "register_score_configs")
 
 
 def dataset_name(domain: str, difficulty: str, split: str) -> str:
@@ -194,11 +195,18 @@ def make_task(
 
 
 def to_evaluations(
-    scores: Iterable[Mapping[str, Any]], *, status: str | None
+    scores: Iterable[Mapping[str, Any]],
+    *,
+    status: str | None,
+    config_ids: Mapping[str, str] | None = None,
 ) -> list[Any]:
-    """점수 dict → Langfuse Evaluation. scored면 NUMERIC 값, 아니면 <이름>_state CATEGORICAL."""
+    """점수 dict → Langfuse Evaluation. scored면 NUMERIC 값, 아니면 <이름>_state CATEGORICAL.
+
+    config_ids({점수 이름: config_id})에 이름이 있으면 점수 설정과 연결한다 (register_score_configs.py).
+    """
     from langfuse import Evaluation
 
+    ids = config_ids or {}
     out = []
     for s in scores:
         meta = {"state": s["state"], "cause": s.get("cause"), "status": status}
@@ -210,6 +218,7 @@ def to_evaluations(
                     comment=s.get("reason") or None,
                     metadata=meta,
                     data_type="NUMERIC",
+                    config_id=ids.get(s["name"]),
                 )
             )
         else:
@@ -221,6 +230,7 @@ def to_evaluations(
                     comment=comment,
                     metadata=meta,
                     data_type="CATEGORICAL",
+                    config_id=ids.get(f"{s['name']}_state"),
                 )
             )
     return out
@@ -249,7 +259,10 @@ def from_evaluations(evaluations: Iterable[Any]) -> list[Record]:
 
 
 def make_evaluators(
-    scorer: Any, *, retrieval_k: int | None = retrieval_scores.K
+    scorer: Any,
+    *,
+    retrieval_k: int | None = retrieval_scores.K,
+    config_ids: Mapping[str, str] | None = None,
 ) -> list[Callable[..., Any]]:
     """문항 평가기 목록. 함수 이름이 Langfuse 화면의 평가기 이름이 된다."""
 
@@ -259,7 +272,7 @@ def make_evaluators(
         rec = dict(output or {})
         rec.setdefault("question", (input or {}).get("question", ""))
         scores = await scorer.score(rec, expected_output or None)
-        return to_evaluations(scores, status=rec.get("status"))
+        return to_evaluations(scores, status=rec.get("status"), config_ids=config_ids)
 
     def retrieval_judgement(
         *, input: Any, output: Any, expected_output: Any, metadata: Any, **kwargs: Any
@@ -268,7 +281,7 @@ def make_evaluators(
         scores = retrieval_scores.score_retrieval(
             rec, expected_output or None, k=retrieval_k
         )
-        return to_evaluations(scores, status=rec.get("status"))
+        return to_evaluations(scores, status=rec.get("status"), config_ids=config_ids)
 
     evaluators: list[Callable[..., Any]] = [answer_quality]
     if retrieval_k is not None:  # --no-retrieval이면 검색 판정을 부르지 않는다
@@ -381,7 +394,9 @@ def run_mode(
         description=f"{args.dataset} · {args.impl} · {mode} · 채점 {args.model}",
         data=list(items),
         task=make_task(chain, mode=mode, page_context=args.page_context),
-        evaluators=make_evaluators(scorer, retrieval_k=k),
+        evaluators=make_evaluators(
+            scorer, retrieval_k=k, config_ids=score_configs.config_ids(langfuse)
+        ),
         run_evaluators=[make_run_evaluator(scorer)],
         max_concurrency=args.concurrency,
         metadata={
