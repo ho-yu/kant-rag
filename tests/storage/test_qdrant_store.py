@@ -32,6 +32,14 @@ class FakeEmbedder:
         return [[b / 255 for b in hashlib.sha256(t.encode()).digest()[:8]] for t in texts]
 
 
+class FakeSparse:
+    def __init__(self, *args, **kwargs):
+        pass
+
+    def encode(self, texts, progress=False):
+        return [{int(b): 1.0 for b in hashlib.sha256(t.encode()).digest()[:4]} for t in texts]
+
+
 @pytest.fixture()
 def repo(tmp_path, monkeypatch):
     (tmp_path / "pyproject.toml").write_text("[project]\nname='t'\n", encoding="utf-8")
@@ -44,6 +52,7 @@ def repo(tmp_path, monkeypatch):
     monkeypatch.chdir(tmp_path)
     monkeypatch.delenv("QDRANT_URL", raising=False)
     monkeypatch.setattr(qdrant_store, "Embedder", FakeEmbedder)
+    monkeypatch.setattr(qdrant_store, "SparseEncoder", FakeSparse)   # sparse 벡터도 올라간 컬렉션에서 확인
     FakeEmbedder.calls = 0
     return tmp_path
 

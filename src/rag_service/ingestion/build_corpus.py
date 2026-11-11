@@ -5,6 +5,7 @@
     uv run python -m rag_service.ingestion.build_corpus --difficulty basic --no-context    # 맥락 없이 (API 키 불필요)
     uv run python -m rag_service.ingestion.build_corpus --difficulty basic --no-index      # jsonl까지만
     uv run python -m rag_service.ingestion.build_corpus --difficulty basic --index-only    # 청킹 없이 Qdrant만 맞춤
+    uv run python -m rag_service.ingestion.build_corpus --difficulty basic --sparse m3,bm25  # sparse 종류 지정 (none = 끔)
     uv run python -m rag_service.ingestion.build_corpus --difficulty basic --restore SB02@v1   # 문서 하나 되돌리기
 
 바뀐 것만 다시 처리
@@ -118,6 +119,8 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--no-index", action="store_true", help="Qdrant 동기화를 건너뜀 (jsonl까지만)")
     ap.add_argument("--index-only", action="store_true", help="청킹 없이 지금 jsonl에 맞춰 Qdrant만 동기화")
     ap.add_argument("--reindex", action="store_true", help="Qdrant 컬렉션을 지우고 모든 청크를 다시 임베딩")
+    ap.add_argument("--sparse", default=None, metavar="m3,bm25",
+                    help="Qdrant에 같이 올릴 sparse 벡터 (예: m3,bm25 / m3 / bm25 / none). 기본: config index.sparse")
     ap.add_argument("--restore", default=None, metavar="BOOK@vN",
                     help="문서 하나를 history의 이전 버전으로 되돌림 (예: SB02@v1)")
     args = ap.parse_args(argv)
@@ -346,15 +349,25 @@ def run_index(args, cfg: dict) -> int:
     from rag_service.ingestion import index_sync
 
     try:
-        summary = index_sync.sync(args.difficulty, args.domain, recreate=args.reindex, config=cfg)
+        sparse = None if args.sparse is None else qdrant_sparse(args.sparse)
+        summary = index_sync.sync(args.difficulty, args.domain, recreate=args.reindex, config=cfg, sparse=sparse)
     except Exception as e:  # noqa: BLE001 — 연결·모델 오류 등. jsonl은 이미 저장됐으니 안내만 한다
         log.error("Qdrant 동기화 실패: %s: %s", type(e).__name__, e)
         log.error("jsonl은 저장됐습니다. .env의 QDRANT_URL·QDRANT_API_KEY를 확인한 뒤 같은 명령을 다시 실행하면 "
                   "청킹은 건너뛰고 Qdrant만 이어서 맞춥니다.")
         return 2
-    log.info("Qdrant %s: 포인트 %d개 (추가·변경 %d, 삭제 %d, 새로 임베딩 %d)", summary["collection"],
-             summary["count"], summary["upserted"], summary["deleted"], summary["embedded"])
+    sp = ", ".join(f"{k} {n}" for k, n in summary.get("sparse", {}).items()) or "없음"
+    log.info("Qdrant %s: 포인트 %d개 (추가·변경 %d, 삭제 %d, 새로 임베딩 %d, sparse 계산 %s)%s", summary["collection"],
+             summary["count"], summary["upserted"], summary["deleted"], summary["embedded"], sp,
+             " — sparse 추가로 컬렉션을 다시 만듦" if summary.get("rebuilt_for_sparse") else "")
     return 0
+
+
+def qdrant_sparse(value: str) -> list[str]:
+    """--sparse 값 → sparse 종류 목록 (none이면 빈 목록)."""
+    from rag_service.storage import qdrant_store
+
+    return qdrant_store.sparse_kinds({"index": {"sparse": value}})
 
 
 def restore(args, cfg: dict) -> int:

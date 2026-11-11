@@ -84,7 +84,8 @@ for lv in ("page", "para", "table"):
 | 청크 크기 등을 바꾼 뒤 근거가 남는지 확인 | `uv run python evaluation/retrieval/check_chunk_coverage.py --difficulty basic` | 청킹 담당 |
 | Dense 검색 (Naive RAG) | 3-1 코드 | 검색 담당 |
 | BM25 (하이브리드) | 3-2 코드 | 검색 담당 |
-| 답변 생성에 부모 쪽 원문 넣기, 출처 표기 | 3-3 코드 | 생성 담당 |
+| Hybrid (Qdrant에 dense + sparse(m3·bm25) 바로 질의) | 3-3 코드 | 검색 담당 |
+| 답변 생성에 부모 쪽 원문 넣기, 출처 표기 | 3-4 코드 | 생성 담당 |
 | 화면(클라이언트)에서 RAG로 답 받기 | `uv run streamlit run client/client.py` → 검색 방식 라디오 선택 | 모두 |
 | 어떤 코드든 고친 뒤 기존 기능 확인 | `uv run pytest` (전부 통과해야 함) | 고친 사람 |
 
@@ -129,7 +130,43 @@ texts = [c.embedding_text() for c in chunks]                    # 검색용 문�
 - BM25는 Qdrant가 아니라 **내 PC의 jsonl**을 읽는다. 그래서 0번(청크 파일 만들기)이 먼저 필요하다.
 - Qdrant의 청크와 jsonl의 청크는 `chunk_id`가 같다 → RRF로 합칠 때 `chunk_id`로 맞춘다.
 
-### 3-3. 부모 쪽 원문과 출처 (답변 생성)
+### 3-3. Hybrid 검색 (Qdrant에 dense + sparse로 바로 질의)
+
+컬렉션의 포인트(page·para·table 전부)에는 벡터가 세 개 들어 있다. 컬렉션 전체를 내려받거나 sparse 캐시를 만들 필요 없이,
+질문마다 Qdrant에 상위 후보만 물어보면 된다.
+
+| 벡터 이름 | 내용 | 질문 쪽 만드는 법 |
+|---|---|---|
+| `""` (기본) | bge-m3 dense 1024차원 | 기존과 같음 (naive 검색 그대로) |
+| `"m3"` | bge-m3 sparse (토큰 번호 = bge-m3 토크나이저 번호) | `qs.SparseEncoder().encode([q])[0]` 또는 hybrid.py `BGEM3Encoder.encode([q])[1][0]` (같은 계산) |
+| `"bm25"` | Kiwi BM25 (토큰 번호 = 형태소 해시, IDF는 Qdrant가 계산) | `qs.bm25_query(q)` |
+
+```python
+from rag_service.storage import qdrant_store as qs
+
+name = "kant_shipping_advanced_bge-m3"
+# dense + bm25
+hits = qs.search_dense_sparse(client, name, dense_vec, qs.bm25_query(question), kind="bm25",
+                              levels=["para", "table"], limit=50)
+# dense + m3
+hits = qs.search_dense_sparse(client, name, dense_vec, m3_weights, kind="m3",
+                              levels=["para", "table"], limit=50)
+# hits = [{"payload": {...}, "dense_score": 0.71 | None, "sparse_score": 3.2 | None}, ...]
+# 점수 합치기(minmax 0.7/0.3, 가중 RRF 등)는 검색 코드에서. 한쪽에만 나온 후보는 다른 쪽을 0점·꼴찌로 본다.
+```
+
+- sparse 글은 `[문서 제목 | 절 제목 | p쪽] + 맥락 + 원문` (`qs.sparse_text(payload)`, 기존 hybrid의 `index_text`와 같은 규칙).
+  advanced의 예약번호(`HG2030-00362`)는 **절 제목에만** 있어서 이 규칙이 중요하다.
+- BM25 토큰 규칙 (`qs.bm25_tokens`). 질문도 꼭 `qs.bm25_tokens`/`qs.bm25_query`로 만든다
+  (규칙이 다르면 같은 단어도 번호가 달라 점수가 안 맞는다). k1=1.5, b=0.75, 평균 길이는 레벨별.
+  1. 번호·코드는 통째로 한 단어: 영문과 숫자가 함께 있고 하이픈으로 이어진 덩어리
+     (`HL-40GP-00362` → `hl-40gp-00362`, `N1-20-F09118` → `n1-20-f09118`, `20GP` → `20gp`)
+  2. 슬래시는 나눔 (`S2/40GP` → `s2`, `40gp`). 쪽 번호(`p116`)·금액(`USD12`)·무게(`18100kg`)는 묶지 않음. `B/L`은 한 단어
+  3. 나머지는 Kiwi 형태소: hybrid.py `_KEEP_TAGS` + `W_SERIAL`(일련번호·날짜. 예: `2029-09-11`), 모두 소문자
+- BM25 점수는 rank_bm25(BM25Okapi)와 IDF 식이 조금 달라 값은 다르지만 순위는 거의 같다.
+- sparse 종류는 `config/chunking.yaml`의 `index.sparse: [m3, bm25]` (청킹 담당만). 메뉴 4·5번으로 켜고 끈다.
+
+### 3-4. 부모 쪽 원문과 출처 (답변 생성)
 
 ```python
 from rag_service.storage.corpus import PageStore

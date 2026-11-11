@@ -22,6 +22,7 @@ from dotenv import load_dotenv
 from rag_service.ingestion import build_corpus
 from rag_service.ingestion.writer import read_manifest
 from rag_service.storage.corpus import corpus_dir, load_config, repo_root
+from rag_service.storage.qdrant_store import sparse_kinds
 
 DOMAINS = [("shipping", "해운", True), ("finance", "금융", False), ("manufacturing", "제조", False)]
 DIFFICULTIES = ["basic", "intermediate", "advanced"]
@@ -101,9 +102,12 @@ def chunk_flow(cfg: dict) -> None:
     difficulty = choose_difficulty("청킹 실행", domain, cfg)
     if difficulty is None:
         return
-    opts = {"context": bool(cfg.get("context", {}).get("enabled", True)), "index": True, "force": False}
+    sparse_on = sparse_kinds(cfg)
+    opts = {"context": bool(cfg.get("context", {}).get("enabled", True)), "index": True, "force": False,
+            "m3": "m3" in sparse_on, "bm25": "bm25" in sparse_on}
     labels = {"1": ("context", "맥락 생성 (OpenAI)"), "2": ("index", "Qdrant 동기화"),
-              "3": ("force", "전부 다시 청킹 (force)")}
+              "3": ("force", "전부 다시 청킹 (force)"),
+              "4": ("m3", "  └ sparse: bge-m3"), "5": ("bm25", "  └ sparse: BM25(Kiwi)")}
     while True:
         scan = build_corpus.scan_changes(difficulty, domain, opts["context"], opts["force"], cfg)
         todo = len(scan["added"]) + len(scan["changed"]) + len(scan["removed"])
@@ -123,9 +127,11 @@ def chunk_flow(cfg: dict) -> None:
             print("    ! .env에 OPENAI_API_KEY가 없습니다. 맥락 생성을 끄거나 키를 넣으세요.")
         if opts["index"] and not os.getenv("QDRANT_URL"):
             print("    ! QDRANT_URL이 없어 Qdrant는 로컬 폴더(artifacts/qdrant_local)에 저장됩니다.")
-        print(" (번호를 입력하면 켜짐/꺼짐이 바뀝니다)\n")
+        if opts["index"] and (opts["m3"] or opts["bm25"]):
+            print("    * sparse가 없는 기존 컬렉션은 한 번 새로 만듭니다 (dense는 재사용, sparse만 계산).")
+        print(" (번호를 입력하면 켜짐/꺼짐이 바뀝니다. 4·5는 Qdrant 동기화가 켜져 있을 때만 적용)\n")
         print(" s. 실행   0. 뒤로")
-        v = ask("선택", {"0", "1", "2", "3", "s"})
+        v = ask("선택", {"0", "1", "2", "3", "4", "5", "s"})
         if v == "0":
             return
         if v in labels:
@@ -147,6 +153,7 @@ def chunk_flow(cfg: dict) -> None:
         argv += [] if opts["context"] else ["--no-context"]
         argv += [] if opts["index"] else ["--no-index"]
         argv += ["--force"] if opts["force"] else []
+        argv += ["--sparse", ",".join(k for k in ("m3", "bm25") if opts[k]) or "none"]
         _run(argv)
         pause()
         return

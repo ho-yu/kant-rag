@@ -15,6 +15,13 @@ index:
   device: cuda                  # cuda = NVIDIA GPU (못 쓰면 자동으로 CPU), cpu = 항상 CPU
   collection_prefix: kant       # 컬렉션 이름 = kant_{도메인}_{난이도}_{모델}  예) kant_shipping_basic_bge-m3
   local_path: artifacts/qdrant_local   # QDRANT_URL이 비어 있을 때만 쓰는 로컬 저장 위치
+  sparse: [m3, bm25]            # 같이 올릴 sparse 벡터. m3 = bge-m3 단어 가중치, bm25 = Kiwi BM25, [] = 끔
+                                #   → hybrid 검색이 Qdrant에 바로 질의 (컬렉션 전체를 내려받지 않음)
+                                #   메뉴에서 켜고 끌 수 있음. 명령줄은 --sparse m3,bm25 / none
+  sparse_batch_size: 16
+  sparse_max_length: 4096       # m3 sparse 만들 때 청크를 읽는 최대 토큰 수 (넘는 부분은 잘림, bge-m3 최대 8192)
+  bm25_k1: 1.5                  # BM25 (rank_bm25 기본값과 같음). IDF는 Qdrant가 계산
+  bm25_b: 0.75
 
 jsonl:                      # 문서 하나 = 파일 하나 (SB01.jsonl). 구버전은 history/SB01/v1.jsonl (로컬 전용)
   max_shard_mb: 90          # 문서 파일이 넘으면 SB01_001, SB01_002 … 로 분할
