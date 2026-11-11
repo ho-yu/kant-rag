@@ -14,6 +14,9 @@ from rag_service.retrieval_a.naive import (
 from rag_service.retrieval_a.rerank import CONFIG_PATH as RERANK_CONFIG
 from rag_service.retrieval_a.rerank import HybridRerankRetriever, make_scorer
 
+# 난이도별 체인에서도 공유하는 로컬 검색 모델의 초기화와 실행 보호
+RETRIEVAL_LOCK = RLock()
+
 
 class RetrieverPool:
     """한 체인에서 사용하는 검색기의 최초 요청 시 생성 및 자원 재사용."""

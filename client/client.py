@@ -128,7 +128,6 @@ with st.sidebar:
     if st.button("새 채팅"):
         reset_chat()
         st.rerun()
-    st.caption("검색과 모델 실행은 공용 백엔드 서버에서 처리")
 
 for message in st.session_state.messages:
     show_message(message)

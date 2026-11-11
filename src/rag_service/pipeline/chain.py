@@ -23,7 +23,7 @@ from rag_service.generation.prompt import (
 )
 from rag_service.generation.sources import add_sources, build_answer_result
 from rag_service.observability import with_langfuse
-from rag_service.pipeline.prepare_retriever import RetrieverPool
+from rag_service.pipeline.prepare_retriever import RETRIEVAL_LOCK, RetrieverPool
 from rag_service.retrieval_a.naive import collection_name, load_config
 from rag_service.storage.qdrant_store import get_pages
 
@@ -78,20 +78,23 @@ def create_chain(domain, difficulty, profile=None, *, include_context=False, tra
 
     def retrieve_docs(request):
         """선택한 검색기만 호출 및 기존 하위 질문별 결과 병합 유지."""
-        search_question = request.get("search_question") or request.get("question")
-        mode = request.get("retrieval_mode", "naive")
-        retriever = retrievers.get(mode)
-        sub_questions = [q.strip() for q in request.get("sub_questions") or [] if q and q.strip()]
-        if sub_questions:
-            queries = list(dict.fromkeys([search_question, *sub_questions]))
-            docs = merge_docs([retriever.invoke(q) for q in queries])
-        else:
-            docs = retriever.invoke(search_question)
-        if request.get("page_context"):
-            # 페이지 확장 요청에만 컬렉션 설정 확인
-            collection = collection_name(load_config(), domain=domain, difficulty=difficulty, profile=profile)
-            docs = to_pages(docs, collection)
-        return docs
+        # ainvoke에서는 이 동기 함수가 작업 스레드에서 실행되므로 이벤트 루프 대기 방지
+        # 기존 검색기의 공유 모델과 캐시 파일 보호를 위해 검색 구간만 순차 실행
+        with RETRIEVAL_LOCK:
+            search_question = request.get("search_question") or request.get("question")
+            mode = request.get("retrieval_mode", "naive")
+            retriever = retrievers.get(mode)
+            sub_questions = [q.strip() for q in request.get("sub_questions") or [] if q and q.strip()]
+            if sub_questions:
+                queries = list(dict.fromkeys([search_question, *sub_questions]))
+                docs = merge_docs([retriever.invoke(q) for q in queries])
+            else:
+                docs = retriever.invoke(search_question)
+            if request.get("page_context"):
+                # 페이지 확장 요청에만 컬렉션 설정 확인
+                collection = collection_name(load_config(), domain=domain, difficulty=difficulty, profile=profile)
+                docs = to_pages(docs, collection)
+            return docs
 
     def retrieve_context(request):
         return format_docs(request["docs"])
@@ -116,10 +119,17 @@ def create_chain(domain, difficulty, profile=None, *, include_context=False, tra
 
 
 @lru_cache(maxsize=1)
-def get_rag_chain(domain, difficulty):
+def _cached_rag_chain(domain, difficulty):
     """최근 한 난이도의 RAG 체인 보관 및 검색 자료의 불필요한 상시 보유 제한."""
     # 난이도 변경 시 이전 캐시 교체이며 이전 난이도 재선택 시 검색 자원 재준비 필요
     return create_chain(domain=domain, difficulty=difficulty, include_context=True, trace=False)
+
+
+def get_rag_chain(domain, difficulty):
+    """동시 최초 요청에서도 동일한 RAG 체인을 한 번만 생성하도록 캐시 조회 보호."""
+    # lru_cache의 최초 계산 중 중복 실행을 막기 위해 캐시 조회 바깥에서 잠금 확보
+    with RETRIEVAL_LOCK:
+        return _cached_rag_chain(domain, difficulty)
 
 
 def create_service_chain():
