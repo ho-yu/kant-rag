@@ -11,15 +11,19 @@
 실행 (레포 맨 위에서)
     uv run python evaluation/answer/run_answers.py --modes naive --limit 1   # 1문항만 시험 (API 1회)
     uv run python evaluation/answer/run_answers.py                           # 30문항 × 3방식
+    uv run python evaluation/answer/run_answers.py --rerank-n 20             # 튜닝 실험 (세 방식에 같게)
 
 결과 (results/는 .gitignore에 없으니 커밋하지 않는다)
     results/answer/retrieval_b/{폴더}/answers_{방식}.jsonl   한 줄 = 요청 하나
     results/answer/retrieval_b/{폴더}/config.json            세 방식에 같게 둔 설정
-    {폴더} = {난이도}_{split}{바꾼 설정}{_tag}. RETRIEVAL_B_* 값이 기본값과 다르면 자동으로 붙는다.
-      예: RETRIEVAL_B_K=3 → basic_development_k3,  --tag r2 → basic_development_r2
+    {폴더} = {난이도}_{split}{바꾼 설정}{_tag}. 명령줄로 준 튜닝 값이 기본값과 다르면 자동으로 붙는다.
+      예: --k 3 → basic_development_k3,  --rerank-n 20 → basic_development_n20,  --tag r2 → basic_development_r2
+    튜닝 옵션: --k --levels --cand --rrf --rerank-n --rerank-len (기본값은 retrieval_b/settings.py의 Settings)
 
 [2026-11-10 추가] 이유: 결과 폴더가 {난이도}_{split}로 고정이라 설정을 바꿀 때마다 폴더 이름을 손으로 바꿔야 했음
 → 효과: 바꾼 설정이 폴더 이름에 붙어 실험마다 따로 쌓이고, faithfulness.py도 같은 폴더를 찾는다.
+[2026-11-11 리팩토링] 이유: 튜닝 값을 .env(RETRIEVAL_B_*)에서 읽지 않게 됨 → 효과: 명령줄 옵션으로 받아
+세 방식 검색기에 같게 넘기고, 폴더 이름·config.json도 그 값으로 만든다.
 """
 
 from __future__ import annotations
@@ -38,6 +42,15 @@ from dotenv import load_dotenv
 from langchain_core.callbacks import get_usage_metadata_callback
 from langchain_core.documents import Document
 
+from rag_service.retrieval_b.settings import (
+    Settings,
+    add_settings_args,
+    describe_settings,
+    get_settings,
+    retriever_kwargs,
+    settings_from_args,
+    settings_tag,
+)
 from rag_service.storage.corpus import repo_root
 
 MODEL = "gpt-6-luna"
@@ -58,15 +71,20 @@ Record = dict[str, Any]
 # ---------- 경로와 질문 ----------
 
 
-def run_name(difficulty: str, split: str, *, model: str = MODEL, tag: str = "") -> str:
+def run_name(
+    difficulty: str,
+    split: str,
+    *,
+    model: str = MODEL,
+    tag: str = "",
+    settings: Settings | None = None,
+) -> str:
     """결과 폴더 이름: {난이도}_{split}{바꾼 설정}{_모델}{_tag}.
 
-    retrieval_b 튜닝 값(RETRIEVAL_B_*)이 기본값과 다르면 이름에 붙는다 (예: basic_development_k3).
+    settings(명령줄 옵션을 반영한 튜닝 값)가 기본값과 다르면 이름에 붙는다 (예: basic_development_k3).
     모두 기본값이면 예전과 같은 basic_development. 같은 설정 반복은 --tag로 구분한다 (예: _r2).
     """
-    from rag_service.retrieval_b.settings import get_settings, settings_tag
-
-    name = f"{difficulty}_{split}{settings_tag(get_settings())}"
+    name = f"{difficulty}_{split}{settings_tag(settings or get_settings())}"
     if model != MODEL:
         name += f"_{model}"
     if tag:
@@ -75,9 +93,16 @@ def run_name(difficulty: str, split: str, *, model: str = MODEL, tag: str = "") 
 
 
 def out_dir_for(
-    difficulty: str, split: str, *, model: str = MODEL, tag: str = ""
+    difficulty: str,
+    split: str,
+    *,
+    model: str = MODEL,
+    tag: str = "",
+    exp: str | None = None,
+    settings: Settings | None = None,
 ) -> Path:
-    return repo_root() / OUT_DIR / run_name(difficulty, split, model=model, tag=tag)
+    base = results_base(exp) / OUT_DIR.relative_to("results")
+    return base / run_name(difficulty, split, model=model, tag=tag, settings=settings)
 
 
 def answers_path(out_dir: Path, mode: str) -> Path:
@@ -119,8 +144,10 @@ def load_questions(path: str | Path) -> list[dict[str, str]]:
 # ---------- 검색기와 답변 체인 (무거운 import는 함수 안에서) ----------
 
 
-def build_retriever(mode: str, *, domain: str, difficulty: str):
-    """retrieval_b 검색기. k·levels는 Settings 기본값을 써서 세 방식이 같게 한다."""
+def build_retriever(
+    mode: str, *, domain: str, difficulty: str, settings: Settings | None = None
+):
+    """retrieval_b 검색기. 같은 settings(k·levels·튜닝 값)를 세 방식에 같게 넘긴다."""
     from rag_service.retrieval_b import (
         build_hybrid_retriever,
         build_naive_retriever,
@@ -134,7 +161,8 @@ def build_retriever(mode: str, *, domain: str, difficulty: str):
     }
     if mode not in builders:
         raise ValueError(f"mode는 {MODES} 중 하나여야 합니다: {mode!r}")
-    return builders[mode](domain=domain, difficulty=difficulty)
+    kwargs = retriever_kwargs(settings or get_settings(), mode)
+    return builders[mode](domain=domain, difficulty=difficulty, **kwargs)
 
 
 def make_answer_chain(model: str = MODEL):
@@ -312,15 +340,21 @@ def run_mode(
 
 
 def run_config(
-    *, split: str, domain: str, difficulty: str, model: str
+    *,
+    split: str,
+    domain: str,
+    difficulty: str,
+    model: str,
+    exp: str | None = None,
+    settings: Settings | None = None,
 ) -> dict[str, Any]:
-    """세 방식에 같게 둔 설정 (발제 STEP 6 "비교 조건 맞추기")."""
+    """세 방식에 같게 둔 설정 (발제 STEP 6 "비교 조건 맞추기"). 실제로 쓴 튜닝 값을 남긴다."""
     from rag_service.retrieval_b.dense import DEFAULT_EMBEDDING_MODEL
     from rag_service.retrieval_b.rerank import model_name_from_env
-    from rag_service.retrieval_b.settings import get_settings
 
-    s = get_settings()
+    s = settings or get_settings()
     return {
+        "exp": exp,
         "split": split,
         "domain": domain,
         "difficulty": difficulty,
@@ -371,21 +405,34 @@ def check_or_write_config(out_dir: Path, config: dict[str, Any]) -> None:
 # ---------- 진입점 ----------
 
 
-def refresh_board() -> None:
-    """실험 비교판(results/experiment_board.html)을 다시 만든다.
+def _paths():
+    """evaluation/experiment_paths.py를 불러온다 (실험 이름 규칙·결과 폴더가 거기 한 곳에 있다)."""
+    path = Path(__file__).resolve().parents[1] / "experiment_paths.py"
+    spec = importlib.util.spec_from_file_location("experiment_paths", path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
 
-    실제 일은 evaluation/reporting/experiment_board.py의 refresh()가 한다. 여기서는 불러오기만 한다.
-    실패해도 경고 한 줄만 찍고 실행 결과는 그대로 둔다.
-    """
-    path = repo_root() / "evaluation" / "reporting" / "experiment_board.py"
+
+def results_base(exp: str | None = None) -> Path:
+    """결과 최상위 폴더. --exp가 없으면 results/, 있으면 results/experiments/<이름>/."""
+    return _paths().results_dir(repo_root(), exp)
+
+
+def check_exp_arg(parser: argparse.ArgumentParser, exp: str | None) -> str | None:
+    """--exp 값 검사. 틀리면 argparse 오류로 멈추고, 맞으면 "[실험] ..." 한 줄을 찍는다."""
+    paths = _paths()
     try:
-        spec = importlib.util.spec_from_file_location("experiment_board", path)
-        board = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(board)
-    except Exception as e:  # noqa: BLE001 — 비교판 문제로 실행 결과를 버리지 않는다
-        print(f"[경고] 비교판 갱신 실패: {type(e).__name__}: {e}")
-        return
-    board.refresh(repo_root())
+        exp = paths.check_exp(exp)
+    except ValueError as e:
+        parser.error(str(e))
+    print(paths.exp_banner(exp), flush=True)
+    return exp
+
+
+def refresh_board(exp: str | None = None) -> Path | None:
+    """실험 비교판(로컬 도구)이 있으면 그 실험의 비교판을 다시 만든다. 없으면 조용히 건너뛴다."""
+    return _paths().refresh_board(repo_root(), exp)
 
 
 def main(argv: Sequence[str] | None = None) -> None:
@@ -407,14 +454,30 @@ def main(argv: Sequence[str] | None = None) -> None:
         action="store_true",
         help="끝난 뒤 실험 비교판을 다시 만들지 않는다",
     )
+    p.add_argument(
+        "--exp",
+        default=None,
+        help="실험 이름. 주면 results/experiments/<이름>/에 따로 저장",
+    )
+    add_settings_args(p)
     args = p.parse_args(argv)
+    exp = check_exp_arg(p, args.exp)
+    settings = settings_from_args(args)
+    print(f"[검색 설정] {describe_settings(settings)}  (* = 기본값과 다름)", flush=True)
 
     questions = load_questions(
         questions_path(args.split, domain=args.domain, difficulty=args.difficulty)
     )
     if args.limit:
         questions = questions[: args.limit]
-    out_dir = out_dir_for(args.difficulty, args.split, model=args.model, tag=args.tag)
+    out_dir = out_dir_for(
+        args.difficulty,
+        args.split,
+        model=args.model,
+        tag=args.tag,
+        exp=exp,
+        settings=settings,
+    )
     print(f"[결과 폴더] {out_dir.relative_to(repo_root())}", flush=True)
     check_or_write_config(
         out_dir,
@@ -423,6 +486,8 @@ def main(argv: Sequence[str] | None = None) -> None:
             domain=args.domain,
             difficulty=args.difficulty,
             model=args.model,
+            exp=exp,
+            settings=settings,
         ),
     )
     answer_chain = make_answer_chain(args.model)
@@ -433,13 +498,13 @@ def main(argv: Sequence[str] | None = None) -> None:
             questions,
             path,
             retriever_factory=lambda m=mode: build_retriever(
-                m, domain=args.domain, difficulty=args.difficulty
+                m, domain=args.domain, difficulty=args.difficulty, settings=settings
             ),
             answer_chain=answer_chain,
         )
         print(f"저장: {path.relative_to(repo_root())}")
     if not args.no_board:
-        refresh_board()
+        refresh_board(exp)
 
 
 if __name__ == "__main__":
