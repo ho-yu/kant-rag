@@ -187,7 +187,7 @@ def answer_directly(question, history):
     """RAG 없이 OpenAI가 바로 답한다."""
     messages = [{"role": "system", "content": SYSTEM_PROMPT}] + history
     messages.append({"role": "user", "content": question})
-    response = get_client().chat.completions.create(model=MODEL, messages=messages)
+    response = get_client().chat.completions.create(model=MODEL, messages=messages, reasoning_effort="low")
     return {"answer": response.choices[0].message.content, "sources": []}
 
 

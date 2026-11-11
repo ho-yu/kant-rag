@@ -21,9 +21,9 @@ BLOCKED_ANSWER = "죄송합니다. 답변에 안내할 수 없는 내용이 포�
 
 def create_query_guard():
     """질문 사전 판단. invoke({"domain", "history", "question"}) → QueryDecision"""
-    return query_guard_prompt | ChatOpenAI(model="gpt-6-luna").with_structured_output(QueryDecision)
+    return query_guard_prompt | ChatOpenAI(model="gpt-6-luna", reasoning_effort="low").with_structured_output(QueryDecision)
 
 
 def create_answer_guard():
     """답변 사후 검사. invoke({"question", "answer"}) → AnswerCheck"""
-    return answer_guard_prompt | ChatOpenAI(model="gpt-6-luna").with_structured_output(AnswerCheck)
+    return answer_guard_prompt | ChatOpenAI(model="gpt-6-luna", reasoning_effort="low").with_structured_output(AnswerCheck)
