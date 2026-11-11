@@ -262,6 +262,11 @@ def test_retrieval_evaluator_uploads_doc_scores_and_can_be_turned_off():
     assert names == ["answer_quality"]
 
 
+def test_without_code_scorer_only_retrieval_is_uploaded():
+    assert [e.__name__ for e in lx.make_evaluators(None)] == ["retrieval_judgement"]
+    assert lx.make_evaluators(None, retrieval_k=None) == []
+
+
 def test_retrieval_scores_are_converted_when_returned(monkeypatch):
     monkeypatch.setattr(
         lx.retrieval_scores,
@@ -316,6 +321,18 @@ def test_run_summary_means_counts_and_grading_tokens():
         out["grading_tokens_input"].value == 300
         and out["grading_tokens_output"].value == 40
     )
+
+
+def test_run_summary_without_code_scorer_has_no_grading_tokens():
+    item = SimpleNamespace(
+        output={"status": "answered"},
+        evaluations=lx.to_evaluations(
+            [lx.quality.score("hit_at_5", 1.0, "scored")], status="answered"
+        ),
+    )
+    out = {e.name: e for e in lx.make_run_evaluator(None)(item_results=[item])}
+    assert out["hit_at_5_mean"].value == 1.0
+    assert "grading_tokens_input" not in out
 
 
 def test_run_name_for():
@@ -385,12 +402,47 @@ def test_run_mode_passes_impl_to_chain(monkeypatch, tmp_path):
     monkeypatch.setattr(lx, "ROOT", tmp_path)
     args = SimpleNamespace(
         domain="shipping", difficulty="basic", impl="retrieval_b", page_context=False, tag="",
-        no_retrieval=False, k=5, model="m", dataset="d", concurrency=1,
+        no_retrieval=False, code_answer_scores=True, k=5, model="m", dataset="d", concurrency=1,
     )
     payload = lx.run_mode(FakeLangfuse(), [], args, "naive")
     assert seen["impl"] == "retrieval_b" and seen["difficulty"] == "basic"
     assert seen["run_name"].startswith("b_naive_") and seen["metadata"]["impl"] == "retrieval_b"
     assert payload["impl"] == "retrieval_b"
+
+
+@pytest.mark.parametrize("code_answer_scores", [False, True])
+def test_answer_scores_come_from_langfuse_unless_code_flag(monkeypatch, tmp_path, code_answer_scores):
+    from rag_service import pipeline
+
+    seen = {"created": 0}
+
+    class FakeLangfuse:
+        def run_experiment(self, **kw):
+            seen["evaluators"] = [e.__name__ for e in kw["evaluators"]]
+            seen["metadata"], seen["description"] = kw["metadata"], kw["description"]
+            return SimpleNamespace(item_results=[], dataset_run_url=None)
+
+    def fake_create(cls, model):
+        seen["created"] += 1
+        return FakeScorer([])
+
+    monkeypatch.setattr(pipeline, "create_chain", lambda **kw: FakeChain(ANSWER))
+    monkeypatch.setattr(lx.quality.QualityScorer, "create", classmethod(fake_create))
+    monkeypatch.setattr(lx.score_configs, "config_ids", lambda langfuse: {})
+    monkeypatch.setattr(lx, "ROOT", tmp_path)
+    args = SimpleNamespace(
+        domain="shipping", difficulty="basic", impl="retrieval_a", page_context=False, tag="",
+        no_retrieval=False, code_answer_scores=code_answer_scores, k=5, model="m", dataset="d",
+        concurrency=1,
+    )
+    payload = lx.run_mode(FakeLangfuse(), [], args, "naive")
+    assert seen["created"] == int(code_answer_scores)
+    expected = ["answer_quality", "retrieval_judgement"] if code_answer_scores else ["retrieval_judgement"]
+    assert seen["evaluators"] == expected
+    assert seen["metadata"]["code_answer_scores"] == str(code_answer_scores)
+    assert payload["code_answer_scores"] is code_answer_scores
+    assert (payload["grading_usage"] is None) is not code_answer_scores
+    assert ("Langfuse evaluator" in seen["description"]) is not code_answer_scores
 
 
 def test_real_run_experiment_wires_task_and_evaluators(monkeypatch):

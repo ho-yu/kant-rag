@@ -1,23 +1,28 @@
-"""Langfuse 실험 한 번: 데이터셋 질문 → 팀 chain(retrieval_a 또는 --impl retrieval_b) → 채점 → Langfuse 점수.
+"""Langfuse 실험 한 번: 데이터셋 질문 → 팀 chain(retrieval_a 또는 --impl retrieval_b) → trace + 검색 점수 → Langfuse.
+
+답변 점수(RAGAS 4개, Judge 4항목)는 Langfuse 서버 evaluator가 채점한다 (팀 기획).
+서버 규칙이 이 스크립트가 만든 experiment-item-run observation을 골라 llm_*, judge_* 점수를 붙인다.
+이 스크립트는 --code-answer-scores일 때만 quality.py로 답변 점수를 직접 매겨 올린다 (서버 결과와 비교할 때).
 
 누가 무엇을 부르나
     이 스크립트(노트북) ─ Langfuse SDK run_experiment
         ├─ 데이터셋 문항마다 task          = 팀 chain 실행 (pipeline/chain.py create_chain 그대로, 최종 문맥은 콜백으로 받음)
-        ├─ 문항마다 evaluators              = answer_quality   (evaluation/answer/quality.py)
-        │                                     retrieval_judgement (evaluation/retrieval/retrieval_scores.py)
+        ├─ 문항마다 evaluators              = retrieval_judgement (evaluation/retrieval/retrieval_scores.py)
+        │                                     answer_quality   (evaluation/answer/quality.py, --code-answer-scores일 때만)
         ├─ 실행이 끝나면 run_evaluators    = run_summary (지표별 평균 + 건수 + 채점 토큰)
-        └─ trace와 점수를 Langfuse 서버로 보낸다. 서버는 저장·표시만 하고 코드를 실행하지 않는다.
+        └─ trace와 점수를 Langfuse 서버로 보낸다. 답변 점수는 서버 evaluator 규칙이 따로 붙인다.
 
 Langfuse에 올라가는 점수 이름
     문항 점수 (scored일 때, NUMERIC)
+        hit_at_5, recall_at_5, mrr_at_5                                            retrieval_scores.py (문서 단위)
+        아래는 --code-answer-scores일 때만 (평소에는 서버 evaluator의 llm_*, judge_*)
         faithfulness, answer_relevancy, context_precision, context_recall          0~1
         judge_facts, judge_conditions, judge_evidence, judge_decision              0 또는 1
-        검색 판정 점수                                                              retrieval_scores.py가 돌려주는 것 (지금은 없음)
     해당 없음·평가 불가 (CATEGORICAL)
         <이름>_state = "na" | "unavailable", comment에 이유. 0이나 1로 바꿔 올리지 않는다
     실행 점수 (run 단위)
         <이름>_mean, comment에 "평가 대상 / 해당 없음 / 평가 불가" 건수와 답변·되묻기·보류별 평균
-        grading_tokens_input, grading_tokens_output (채점 호출만. 서비스 토큰은 chain trace에 따로 남는다)
+        grading_tokens_input, grading_tokens_output (--code-answer-scores일 때 코드 채점 호출만. 서비스 토큰은 chain trace에 따로 남는다)
 
 데이터셋: evaluation/upload_langfuse_datasets.py가 올린 {domain}-{difficulty}-{split}-v1 (예: shipping-basic-development-v1)
     input = {"question"}, expected_output = 정답 파일 칸 (채점에만 쓴다. chain에는 질문만 들어간다)
@@ -27,6 +32,7 @@ Langfuse에 올라가는 점수 이름
     uv run python evaluation/langfuse_experiment.py                                      # 세 방식 × development 전체
     uv run python evaluation/langfuse_experiment.py --split additional --page-context --tag page
     uv run python evaluation/langfuse_experiment.py --impl retrieval_b                   # retrieval_b 검색기로 같은 비교
+    uv run python evaluation/langfuse_experiment.py --code-answer-scores --limit 2       # 코드 채점과 서버 evaluator 비교할 때만
 
 로컬 사본: results/langfuse/{run_name}.json (요약·채점 토큰·Langfuse 링크 url). results/는 커밋하지 않는다.
 
@@ -259,12 +265,15 @@ def from_evaluations(evaluations: Iterable[Any]) -> list[Record]:
 
 
 def make_evaluators(
-    scorer: Any,
+    scorer: Any | None,
     *,
     retrieval_k: int | None = retrieval_scores.K,
     config_ids: Mapping[str, str] | None = None,
 ) -> list[Callable[..., Any]]:
-    """문항 평가기 목록. 함수 이름이 Langfuse 화면의 평가기 이름이 된다."""
+    """문항 평가기 목록. 함수 이름이 Langfuse 화면의 평가기 이름이 된다.
+
+    scorer가 None이면 답변 점수를 매기지 않는다 (서버 evaluator가 채점). retrieval_k가 None이면 검색 점수도 없다.
+    """
 
     async def answer_quality(
         *, input: Any, output: Any, expected_output: Any, metadata: Any, **kwargs: Any
@@ -283,7 +292,7 @@ def make_evaluators(
         )
         return to_evaluations(scores, status=rec.get("status"), config_ids=config_ids)
 
-    evaluators: list[Callable[..., Any]] = [answer_quality]
+    evaluators: list[Callable[..., Any]] = [] if scorer is None else [answer_quality]
     if retrieval_k is not None:  # --no-retrieval이면 검색 판정을 부르지 않는다
         evaluators.append(retrieval_judgement)
     return evaluators
@@ -311,8 +320,8 @@ def run_comment(m: Mapping[str, Any]) -> str:
     )
 
 
-def make_run_evaluator(scorer: Any) -> Callable[..., Any]:
-    """실행 단위 점수: 지표별 평균(평가 대상만) + 건수 comment + 채점 토큰."""
+def make_run_evaluator(scorer: Any | None) -> Callable[..., Any]:
+    """실행 단위 점수: 지표별 평균(평가 대상만) + 건수 comment + 채점 토큰 (코드 채점을 했을 때만)."""
     from langfuse import Evaluation
 
     def run_summary(*, item_results: Sequence[Any], **kwargs: Any) -> list[Any]:
@@ -331,6 +340,8 @@ def make_run_evaluator(scorer: Any) -> Callable[..., Any]:
                     data_type="NUMERIC",
                 )
             )
+        if scorer is None:
+            return out
         usage = scorer.grading_usage()
         out.append(
             Evaluation(
@@ -383,7 +394,9 @@ def run_mode(
     from rag_service.pipeline import create_chain
 
     chain = create_chain(domain=args.domain, difficulty=args.difficulty, impl=args.impl)
-    scorer = quality.QualityScorer.create(args.model)
+    scorer = (
+        quality.QualityScorer.create(args.model) if args.code_answer_scores else None
+    )
     run_name = run_name_for(
         mode, page_context=args.page_context, tag=args.tag, impl=args.impl
     )
@@ -391,7 +404,12 @@ def run_mode(
     result = langfuse.run_experiment(
         name=EXPERIMENT,
         run_name=run_name,
-        description=f"{args.dataset} · {args.impl} · {mode} · 채점 {args.model}",
+        description=f"{args.dataset} · {args.impl} · {mode} · "
+        + (
+            f"코드 답변 채점 {args.model}"
+            if scorer
+            else "답변 채점은 Langfuse evaluator"
+        ),
         data=list(items),
         task=make_task(chain, mode=mode, page_context=args.page_context),
         evaluators=make_evaluators(
@@ -403,7 +421,8 @@ def run_mode(
             "impl": args.impl,
             "mode": mode,
             "page_context": str(args.page_context),
-            "judge_model": args.model,
+            "code_answer_scores": str(scorer is not None),
+            "judge_model": args.model if scorer else "",
             "dataset": args.dataset,
         },
     )
@@ -414,10 +433,11 @@ def run_mode(
         "impl": args.impl,
         "mode": mode,
         "page_context": args.page_context,
-        "judge_model": args.model,
+        "code_answer_scores": scorer is not None,
+        "judge_model": args.model if scorer else None,
         "n_items": len(items),
         "summary": summary,
-        "grading_usage": scorer.grading_usage(),
+        "grading_usage": scorer.grading_usage() if scorer else None,
         "url": getattr(result, "dataset_run_url", None)
         or getattr(result, "experiment_url", None),
     }
@@ -433,7 +453,7 @@ def main(argv: Sequence[str] | None = None) -> None:
 
     load_dotenv(ROOT / ".env")
     p = argparse.ArgumentParser(
-        description="Langfuse 실험: 팀 chain 답변을 RAGAS·Judge·검색 판정으로 채점"
+        description="Langfuse 실험: 팀 chain 실행 trace와 검색 점수를 올린다 (답변 점수는 Langfuse 서버 evaluator)"
     )
     p.add_argument("--domain", default="shipping")
     p.add_argument("--difficulty", default="basic")
@@ -450,7 +470,16 @@ def main(argv: Sequence[str] | None = None) -> None:
         action="store_true",
         help="찾은 문단·표 대신 그 쪽 전체를 문맥으로 (chain 옵션)",
     )
-    p.add_argument("--model", default=quality.MODEL, help="채점 LLM (모든 방식에 같게)")
+    p.add_argument(
+        "--code-answer-scores",
+        action="store_true",
+        help="답변 점수(RAGAS 4개, Judge 4항목)도 코드로 채점해 올린다. 평소에는 서버 evaluator가 채점. 비교할 때만",
+    )
+    p.add_argument(
+        "--model",
+        default=quality.MODEL,
+        help="--code-answer-scores 채점 LLM (모든 방식에 같게)",
+    )
     p.add_argument(
         "--k",
         type=int,
