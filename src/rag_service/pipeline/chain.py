@@ -87,14 +87,18 @@ def retriever_builders(impl="retrieval_a"):
     raise ValueError(f"impl은 {IMPLS} 중 하나여야 합니다: {impl!r}")
 
 
-def create_chain(domain, difficulty, profile=None, impl="retrieval_a", *, include_context=False, trace=True):
+def create_chain(
+    domain, difficulty, profile=None, impl="retrieval_a", *,
+    include_context=False, trace=True, retriever_pool=None,
+):
     """기본 RagAnswer 반환 및 API 요청 시 실제 모델 입력 자료의 추가 반환."""
     # 검색 구현 검증 및 객체 생성 전 검색 방식별 생성 함수 보관
     builders = dict(zip(("naive", "hybrid", "hybrid_rerank"), retriever_builders(impl), strict=True))
     # 기존 검색 후 답변 기능의 독립 실행 유지 및 전체 서비스 체인의 RAG 분기로 재사용
     answer_chain = RunnableLambda(prepare_answer_input) | answer_prompt | create_model().with_structured_output(RagAnswer)
     # A의 Hybrid 공유 유지 및 B의 선택한 검색기만 최초 호출 시 생성
-    pool = RetrieverPool(domain, difficulty, profile) if impl == "retrieval_a" else None
+    # 서버에서 사전 준비한 검색 자원 주입 및 기존 독립 호출의 자체 준비 유지
+    pool = (retriever_pool or RetrieverPool(domain, difficulty, profile)) if impl == "retrieval_a" else None
     retrievers = {}
 
     def retrieve_docs(request):
@@ -146,18 +150,29 @@ def create_chain(domain, difficulty, profile=None, impl="retrieval_a", *, includ
     return chain.with_config(run_name="rag-answer")
 
 
-@lru_cache(maxsize=1)
-def _cached_rag_chain(domain, difficulty):
-    """최근 한 난이도의 RAG 체인 보관 및 검색 자료의 불필요한 상시 보유 제한."""
-    # 난이도 변경 시 이전 캐시 교체이며 이전 난이도 재선택 시 검색 자원 재준비 필요
-    return create_chain(domain=domain, difficulty=difficulty, include_context=True, trace=False)
+@lru_cache(maxsize=3)
+def _cached_rag_resources(domain, difficulty):
+    """서비스의 세 난이도별 체인과 검색 자원 보관 및 준비한 객체의 재사용."""
+    # 호출한 난이도만 생성하며 난이도 전환 시 기존 워밍업 자원의 캐시 퇴출 방지
+    pool = RetrieverPool(domain, difficulty)
+    chain = create_chain(
+        domain=domain, difficulty=difficulty, include_context=True, trace=False, retriever_pool=pool,
+    )
+    return chain, pool
 
 
 def get_rag_chain(domain, difficulty):
     """동시 최초 요청에서도 동일한 RAG 체인을 한 번만 생성하도록 캐시 조회 보호."""
     # lru_cache의 최초 계산 중 중복 실행을 막기 위해 캐시 조회 바깥에서 잠금 확보
     with RETRIEVAL_LOCK:
-        return _cached_rag_chain(domain, difficulty)
+        return _cached_rag_resources(domain, difficulty)[0]
+
+
+def warmup_service(domain, difficulty, modes):
+    """실제 서비스 체인이 재사용할 검색 자원 준비 및 답변·검사 모델 호출 제외."""
+    with RETRIEVAL_LOCK:
+        _, pool = _cached_rag_resources(domain, difficulty)
+        pool.warmup(modes)
 
 
 def create_service_chain():

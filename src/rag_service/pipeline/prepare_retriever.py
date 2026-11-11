@@ -64,3 +64,14 @@ class RetrieverPool:
                     raise ValueError(f"지원하지 않는 검색 방식: {mode}")
                 self.retrievers[mode] = retriever
             return self.retrievers[mode]
+
+    def warmup(self, modes):
+        """답변 생성 없이 검색 실행으로 지연 로딩 모델과 검색 자료의 사전 준비."""
+        # 실제 요청과 같은 잠금과 검색 객체 사용 및 워밍업 중 중복 초기화 방지
+        with RETRIEVAL_LOCK:
+            for mode in modes:
+                retriever = self.get(mode)
+                docs = retriever.invoke("해상 운송")
+                # 검색 결과가 없어도 첫 점수 계산 때 로드되는 리랭커의 사전 준비
+                if mode == "hybrid_rerank" and not docs:
+                    retriever.score_fn("해상 운송", ["해상 운송"])
