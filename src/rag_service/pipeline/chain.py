@@ -55,13 +55,28 @@ def to_pages(docs: list[Document], collection: str) -> list[Document]:
     return out
 
 
-def create_chain(domain, difficulty, profile=None):
+IMPLS = ("retrieval_a", "retrieval_b")  # 검색기 구현 (평가에서 둘을 같은 chain으로 비교)
+
+
+def retriever_builders(impl="retrieval_a"):
+    """impl의 (naive, hybrid, hybrid_rerank) 검색기 생성 함수."""
+    if impl == "retrieval_a":
+        return build_naive_retriever, build_hybrid_retriever, build_rerank_retriever
+    if impl == "retrieval_b":
+        from rag_service import retrieval_b
+
+        return retrieval_b.build_naive_retriever, retrieval_b.build_hybrid_retriever, retrieval_b.build_rerank_retriever
+    raise ValueError(f"impl은 {IMPLS} 중 하나여야 합니다: {impl!r}")
+
+
+def create_chain(domain, difficulty, profile=None, impl="retrieval_a"):
     model = ChatOpenAI(model="gpt-6-luna", reasoning_effort="low")
 
+    naive, hybrid, rerank = retriever_builders(impl)
     retrievers = {
-        "naive": build_naive_retriever(domain=domain, difficulty=difficulty, profile=profile),
-        "hybrid": build_hybrid_retriever(domain=domain, difficulty=difficulty, profile=profile),
-        "hybrid_rerank": build_rerank_retriever(domain=domain, difficulty=difficulty, profile=profile),
+        "naive": naive(domain=domain, difficulty=difficulty, profile=profile),
+        "hybrid": hybrid(domain=domain, difficulty=difficulty, profile=profile),
+        "hybrid_rerank": rerank(domain=domain, difficulty=difficulty, profile=profile),
         }
 
     collection = collection_name(load_config(), domain=domain, difficulty=difficulty, profile=profile)  # page 확장에서 쪽을 꺼낼 컬렉션

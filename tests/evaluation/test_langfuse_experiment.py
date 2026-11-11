@@ -253,12 +253,11 @@ def test_answer_quality_evaluator_passes_record_and_golden():
     assert rec["question"] == "q" and golden is GOLDEN
 
 
-def test_retrieval_evaluator_uploads_nothing_for_now_and_can_be_turned_off():
+def test_retrieval_evaluator_uploads_doc_scores_and_can_be_turned_off():
     evaluators = lx.make_evaluators(FakeScorer([]))
-    out = evaluators[1](
-        input={}, output={"status": "answered"}, expected_output=GOLDEN, metadata=None
-    )
-    assert out == []  # 검색 판정 함수가 아직 점수를 만들지 않는다
+    output = {"status": "answered", "contexts": [{"sid": "S1", "book_id": "SB01", "page": 1, "text": "t"}]}
+    out = evaluators[1](input={}, output=output, expected_output=GOLDEN, metadata=None)
+    assert [(e.name, e.value) for e in out] == [("hit_at_5", 1.0), ("recall_at_5", 1.0), ("mrr_at_5", 1.0)]
     names = [e.__name__ for e in lx.make_evaluators(FakeScorer([]), retrieval_k=None)]
     assert names == ["answer_quality"]
 
@@ -329,6 +328,69 @@ def test_run_name_for():
         lx.run_name_for("naive", page_context=True, tag="r2", now=now)
         == "naive_page_20261111-1305_r2"
     )
+    assert (
+        lx.run_name_for("hybrid", page_context=False, now=now, impl="retrieval_b")
+        == "b_hybrid_20261111-1305"
+    )
+
+
+def test_impl_lists_match_chain():
+    assert lx.IMPLS == chain_mod.IMPLS
+
+
+def test_chain_picks_retriever_impl(monkeypatch):
+    from rag_service import retrieval_b
+
+    assert chain_mod.retriever_builders() == (
+        chain_mod.build_naive_retriever,
+        chain_mod.build_hybrid_retriever,
+        chain_mod.build_rerank_retriever,
+    )
+    assert chain_mod.retriever_builders("retrieval_b") == (
+        retrieval_b.build_naive_retriever,
+        retrieval_b.build_hybrid_retriever,
+        retrieval_b.build_rerank_retriever,
+    )
+    with pytest.raises(ValueError):
+        chain_mod.retriever_builders("retrieval_c")
+
+    seen = []
+    for name in ("build_naive_retriever", "build_hybrid_retriever", "build_rerank_retriever"):
+        monkeypatch.setattr(retrieval_b, name, lambda _n=name, **kw: seen.append((_n, kw)) or RunnableLambda(lambda q: []))
+        monkeypatch.setattr(chain_mod, name, lambda **kw: pytest.fail("retrieval_a 검색기를 부르면 안 됨"))
+    monkeypatch.setattr(chain_mod, "load_config", dict)
+    monkeypatch.setattr(chain_mod, "collection_name", lambda *a, **kw: "test")
+    monkeypatch.setattr(chain_mod, "ChatOpenAI", lambda **kw: SimpleNamespace(with_structured_output=lambda s: RunnableLambda(lambda p: ANSWER)))
+    chain_mod.create_chain("shipping", "advanced", impl="retrieval_b")
+    assert [n for n, _ in seen] == ["build_naive_retriever", "build_hybrid_retriever", "build_rerank_retriever"]
+    assert all(kw == {"domain": "shipping", "difficulty": "advanced", "profile": None} for _, kw in seen)
+
+
+def test_run_mode_passes_impl_to_chain(monkeypatch, tmp_path):
+    import rag_service.pipeline as pipeline
+
+    seen = {}
+
+    def fake_create_chain(**kw):
+        seen.update(kw)
+        return FakeChain(ANSWER)
+
+    class FakeLangfuse:
+        def run_experiment(self, **kw):
+            seen["run_name"], seen["metadata"] = kw["run_name"], kw["metadata"]
+            return SimpleNamespace(item_results=[], dataset_run_url=None)
+
+    monkeypatch.setattr(pipeline, "create_chain", fake_create_chain)
+    monkeypatch.setattr(lx.quality.QualityScorer, "create", classmethod(lambda cls, model: FakeScorer([])))
+    monkeypatch.setattr(lx, "ROOT", tmp_path)
+    args = SimpleNamespace(
+        domain="shipping", difficulty="basic", impl="retrieval_b", page_context=False, tag="",
+        no_retrieval=False, k=5, model="m", dataset="d", concurrency=1,
+    )
+    payload = lx.run_mode(FakeLangfuse(), [], args, "naive")
+    assert seen["impl"] == "retrieval_b" and seen["difficulty"] == "basic"
+    assert seen["run_name"].startswith("b_naive_") and seen["metadata"]["impl"] == "retrieval_b"
+    assert payload["impl"] == "retrieval_b"
 
 
 def test_real_run_experiment_wires_task_and_evaluators(monkeypatch):

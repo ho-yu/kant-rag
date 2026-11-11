@@ -1,4 +1,4 @@
-"""Langfuse 실험 한 번: 데이터셋 질문 → 팀 chain(retrieval_a) → 채점 → Langfuse 점수.
+"""Langfuse 실험 한 번: 데이터셋 질문 → 팀 chain(retrieval_a 또는 --impl retrieval_b) → 채점 → Langfuse 점수.
 
 누가 무엇을 부르나
     이 스크립트(노트북) ─ Langfuse SDK run_experiment
@@ -26,6 +26,7 @@ Langfuse에 올라가는 점수 이름
     uv run python evaluation/langfuse_experiment.py --modes hybrid_rerank --limit 2      # 먼저 2문항으로 확인
     uv run python evaluation/langfuse_experiment.py                                      # 세 방식 × development 전체
     uv run python evaluation/langfuse_experiment.py --split additional --page-context --tag page
+    uv run python evaluation/langfuse_experiment.py --impl retrieval_b                   # retrieval_b 검색기로 같은 비교
 
 로컬 사본: results/langfuse/{run_name}.json (요약·채점 토큰·Langfuse 링크 url). results/는 커밋하지 않는다.
 
@@ -46,6 +47,9 @@ from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
 MODES = ("naive", "hybrid", "hybrid_rerank")
+IMPLS = ("retrieval_a", "retrieval_b")  # pipeline/chain.py IMPLS와 같게
+DEFAULT_IMPL = "retrieval_a"
+IMPL_PREFIX = {"retrieval_a": "a", "retrieval_b": "b"}
 SPLITS = ("development", "additional", "expansion_validation")
 EXPERIMENT = "kant-rag-eval"
 MAX_CONCURRENCY = 4
@@ -338,10 +342,17 @@ def make_run_evaluator(scorer: Any) -> Callable[..., Any]:
 
 
 def run_name_for(
-    mode: str, *, page_context: bool, tag: str = "", now: datetime | None = None
+    mode: str,
+    *,
+    page_context: bool,
+    tag: str = "",
+    now: datetime | None = None,
+    impl: str = DEFAULT_IMPL,
 ) -> str:
+    """실행 이름. retrieval_b면 앞에 b_를 붙인다 (retrieval_a는 예전 이름 그대로)."""
     stamp = (now or datetime.now().astimezone()).strftime("%Y%m%d-%H%M")
-    name = f"{mode}{'_page' if page_context else ''}_{stamp}"
+    prefix = "" if impl == DEFAULT_IMPL else f"{IMPL_PREFIX[impl]}_"
+    name = f"{prefix}{mode}{'_page' if page_context else ''}_{stamp}"
     return f"{name}_{tag}" if tag else name
 
 
@@ -358,20 +369,23 @@ def run_mode(
     """방식 하나를 실험 한 번으로 돌린다. chain·채점기는 방식마다 새로 만든다 (실험마다 이벤트 루프가 새로 생김)."""
     from rag_service.pipeline import create_chain
 
-    chain = create_chain(domain=args.domain, difficulty=args.difficulty)
+    chain = create_chain(domain=args.domain, difficulty=args.difficulty, impl=args.impl)
     scorer = quality.QualityScorer.create(args.model)
-    run_name = run_name_for(mode, page_context=args.page_context, tag=args.tag)
+    run_name = run_name_for(
+        mode, page_context=args.page_context, tag=args.tag, impl=args.impl
+    )
     k = None if args.no_retrieval else args.k
     result = langfuse.run_experiment(
         name=EXPERIMENT,
         run_name=run_name,
-        description=f"{args.dataset} · {mode} · 채점 {args.model}",
+        description=f"{args.dataset} · {args.impl} · {mode} · 채점 {args.model}",
         data=list(items),
         task=make_task(chain, mode=mode, page_context=args.page_context),
         evaluators=make_evaluators(scorer, retrieval_k=k),
         run_evaluators=[make_run_evaluator(scorer)],
         max_concurrency=args.concurrency,
         metadata={
+            "impl": args.impl,
             "mode": mode,
             "page_context": str(args.page_context),
             "judge_model": args.model,
@@ -382,6 +396,7 @@ def run_mode(
     payload = {
         "run_name": run_name,
         "dataset": args.dataset,
+        "impl": args.impl,
         "mode": mode,
         "page_context": args.page_context,
         "judge_model": args.model,
@@ -392,7 +407,7 @@ def run_mode(
         or getattr(result, "experiment_url", None),
     }
     save_local(ROOT / "results" / "langfuse" / f"{run_name}.json", payload)
-    print(f"\n[{mode}] {run_name}")
+    print(f"\n[{args.impl} · {mode}] {run_name}")
     print(quality.report(summary))
     print(f"Langfuse: {payload['url'] or '(링크 없음)'}")
     return payload
@@ -409,6 +424,12 @@ def main(argv: Sequence[str] | None = None) -> None:
     p.add_argument("--difficulty", default="basic")
     p.add_argument("--split", default="development", choices=SPLITS)
     p.add_argument("--modes", nargs="+", default=list(MODES), choices=MODES)
+    p.add_argument(
+        "--impl",
+        default=DEFAULT_IMPL,
+        choices=IMPLS,
+        help="검색기 구현 (같은 chain·프롬프트·채점으로 retrieval_a와 retrieval_b를 비교)",
+    )
     p.add_argument(
         "--page-context",
         action="store_true",
@@ -440,7 +461,7 @@ def main(argv: Sequence[str] | None = None) -> None:
         if args.limit:
             items = items[: args.limit]
         print(
-            f"[데이터셋] {args.dataset} {len(items)}문항 · 방식 {', '.join(args.modes)}",
+            f"[데이터셋] {args.dataset} {len(items)}문항 · {args.impl} · 방식 {', '.join(args.modes)}",
             flush=True,
         )
         for mode in args.modes:
