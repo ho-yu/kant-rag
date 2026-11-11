@@ -33,24 +33,35 @@ async def lifespan(app: FastAPI):
         raise RuntimeError("RAG_MAX_CONCURRENT_REQUESTS는 1 이상의 정수로 설정해주세요")
     # 모델 API 대기를 겹쳐 처리하되 서버 프로세스의 동시 요청 수 제한
     app.state.query_slots = asyncio.BoundedSemaphore(max_concurrent)
-    # 기본 난이도의 세 검색기 사전 준비 및 빈 설정으로 워밍업 생략 가능
+    # 지정한 난이도의 세 검색기 사전 준비 및 빈 검색 방식 설정으로 워밍업 생략 가능
     modes = tuple(dict.fromkeys(
         mode.strip() for mode in os.getenv("RAG_WARMUP_MODES", "naive,hybrid,hybrid_rerank").split(",")
         if mode.strip()
     ))
-    difficulty = os.getenv("RAG_WARMUP_DIFFICULTY", "basic").strip()
+    # 복수 난이도 설정 우선 적용 및 기존 단일 난이도 설정과의 호환 유지
+    difficulties = tuple(dict.fromkeys(
+        value.strip() for value in os.getenv(
+            "RAG_WARMUP_DIFFICULTIES",
+            os.getenv("RAG_WARMUP_DIFFICULTY") or "basic,intermediate,advanced",
+        ).split(",") if value.strip()
+    ))
+    if modes and not difficulties:
+        raise ValueError("RAG_WARMUP_DIFFICULTIES에 준비할 난이도를 지정해주세요")
     # 요청과 동일한 허용 값 검증으로 설정 오타에 따른 모델 로딩 전 실패 처리
-    for mode in modes:
-        QueryRequest(question="워밍업", difficulty=difficulty, retrieval_mode=mode)
+    for difficulty in difficulties:
+        for mode in modes:
+            QueryRequest(question="워밍업", difficulty=difficulty, retrieval_mode=mode)
     # 서버 시작 시 전체 처리 체인 구성 및 준비한 검색 자원의 후속 요청 재사용
     app.state.chain = create_service_chain()
     try:
         if modes:
-            logger.info("RAG warmup starting difficulty=%s modes=%s", difficulty, modes)
-            started = time.perf_counter()
-            # 시작 완료 전에 작업 스레드에서 검색 실행 및 실패 시 서버 시작 중단
-            await asyncio.to_thread(warmup_service, "shipping", difficulty, modes)
-            logger.info("RAG warmup complete elapsed=%.1fs", time.perf_counter() - started)
+            # 난이도별 순차 준비로 초기화 부하 집중 완화 및 전체 완료 후 요청 수신
+            for difficulty in difficulties:
+                logger.info("RAG warmup starting difficulty=%s modes=%s", difficulty, modes)
+                started = time.perf_counter()
+                # 시작 완료 전에 작업 스레드에서 검색 실행 및 실패 시 서버 시작 중단
+                await asyncio.to_thread(warmup_service, "shipping", difficulty, modes)
+                logger.info("RAG warmup complete difficulty=%s elapsed=%.1fs", difficulty, time.perf_counter() - started)
         yield
     finally:
         # 요청별 전송 대기 대신 프로세스 종료 시 남은 기록 전송
