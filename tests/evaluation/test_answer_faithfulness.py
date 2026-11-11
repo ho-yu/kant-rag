@@ -314,21 +314,30 @@ def test_real_ragas_no_statements_is_na():
     assert row["state"] == "na" and row["cause"] == "no_claims"
 
 
-def test_out_dir_matches_run_answers_and_run_overrides(monkeypatch, tmp_path):
-    from rag_service.retrieval_b import settings as settings_mod
+def test_out_dir_matches_run_answers_and_run_overrides():
+    from rag_service.retrieval_b.settings import Settings
 
-    for var in ("K", "LEVELS", "CANDIDATE_K", "RRF_K", "RERANK_N", "RERANK_MAX_LENGTH"):
-        monkeypatch.setenv(f"RETRIEVAL_B_{var}", "")
-    monkeypatch.setenv("RETRIEVAL_B_K", "3")
-    settings_mod.get_settings.cache_clear()
-    try:
-        assert fa.run_name("basic", "development") == "basic_development_k3"
-        assert (
-            fa.run_name("basic", "development", tag="r2") == "basic_development_k3_r2"
-        )
-        assert fa.out_dir_for("basic", "development", run="mine").name == "mine"
-    finally:
-        settings_mod.get_settings.cache_clear()
+    s = Settings(k=3)
+    assert fa.run_name("basic", "development") == "basic_development"
+    assert fa.run_name("basic", "development", settings=s) == "basic_development_k3"
+    assert (
+        fa.run_name("basic", "development", tag="r2", settings=s)
+        == "basic_development_k3_r2"
+    )
+    assert fa.out_dir_for("basic", "development", run="mine", settings=s).name == "mine"
+
+
+def test_main_finds_folder_from_cli_tuning(monkeypatch, tmp_path, capsys):
+    """run_answers.py --rerank-n 20 으로 만든 폴더를 같은 옵션으로 찾는다."""
+    monkeypatch.setattr(fa, "repo_root", lambda: tmp_path)
+    folder = tmp_path / fa.OUT_DIR / "basic_development_n20"
+    folder.mkdir(parents=True)
+    (folder / "answers_naive.jsonl").write_text("", encoding="utf-8")
+    monkeypatch.setattr(fa, "refresh_board", lambda *a: None)
+    fa.main(["--rerank-n", "20", "--summary-only"])
+    assert "[답변 폴더] results" in capsys.readouterr().out
+    with pytest.raises(SystemExit, match="basic_development_n20"):
+        fa.main(["--summary-only"])  # 기본 설정 폴더는 없다 → 있는 폴더 목록에 n20
 
 
 def test_available_runs_lists_only_answer_folders(monkeypatch, tmp_path):
@@ -376,7 +385,7 @@ def test_main_refreshes_board_unless_no_board(monkeypatch, tmp_path):
     monkeypatch.setattr(fa, "repo_root", lambda: tmp_path)
     _answers_folder(tmp_path)
     calls = []
-    monkeypatch.setattr(fa, "refresh_board", lambda: calls.append(1))
+    monkeypatch.setattr(fa, "refresh_board", lambda *a: calls.append(1))
     fa.main(["--run", "basic_development_x", "--modes", "naive", "--summary-only"])
     assert calls == [1]
     fa.main(
@@ -392,7 +401,26 @@ def test_main_refreshes_board_unless_no_board(monkeypatch, tmp_path):
     assert calls == [1]
 
 
-def test_refresh_board_failure_does_not_raise(monkeypatch, tmp_path, capsys):
+def test_refresh_board_is_silent_without_board_file(monkeypatch, tmp_path, capsys):
     monkeypatch.setattr(fa, "repo_root", lambda: tmp_path)  # 비교판 스크립트가 없는 곳
-    fa.refresh_board()
-    assert "비교판 갱신 실패" in capsys.readouterr().out
+    assert fa.refresh_board() is None
+    assert capsys.readouterr().out == ""
+
+
+def test_out_dir_and_available_runs_with_exp(monkeypatch, tmp_path):
+    monkeypatch.setattr(fa, "repo_root", lambda: tmp_path)
+    exp_answers = (
+        tmp_path / "results" / "experiments" / "page_k" / "answer" / "retrieval_b"
+    )
+    (exp_answers / "basic_development_k9").mkdir(parents=True)
+    (exp_answers / "basic_development_k9" / "answers_naive.jsonl").write_text(
+        "", encoding="utf-8"
+    )
+    assert (
+        fa.out_dir_for("basic", "development", run="basic_development_k9", exp="page_k")
+        == exp_answers / "basic_development_k9"
+    )
+    assert fa.available_runs("basic", "development", "page_k") == [
+        "basic_development_k9"
+    ]
+    assert fa.available_runs("basic", "development") == []  # 기본 폴더에는 없음

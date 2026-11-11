@@ -39,11 +39,15 @@ na와 unavailable은 충족률에서 빼고 건수를 따로 센다. 0은 넣는
     uv run python evaluation/answer/judge.py
     uv run python evaluation/answer/judge.py --summary-only     # 채점 없이 요약만 다시
     uv run python evaluation/answer/judge.py --run basic_development_k3   # 답변 폴더를 직접 고르기
+    uv run python evaluation/answer/judge.py --rerank-n 20               # run_answers.py와 같은 튜닝 옵션
+    uv run python evaluation/answer/judge.py --exp page_k                # 실험 폴더 안에서 찾기
 
 답변 폴더 (run_answers.py, faithfulness.py와 같은 규칙)
     results/answer/retrieval_b/{난이도}_{split}{설정 태그}[_{태그}]
-    - 설정 태그: 기본값과 다른 RETRIEVAL_B_* 설정만 붙는다 (예: _k3, _k3_n100). 기본값이면 basic_development
+    - 설정 태그: 명령줄 튜닝 옵션(--k, --levels, --cand, --rrf, --rerank-n, --rerank-len) 중
+      기본값과 다른 것만 붙는다 (예: _k3, _k3_n100). 기본값이면 basic_development. 옵션은 폴더 찾기에만 쓴다
     - --tag: run_answers.py에 준 --tag와 같게 / --run: 폴더 이름 전체를 직접 (태그·설정 무시)
+    - --exp 이름: results/experiments/<이름>/answer/retrieval_b/ 안에서 찾는다 (run_answers.py --exp와 같게)
     - --model은 평가 LLM이라 폴더 이름에 들어가지 않는다. 다른 생성 모델의 답변은 --run으로 고른다
 
 결과 (답변 폴더 안)
@@ -51,10 +55,15 @@ na와 unavailable은 충족률에서 빼고 건수를 따로 센다. 0은 넣는
     grading_usage.jsonl       채점 호출 토큰 (step "judge")
     judge_summary.json        방식별 항목 충족률과 건수
     judge_per_question.csv
+로컬에 실험 비교판(evaluation/reporting/experiment_board.py)이 있으면 끝난 뒤 다시 만든다. --no-board면 건너뛴다.
+
+[2026-11-11 추가] 이유: 튜닝 값을 .env에서 읽지 않게 되고 다른 평가 스크립트에 --exp가 생김
+→ 효과: run_answers.py와 같은 튜닝 옵션·--exp로 같은 답변 폴더를 찾는다.
 """
 
 import argparse
 import csv
+import importlib.util
 import json
 import time
 from collections.abc import Callable, Sequence
@@ -67,6 +76,13 @@ from langchain_core.callbacks import get_usage_metadata_callback
 from langchain_core.prompts import ChatPromptTemplate
 from pydantic import BaseModel, Field
 
+from rag_service.retrieval_b.settings import (
+    Settings,
+    add_settings_args,
+    get_settings,
+    settings_from_args,
+    settings_tag,
+)
 from rag_service.storage.corpus import repo_root
 
 MODEL = "gpt-6-luna"
@@ -176,22 +192,31 @@ def make_judge(model: str = MODEL, http_client: Any = None) -> Any:
 # ---------- 파일 ----------
 
 
-def run_name(difficulty: str, split: str, *, tag: str = "") -> str:
-    """run_answers.py와 같은 규칙의 폴더 이름. 같은 RETRIEVAL_B_* 환경변수로 실행해야 같은 폴더가 된다."""
-    from rag_service.retrieval_b.settings import get_settings, settings_tag
-
-    name = f"{difficulty}_{split}{settings_tag(get_settings())}"
+def run_name(
+    difficulty: str, split: str, *, tag: str = "", settings: Settings | None = None
+) -> str:
+    """run_answers.py와 같은 규칙의 폴더 이름. 같은 튜닝 옵션으로 실행해야 같은 폴더가 된다."""
+    name = f"{difficulty}_{split}{settings_tag(settings or get_settings())}"
     return f"{name}_{tag}" if tag else name
 
 
-def out_dir_for(difficulty: str, split: str, *, run: str = "", tag: str = "") -> Path:
-    """--run으로 폴더 이름을 직접 주면 그 폴더, 아니면 지금 설정으로 이름을 만든다."""
-    return repo_root() / OUT_DIR / (run or run_name(difficulty, split, tag=tag))
+def out_dir_for(
+    difficulty: str,
+    split: str,
+    *,
+    run: str = "",
+    tag: str = "",
+    exp: str | None = None,
+    settings: Settings | None = None,
+) -> Path:
+    """--run으로 폴더 이름을 직접 주면 그 폴더, 아니면 지금 설정으로 이름을 만든다 (--exp면 그 실험 폴더 안에서)."""
+    base = results_base(exp) / OUT_DIR.relative_to("results")
+    return base / (run or run_name(difficulty, split, tag=tag, settings=settings))
 
 
-def available_runs(difficulty: str, split: str) -> list[str]:
+def available_runs(difficulty: str, split: str, exp: str | None = None) -> list[str]:
     """같은 난이도·split의 답변 폴더 이름들 (폴더를 못 찾았을 때 안내용)."""
-    base = repo_root() / OUT_DIR
+    base = results_base(exp) / OUT_DIR.relative_to("results")
     if not base.is_dir():
         return []
     prefix = f"{difficulty}_{split}"
@@ -604,6 +629,39 @@ def report(summary: dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
+# ---------- 실험 폴더와 비교판 (evaluation/experiment_paths.py) ----------
+
+
+def _paths():
+    """evaluation/experiment_paths.py를 불러온다 (실험 이름 규칙·결과 폴더가 거기 한 곳에 있다)."""
+    path = Path(__file__).resolve().parents[1] / "experiment_paths.py"
+    spec = importlib.util.spec_from_file_location("experiment_paths", path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def results_base(exp: str | None = None) -> Path:
+    """결과 최상위 폴더. --exp가 없으면 results/, 있으면 results/experiments/<이름>/."""
+    return _paths().results_dir(repo_root(), exp)
+
+
+def check_exp_arg(parser: argparse.ArgumentParser, exp: str | None) -> str | None:
+    """--exp 값 검사. 틀리면 argparse 오류로 멈추고, 맞으면 "[실험] ..." 한 줄을 찍는다."""
+    paths = _paths()
+    try:
+        exp = paths.check_exp(exp)
+    except ValueError as e:
+        parser.error(str(e))
+    print(paths.exp_banner(exp), flush=True)
+    return exp
+
+
+def refresh_board(exp: str | None = None) -> Path | None:
+    """실험 비교판(로컬 도구)이 있으면 그 실험의 비교판을 다시 만든다. 없으면 조용히 건너뛴다."""
+    return _paths().refresh_board(repo_root(), exp)
+
+
 def main(argv: Sequence[str] | None = None) -> None:
     load_dotenv(repo_root() / ".env")
     p = argparse.ArgumentParser(description="답변 평가 3단계: LLM-as-a-Judge 네 항목")
@@ -620,14 +678,34 @@ def main(argv: Sequence[str] | None = None) -> None:
         "--run", default="", help="채점할 답변 폴더 이름 (예: basic_development_k3)"
     )
     p.add_argument("--tag", default="", help="run_answers.py에 준 --tag와 같게")
+    p.add_argument(
+        "--no-board",
+        action="store_true",
+        help="끝난 뒤 실험 비교판을 다시 만들지 않는다",
+    )
+    p.add_argument(
+        "--exp",
+        default=None,
+        help="실험 이름. run_answers.py에 준 --exp와 같게 (results/experiments/<이름>/)",
+    )
+    add_settings_args(p)
     args = p.parse_args(argv)
+    exp = check_exp_arg(p, args.exp)
+    settings = settings_from_args(args)
 
-    out_dir = out_dir_for(args.difficulty, args.split, run=args.run, tag=args.tag)
+    out_dir = out_dir_for(
+        args.difficulty,
+        args.split,
+        run=args.run,
+        tag=args.tag,
+        exp=exp,
+        settings=settings,
+    )
     rel = out_dir.relative_to(repo_root())
     if not any(out_dir.glob("answers_*.jsonl")):
-        runs = available_runs(args.difficulty, args.split)
+        runs = available_runs(args.difficulty, args.split, exp)
         raise SystemExit(
-            f"답변 폴더 {rel}가 없습니다. run_answers.py와 같은 RETRIEVAL_B_* 설정으로 실행하거나 "
+            f"답변 폴더 {rel}가 없습니다. run_answers.py와 같은 튜닝 옵션(--k, --rerank-n 등)으로 실행하거나 "
             f"--run으로 폴더를 고르세요. 있는 폴더: {', '.join(runs) or '없음'}"
         )
     print(f"[답변 폴더] {rel}", flush=True)
@@ -657,6 +735,8 @@ def main(argv: Sequence[str] | None = None) -> None:
     print()
     print(report(summary))
     print(f"\n저장: {(out_dir / 'judge_summary.json').relative_to(repo_root())}")
+    if not args.no_board:
+        refresh_board(exp)
 
 
 if __name__ == "__main__":

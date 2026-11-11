@@ -6,7 +6,8 @@ chain.py와의 약속 (retrieval_a와 같은 모양이라 import 한 줄만 바�
 
 값을 정하는 곳 (settings.py 참고)
 - domain, difficulty: 호출하는 쪽이 꼭 넘긴다. 기본값이 없어서 빠뜨리면 바로 오류가 난다.
-- k, levels, candidate_k, rrf_k, rerank_n …: 인자로 넘기면 그 값, 안 넘기면 Settings(환경변수) 값.
+- k, levels, candidate_k, rrf_k, rerank_n …: 인자로 넘기면 그 값, 안 넘기면 Settings 기본값.
+  평가 스크립트는 명령줄 옵션(--k, --rerank-n 등)으로 받은 값을 인자로 넘긴다.
 - profile: retrieval_a 호환용. retrieval_b는 모델 하나(EMBEDDING_MODEL)만 써서 값은 쓰지 않는다.
 
 무거운 자원(Qdrant 연결, BM25 색인, 리랭커)은 (domain, difficulty, levels)마다 한 번만 만들고

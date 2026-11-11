@@ -24,10 +24,16 @@ from rag_service.generation.prompt import (
 from rag_service.generation.sources import add_sources, build_answer_result
 from rag_service.observability import with_langfuse
 from rag_service.pipeline.prepare_retriever import RETRIEVAL_LOCK, RetrieverPool
+from rag_service.retrieval_a import (
+    build_hybrid_retriever,
+    build_naive_retriever,
+    build_rerank_retriever,
+)
 from rag_service.retrieval_a.naive import collection_name, load_config
 from rag_service.storage.qdrant_store import get_pages
 
 MAX_DOCS = 8  # 나눠 찾기(sub_questions)로 합친 검색 결과를 LLM에 넘기는 최대 개수
+IMPLS = ("retrieval_a", "retrieval_b")  # 동일한 체인에서 선택 가능한 검색 구현
 
 
 def format_docs(docs: list[Document]) -> str:
@@ -70,11 +76,26 @@ def to_pages(docs: list[Document], collection: str) -> list[Document]:
     return out
 
 
-def create_chain(domain, difficulty, profile=None, *, include_context=False, trace=True):
+def retriever_builders(impl="retrieval_a"):
+    """검색 구현별 naive와 hybrid 및 hybrid_rerank 생성 함수 반환."""
+    if impl == "retrieval_a":
+        return build_naive_retriever, build_hybrid_retriever, build_rerank_retriever
+    if impl == "retrieval_b":
+        from rag_service import retrieval_b
+
+        return retrieval_b.build_naive_retriever, retrieval_b.build_hybrid_retriever, retrieval_b.build_rerank_retriever
+    raise ValueError(f"impl은 {IMPLS} 중 하나여야 합니다: {impl!r}")
+
+
+def create_chain(domain, difficulty, profile=None, impl="retrieval_a", *, include_context=False, trace=True):
     """기본 RagAnswer 반환 및 API 요청 시 실제 모델 입력 자료의 추가 반환."""
+    # 검색 구현 검증 및 객체 생성 전 검색 방식별 생성 함수 보관
+    builders = dict(zip(("naive", "hybrid", "hybrid_rerank"), retriever_builders(impl), strict=True))
     # 기존 검색 후 답변 기능의 독립 실행 유지 및 전체 서비스 체인의 RAG 분기로 재사용
     answer_chain = RunnableLambda(prepare_answer_input) | answer_prompt | create_model().with_structured_output(RagAnswer)
-    retrievers = RetrieverPool(domain, difficulty, profile)
+    # A의 Hybrid 공유 유지 및 B의 선택한 검색기만 최초 호출 시 생성
+    pool = RetrieverPool(domain, difficulty, profile) if impl == "retrieval_a" else None
+    retrievers = {}
 
     def retrieve_docs(request):
         """선택한 검색기만 호출 및 기존 하위 질문별 결과 병합 유지."""
@@ -83,7 +104,14 @@ def create_chain(domain, difficulty, profile=None, *, include_context=False, tra
         with RETRIEVAL_LOCK:
             search_question = request.get("search_question") or request.get("question")
             mode = request.get("retrieval_mode", "naive")
-            retriever = retrievers.get(mode)
+            if mode not in builders:
+                raise ValueError(f"지원하지 않는 검색 방식: {mode}")
+            if pool is not None:
+                retriever = pool.get(mode)
+            else:
+                if mode not in retrievers:
+                    retrievers[mode] = builders[mode](domain=domain, difficulty=difficulty, profile=profile)
+                retriever = retrievers[mode]
             sub_questions = [q.strip() for q in request.get("sub_questions") or [] if q and q.strip()]
             if sub_questions:
                 queries = list(dict.fromkeys([search_question, *sub_questions]))
