@@ -45,3 +45,33 @@ def add_sources(request: dict, *, domain: str, difficulty: str) -> RagAnswer:
     if not sources:
         return answer
     return answer.model_copy(update={"answer": f"{answer.answer}\n\n\n[출처]\n{sources}"})
+
+
+def build_answer_result(request: dict) -> dict:
+    """인용 검증과 구조화된 출처 및 실제 생성 문맥의 공통 결과 구성."""
+    # contexts는 전체 모델 입력 자료이며 sources는 그중 답변에서 인용한 자료
+    contexts = [
+        {"id": f"S{i}", "content": doc.page_content, "metadata": doc.metadata}
+        for i, doc in enumerate(request["docs"], start=1)
+    ]
+    sources, invalid_ids, seen = [], [], set()
+    # 선언한 인용 목록과 답변 본문의 인용을 함께 확인하여 누락된 출처 검증
+    references = request["answer"].source_ids + re.findall(
+        r"\[S\d+\]", request["answer"].answer, flags=re.IGNORECASE
+    )
+    for sid in references:
+        match = re.fullmatch(r"\[?S(\d+)\]?", sid.strip(), flags=re.IGNORECASE)
+        index = int(match.group(1)) - 1 if match else -1
+        if not 0 <= index < len(contexts):
+            invalid_sid = f"S{index + 1}" if match else sid.strip()
+            if invalid_sid not in invalid_ids:
+                invalid_ids.append(invalid_sid)
+        elif index not in seen:
+            sources.append(contexts[index])
+            seen.add(index)
+    return {
+        "result": request["answer"],
+        "sources": sources,
+        "invalid_source_ids": invalid_ids,
+        "contexts": contexts,
+    }
