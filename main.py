@@ -1,38 +1,145 @@
+"""Windows 백엔드의 대표 실행 진입점 및 HTTP 요청과 서버 수명주기 관리."""
+
+import asyncio
+import logging
+import os
+import secrets
+import time
+from contextlib import asynccontextmanager
+from uuid import uuid4
+
 from dotenv import load_dotenv
-from langfuse import get_client
+from fastapi import Depends, FastAPI, HTTPException, Request, Response
+from fastapi.security import APIKeyHeader
 
-from rag_service.pipeline import create_chain
-from rag_service.observability import trace_request, with_langfuse
+from rag_service.contracts.query import QueryRequest, QueryResponse
+from rag_service.observability.tracing import optional_trace, update_trace
+from rag_service.pipeline import create_service_chain
+from rag_service.pipeline.chain import warmup_service
 
-def main():
+# Uvicorn 로그 설정 재사용으로 워밍업 시작과 완료 및 처리 오류의 콘솔 출력
+logger = logging.getLogger("uvicorn.error")
+api_key_header = APIKeyHeader(name="X-API-Key", auto_error=False)
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # 서버 실행 위치의 환경 설정 로드 및 OpenAI 키와 별개인 서비스 접속 키 확인
     load_dotenv()
-    langfuse = get_client()
-
+    if not os.getenv("RAG_API_KEY", "").strip():
+        raise RuntimeError("서버 .env에 RAG_API_KEY를 설정해주세요")
+    max_concurrent = int(os.getenv("RAG_MAX_CONCURRENT_REQUESTS") or "16")
+    if max_concurrent < 1:
+        raise RuntimeError("RAG_MAX_CONCURRENT_REQUESTS는 1 이상의 정수로 설정해주세요")
+    # 모델 API 대기를 겹쳐 처리하되 서버 프로세스의 동시 요청 수 제한
+    app.state.query_slots = asyncio.BoundedSemaphore(max_concurrent)
+    # 지정한 난이도의 세 검색기 사전 준비 및 빈 검색 방식 설정으로 워밍업 생략 가능
+    modes = tuple(dict.fromkeys(
+        mode.strip() for mode in os.getenv("RAG_WARMUP_MODES", "naive,hybrid,hybrid_rerank").split(",")
+        if mode.strip()
+    ))
+    # 복수 난이도 설정 우선 적용 및 기존 단일 난이도 설정과의 호환 유지
+    difficulties = tuple(dict.fromkeys(
+        value.strip() for value in os.getenv(
+            "RAG_WARMUP_DIFFICULTIES",
+            os.getenv("RAG_WARMUP_DIFFICULTY") or "basic,intermediate,advanced",
+        ).split(",") if value.strip()
+    ))
+    if modes and not difficulties:
+        raise ValueError("RAG_WARMUP_DIFFICULTIES에 준비할 난이도를 지정해주세요")
+    # 요청과 동일한 허용 값 검증으로 설정 오타에 따른 모델 로딩 전 실패 처리
+    for difficulty in difficulties:
+        for mode in modes:
+            QueryRequest(question="워밍업", difficulty=difficulty, retrieval_mode=mode)
+    # 서버 시작 시 전체 처리 체인 구성 및 준비한 검색 자원의 후속 요청 재사용
+    app.state.chain = create_service_chain()
     try:
-        domain="shipping"   # TODO 실제 사용자의 옵션 선택 변수로 대체
-        difficulty="basic"  # TODO 실제 사용자의 옵션 선택 변수로 대체
-        retrieval_mode = "naive"  # TODO 실제 사용자의 옵션 선택 변수로 대체
-        
-        chain = with_langfuse(
-            create_chain(domain=domain, difficulty=difficulty),
-            domain=domain,
-            difficulty=difficulty
-        )
-
-        question = "부산에서 LA로 보내는 일반 건화물의 서류 제출 마감은 언제인가요?" # TODO 예시
-
-        with trace_request(question) as trace:
-            result = chain.invoke({
-                "question": question,
-                "retrieval_mode": retrieval_mode
-            })
-            trace.update(output=result.model_dump())
-
-        print(result)
-
+        if modes:
+            # 난이도별 순차 준비로 초기화 부하 집중 완화 및 전체 완료 후 요청 수신
+            for difficulty in difficulties:
+                logger.info("RAG warmup starting difficulty=%s modes=%s", difficulty, modes)
+                started = time.perf_counter()
+                # 시작 완료 전에 작업 스레드에서 검색 실행 및 실패 시 서버 시작 중단
+                await asyncio.to_thread(warmup_service, "shipping", difficulty, modes)
+                logger.info("RAG warmup complete difficulty=%s elapsed=%.1fs", difficulty, time.perf_counter() - started)
+        yield
     finally:
-        langfuse.shutdown()
+        # 요청별 전송 대기 대신 프로세스 종료 시 남은 기록 전송
+        if os.getenv("LANGFUSE_PUBLIC_KEY") and os.getenv("LANGFUSE_SECRET_KEY"):
+            try:
+                from langfuse import get_client
+
+                get_client().shutdown()
+            except Exception:
+                logger.exception("Langfuse shutdown failed")
+
+
+app = FastAPI(title="KANT RAG API", version="0.1.0", lifespan=lifespan)
+
+
+def require_api_key(key: str | None = Depends(api_key_header)):
+    """화면과 평가 요청의 공통 인증 키 확인."""
+    expected = os.getenv("RAG_API_KEY", "").strip()
+    if not expected:
+        raise HTTPException(status_code=503, detail="API 키가 설정되지 않았습니다")
+    if key is None or not secrets.compare_digest(key.encode(), expected.encode()):
+        raise HTTPException(status_code=401, detail="API 키를 확인해주세요")
+
+
+@app.get("/health")
+def health():
+    # 모델 다운로드나 Qdrant 조회를 발생시키지 않는 프로세스 상태 확인
+    return {"status": "ok", "scope": "api_process"}
+
+
+@app.post("/query", response_model=QueryResponse, dependencies=[Depends(require_api_key)])
+async def query(body: QueryRequest, request: Request, response: Response):
+    """허용한 수의 질문을 비동기로 처리하고 초과 요청에 재시도 가능 상태 반환."""
+    request_id = uuid4().hex
+    slots = request.app.state.query_slots
+    # 같은 이벤트 루프에서 빈 처리 자리 확인 및 대기열 없이 즉시 확보
+    if slots.locked():
+        raise HTTPException(
+            status_code=429,
+            detail={"message": "동시 처리 한도에 도달했습니다. 잠시 후 다시 시도해주세요", "request_id": request_id},
+            headers={"Retry-After": "5"},
+        )
+    await slots.acquire()
+    started = time.perf_counter()
+    trace_id = None
+    try:
+        with optional_trace(body.question, request_id) as trace:
+            trace_id = trace.trace_id if trace is not None else None
+            update_trace(trace, metadata={
+                "request_id": request_id,
+                "domain": body.domain,
+                "difficulty": body.difficulty,
+                "retrieval_mode": body.retrieval_mode,
+                "page_context": body.page_context,
+            })
+            # LangChain의 비동기 실행으로 모델 응답 대기 중 다른 요청 처리 허용
+            result = await request.app.state.chain.ainvoke(body)
+            update_trace(trace, output=result)
+        # 체인 결과의 응답 형식 검증 및 서버 로그와 Langfuse 조회용 식별자 추가
+        payload = QueryResponse(
+            **result, request_id=request_id, trace_id=trace_id,
+            elapsed=round(time.perf_counter() - started, 3),
+        )
+        response.headers["X-Request-ID"] = request_id
+        return payload
+    except Exception:
+        logger.exception("query failed request_id=%s trace_id=%s", request_id, trace_id)
+        raise HTTPException(status_code=503, detail={
+            "message": "질문 처리에 실패했습니다. 서버 실행 기록을 확인해주세요",
+            "request_id": request_id, "trace_id": trace_id,
+        }) from None
+    finally:
+        # 성공과 실패 및 요청 취소 시 확보한 처리 자리 반환
+        slots.release()
 
 
 if __name__ == "__main__":
-    main()
+    import uvicorn
+
+    # 한 프로세스에서 검색 자원 재사용 및 외부 네트워크 요청 수신
+    uvicorn.run(app, host="0.0.0.0", port=8000, workers=1)
