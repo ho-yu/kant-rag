@@ -319,7 +319,7 @@ def _main() -> None:
 
     p = argparse.ArgumentParser(description="검색 3방식 골든 데이터셋 채점 (LLM 없음)")
     p.add_argument("--golden", nargs="+", required=True)
-    p.add_argument("--profile", default="bge-m3", help="models.yaml의 모델 설정 (bge-m3, qwen3 …)")
+    p.add_argument("--profile", default="bge-m3", help="models.yaml의 모델 설정 (bge-m3, bge-m3-bm25 …)")
     p.add_argument("--difficulty", default="basic")
     p.add_argument("--domain", default="shipping")
     p.add_argument("--corpus", default=None, help="기본: artifacts/corpus/<난이도>/*/*.jsonl")

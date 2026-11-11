@@ -126,9 +126,8 @@ def _connect_client(name: str):
             return client
     where = "Qdrant 서버와 로컬 색인" if url else "로컬 색인 (QDRANT_URL이 비어 있음)"
     raise RuntimeError(
-        f"{where}에 컬렉션 {name!r}이 없습니다. 아직 적재되지 않았다면 "
-        "uv run python -m rag_service.retrieval_a.index_local --profile <모델 설정> --difficulty <난이도> "
-        "(예: --profile qwen3 --difficulty intermediate) 로 로컬 색인을 만들 수 있습니다."
+        f"{where}에 컬렉션 {name!r}이 없습니다. 아직 적재되지 않은 주제·난이도이거나 "
+        "models.yaml의 모델 설정과 적재된 모델이 다를 수 있습니다."
     )
 
 

@@ -153,8 +153,8 @@ def test_non_bge_m3_profile_uses_bm25(monkeypatch):
     monkeypatch.setattr(hybrid, "load_points", lambda c, n, l: (docs, vecs))
     monkeypatch.setattr(hybrid, "_embeddings", fake_embeddings)
     monkeypatch.setattr(hybrid, "doc_sparse_weights", lambda *a, **k: (_ for _ in ()).throw(AssertionError("bm25 경로")))
-    r = build_hybrid_retriever(domain="shipping", difficulty="basic", profile="qwen3")
-    profile = hybrid.model_profile("qwen3")
+    r = build_hybrid_retriever(domain="shipping", difficulty="basic", profile="bge-m3-bm25")
+    profile = hybrid.model_profile("bge-m3-bm25")
     assert seen["model"] == profile["embedding"] and seen["prefix"] == profile["query_prefix"]
     assert seen["name"] == f"kant_shipping_basic_{model_slug(profile['embedding'])}"
     got = r.invoke("SI 마감")

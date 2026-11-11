@@ -22,12 +22,6 @@ bge-m3:
   sparse: bge-m3
   reranker: BAAI/bge-reranker-v2-m3
 
-qwen3:
-  embedding: Qwen/Qwen3-Embedding-0.6B
-  query_prefix: "Instruct: Given a question, retrieve relevant passages that answer the question\nQuery:"
-  sparse: bm25
-  reranker: BAAI/bge-reranker-v2-m3
-
 bge-m3-bm25:
   embedding: BAAI/bge-m3
   query_prefix: ""

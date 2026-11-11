@@ -62,11 +62,11 @@ def test_profiles_pick_model_and_collection_per_difficulty(tmp_path):
     assert model_profile("intermediate")["embedding"] == "BAAI/bge-m3"
     assert collection_name(cfg, difficulty="advanced") == "kant_shipping_advanced_bge-m3"
     assert model_profile("advanced")["sparse"] == "bge-m3"
-    assert model_slug("Qwen/Qwen3-Embedding-0.6B") == "qwen3-embedding-0.6b"
+    assert model_slug("intfloat/multilingual-e5-large") == "multilingual-e5-large"
     assert model_profile("basic")["sparse"] == "bge-m3"
     bad = tmp_path / "models.yaml"
     bad.write_text(
-        "basic:\n  embedding: Qwen/Qwen3-Embedding-0.6B\n  sparse: bge-m3\n  reranker: x\n", encoding="utf-8"
+        "basic:\n  embedding: intfloat/multilingual-e5-large\n  sparse: bge-m3\n  reranker: x\n", encoding="utf-8"
     )
     with pytest.raises(ValueError):
         model_profile("basic", bad)
@@ -84,9 +84,9 @@ def test_profile_overrides_difficulty_model(monkeypatch):
         return FakeStore()
 
     monkeypatch.setattr(naive, "_connect_store", fake_connect)
-    build_naive_retriever(domain="shipping", difficulty="basic", profile="qwen3")
-    assert seen["name"] == "kant_shipping_basic_qwen3-embedding-0.6b"
-    assert seen["model"] == "Qwen/Qwen3-Embedding-0.6B"
+    build_naive_retriever(domain="shipping", difficulty="intermediate", profile="bge-m3-bm25")
+    assert seen["name"] == "kant_shipping_intermediate_bge-m3"
+    assert seen["model"] == "BAAI/bge-m3"
     assert collection_name(load_config(), difficulty="basic") == "kant_shipping_basic_bge-m3"
     with pytest.raises(ValueError):
         model_profile("없는설정")

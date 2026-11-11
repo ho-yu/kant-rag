@@ -56,7 +56,7 @@ def to_pages(docs: list[Document], collection: str) -> list[Document]:
 
 
 def create_chain(domain, difficulty, profile=None):
-    model = ChatOpenAI(model="gpt-6-luna")
+    model = ChatOpenAI(model="gpt-6-luna", reasoning_effort="low")
 
     retrievers = {
         "naive": build_naive_retriever(domain=domain, difficulty=difficulty, profile=profile),
@@ -99,4 +99,4 @@ def create_chain(domain, difficulty, profile=None):
             )
         )
 
-    return with_langfuse(chain, domain=domain, difficulty=difficulty)
+    return with_langfuse(chain, domain=domain, difficulty=difficulty)

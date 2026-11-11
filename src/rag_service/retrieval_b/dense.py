@@ -73,15 +73,18 @@ def dense_search(
     if k < 1:
         raise ValueError(f"k는 1 이상이어야 합니다: {k}")
 
+    # 질문을 bge-m3로 바꾸고, Qdrant에서 가까운 k개를 가져온다.
     pairs = store.similarity_search_with_score(
         question, k=k, filter=level_filter(levels)
     )
     docs = []
 
+    # 점수를 metadata의 score에 넣는다.
     for doc, score in pairs:
         doc.metadata["score"] = float(score)
         docs.append(doc)
 
+    # (-score, chunk_id)로 정렬한다. 동점이어도 매번 같은 순서가 나오도록 한다.
     return sorted(docs, key=lambda d: (-d.metadata["score"], d.metadata["chunk_id"]))
 
 

@@ -1,0 +1,13 @@
+from rag_service.retrieval_b.retrievers import (
+    build_bm25_retriever,
+    build_hybrid_retriever,
+    build_naive_retriever,
+    build_rerank_retriever,
+)
+
+__all__ = [
+    "build_bm25_retriever",
+    "build_hybrid_retriever",
+    "build_naive_retriever",
+    "build_rerank_retriever",
+]
