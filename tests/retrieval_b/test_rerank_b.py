@@ -171,7 +171,7 @@ def fake_hybrid(make_store, monkeypatch):
     monkeypatch.setattr(
         retrievers,
         "get_bm25_index",
-        lambda domain, difficulty, levels: BM25Index(docs, tokenizer=str.split),
+        lambda domain, difficulty, levels, source: BM25Index(docs, tokenizer=str.split),
     )
 
 

@@ -223,7 +223,7 @@ def test_retrievers_ask_for_the_same_index_key(fake_hybrid):
     build_rerank_retriever(**SCOPE, score_fn=lambda q, t: [0.0] * len(t))
     build_bm25_retriever(**SCOPE)
     assert len(fake_hybrid) == 3
-    assert set(fake_hybrid) == {("shipping", "basic", ("para", "table"))}
+    assert set(fake_hybrid) == {("shipping", "basic", ("para", "table"), "qdrant")}
 
 
 def test_default_settings_match_previous_constants():
@@ -272,8 +272,8 @@ def fake_hybrid(make_store, monkeypatch):
     store = make_store(HYBRID_ROWS, {"gamma": [1.0, 0.0]})
     calls = []
 
-    def _get_bm25_index(domain, difficulty, levels):
-        calls.append((domain, difficulty, levels))
+    def _get_bm25_index(domain, difficulty, levels, source):
+        calls.append((domain, difficulty, levels, source))
         docs = [
             Document(page_content=text, metadata=m)
             for text, _, m in HYBRID_ROWS
@@ -303,7 +303,18 @@ def test_hybrid_fuses_dense_and_bm25(fake_hybrid):
 def test_hybrid_uses_same_levels_for_both(fake_hybrid):
     docs = build_hybrid_retriever(**SCOPE, k=10).invoke("gamma")
     assert all(d.metadata["level"] == "para" for d in docs)
-    assert fake_hybrid == [("shipping", "basic", ("para", "table"))]
+    assert fake_hybrid == [("shipping", "basic", ("para", "table"), "qdrant")]
+
+
+def test_bm25_source_reaches_index_key(fake_hybrid, default_settings):
+    """인자로 준 bm25_source가 색인 키까지 간다. 안 주면 설정값을 쓴다."""
+    build_hybrid_retriever(**SCOPE, bm25_source="jsonl")
+    build_rerank_retriever(
+        **SCOPE, bm25_source="jsonl", score_fn=lambda q, t: [0.0] * len(t)
+    )
+    default_settings(bm25_source="jsonl")
+    build_bm25_retriever(**SCOPE)
+    assert [call[3] for call in fake_hybrid] == ["jsonl", "jsonl", "jsonl"]
 
 
 def test_hybrid_candidate_k_never_below_k(fake_hybrid):

@@ -358,6 +358,7 @@ def main(argv: list[str] | None = None) -> Path:
         "levels": list(s.levels),
         "candidate_k": s.candidate_k,
         "rrf_k": s.rrf_k,
+        "bm25_source": s.bm25_source,
     }
     hybrid_k = max(COMPARE_HYBRID_K, s.k)
     hybrid = build_hybrid_retriever(k=hybrid_k, **common)

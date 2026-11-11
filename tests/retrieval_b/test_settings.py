@@ -106,10 +106,12 @@ def test_get_settings_ignores_old_environment(fresh_settings, monkeypatch):
 def test_retriever_kwargs_only_pass_what_each_mode_uses():
     s = Settings(k=3, levels=("page",), candidate_k=40, rrf_k=20, rerank_n=20)
     base = {"k": 3, "levels": ["page"]}
-    hybrid = {**base, "candidate_k": 40, "rrf_k": 20}
+    bm25 = {**base, "bm25_source": "qdrant"}
+    hybrid = {**bm25, "candidate_k": 40, "rrf_k": 20}
     rerank = {**hybrid, "rerank_n": 20, "max_length": 1024}
+    # naive는 Dense만 쓰니 bm25_source를 넘기지 않는다
     assert retriever_kwargs(s, "naive") == base
-    assert retriever_kwargs(s, "bm25") == base
+    assert retriever_kwargs(s, "bm25") == bm25
     assert retriever_kwargs(s, "hybrid") == hybrid
     assert retriever_kwargs(s, "rerank") == rerank
     assert retriever_kwargs(s, "hybrid_rerank") == rerank
@@ -118,9 +120,27 @@ def test_retriever_kwargs_only_pass_what_each_mode_uses():
 def test_describe_settings_marks_changed_values():
     assert describe_settings(Settings()) == (
         "k=5 levels=para,table cand=30 rrf=60 rerank-n=50 rerank-len=1024"
+        " bm25-source=qdrant"
     )
     assert "rerank-n=20*" in describe_settings(Settings(rerank_n=20))
     assert "k=5 " in describe_settings(Settings(rerank_n=20))
+
+
+def test_bm25_source_option(fresh_settings, capsys):
+    s = parse(["--bm25-source", "jsonl"])
+    assert s == Settings(bm25_source="jsonl")
+    assert settings_tag(s) == "_bm25jsonl"  # 결과 이름으로 기본(qdrant) 실행과 구분된다
+    assert "bm25-source=jsonl*" in describe_settings(s)
+    assert parse([]).bm25_source == "qdrant"  # 옵션을 안 주면 Dense와 같은 팀 Qdrant
+    with pytest.raises(SystemExit) as info:
+        parse(["--bm25-source", "csv"])
+    assert info.value.code == 2
+    assert "--bm25-source" in capsys.readouterr().err
+
+
+def test_bad_bm25_source_in_settings_is_error():
+    with pytest.raises(ValueError, match="bm25_source"):
+        Settings(bm25_source="csv")
 
 
 def test_settings_are_frozen():

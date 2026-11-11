@@ -3,12 +3,12 @@
 값은 성격에 따라 두 곳에서 정한다.
 - 요청마다 달라지는 값 (domain, difficulty): build_*_retriever 인자로 받고 validate_scope로 검사한다.
   chain.py가 create_chain(domain, difficulty)로 받은 값을 그대로 넘겨 준다.
-- 서버가 정하는 튜닝 값 (k, levels, candidate_k, rrf_k, rerank_n, 리랭커 max_length·batch_size):
+- 서버가 정하는 튜닝 값 (k, levels, candidate_k, rrf_k, rerank_n, 리랭커 max_length·batch_size, bm25_source):
   기본값은 Settings 한 곳에만 둔다. .env와 환경변수는 읽지 않는다.
   팀 기본값을 바꾸려면 Settings의 숫자를 고친다 (팀 결정).
 
 개인 실험은 평가 스크립트의 명령줄 옵션으로 바꾼다 (add_settings_args, settings_from_args).
-    --k  --levels  --cand  --rrf  --rerank-n  --rerank-len
+    --k  --levels  --cand  --rrf  --rerank-n  --rerank-len  --bm25-source
     예: uv run python evaluation/answer/run_answers.py --rerank-n 20
 
 우선순위: build_*_retriever에 직접 넘긴 인자(명령줄 옵션) > Settings 기본값
@@ -16,6 +16,7 @@
 
 [2026-11-10 신설] 이유: 튜닝 상수가 여러 파일에 하드코딩돼 있고 입력 검증이 없었음 → 효과: 설정값을 한 곳에 모으고 잘못된 값은 시작 시 바로 오류.
 [2026-11-11 리팩토링] 이유: 개인 실험 값(RETRIEVAL_B_*)이 팀 공용 .env에 섞임 → 효과: .env에는 키·주소·모델 이름만 두고, 실험 값은 명령줄 옵션으로 넘김.
+[2026-11-11 기능 추가] 이유: BM25만 로컬 jsonl을 읽어 Dense(팀 Qdrant)와 다른 곳의 청크를 볼 수 있었음 → 효과: BM25도 기본으로 팀 Qdrant에서 청크를 읽음 (chain의 hybrid·hybrid_rerank 포함). --bm25-source jsonl로 로컬 파일도 고를 수 있음 (검색 계산은 그대로).
 """
 
 from __future__ import annotations
@@ -33,6 +34,8 @@ from rag_service.contracts.chunk import Level
 from rag_service.retrieval_b.fusion import RRF_K
 
 DOMAINS = ("shipping", "finance", "manufacturing")
+# BM25가 청크를 읽는 곳: qdrant(기본) = Dense와 같은 팀 Qdrant 컬렉션, jsonl = 로컬 artifacts/corpus 파일
+BM25_SOURCES = ("jsonl", "qdrant")
 DIFFICULTIES = ("basic", "intermediate", "advanced")
 LEVELS: tuple[str, ...] = get_args(Level)
 
@@ -96,10 +99,15 @@ class Settings:
     rerank_n: int = 50
     rerank_max_length: int = 1024
     rerank_batch_size: int = 16
+    bm25_source: str = "qdrant"
 
     def __post_init__(self) -> None:
         for name, minimum in _INT_FIELDS.items():
             check_int(name, getattr(self, name), minimum)
+        if self.bm25_source not in BM25_SOURCES:
+            raise ValueError(
+                f"bm25_source는 {BM25_SOURCES} 중 하나여야 합니다: {self.bm25_source!r}"
+            )
         object.__setattr__(self, "levels", check_levels(self.levels))
         if self.rerank_n < self.k:
             raise ValueError(
@@ -115,6 +123,7 @@ TAG_NAMES = {
     "rrf_k": "rrf",
     "rerank_n": "n",
     "rerank_max_length": "len",
+    "bm25_source": "bm25",
 }
 
 
@@ -140,6 +149,10 @@ CLI_OPTIONS = {
     "rrf_k": ("--rrf", "RRF 상수, 0 이상"),
     "rerank_n": ("--rerank-n", "리랭커에 넘길 Hybrid 후보 수, k 이상"),
     "rerank_max_length": ("--rerank-len", "리랭커 입력 최대 토큰 수"),
+    "bm25_source": (
+        "--bm25-source",
+        "BM25가 청크를 읽는 곳 (jsonl = 로컬 파일, qdrant = 팀 Qdrant)",
+    ),
 }
 
 
@@ -172,6 +185,10 @@ def add_settings_args(
                 metavar="LEVEL",
                 help=f"{text} (기본 {' '.join(value)})",
             )
+        elif name == "bm25_source":
+            group.add_argument(
+                flag, dest=name, choices=BM25_SOURCES, help=f"{text} (기본 {value})"
+            )
         else:
             group.add_argument(
                 flag, dest=name, type=int, metavar="N", help=f"{text} (기본 {value})"
@@ -197,6 +214,8 @@ def retriever_kwargs(settings: Settings, mode: str) -> dict[str, object]:
     mode: naive, bm25, hybrid, rerank (run_answers의 hybrid_rerank도 rerank로 본다)
     """
     kwargs: dict[str, object] = {"k": settings.k, "levels": list(settings.levels)}
+    if mode in ("bm25", "hybrid", "rerank", "hybrid_rerank"):
+        kwargs.update(bm25_source=settings.bm25_source)
     if mode in ("hybrid", "rerank", "hybrid_rerank"):
         kwargs.update(candidate_k=settings.candidate_k, rrf_k=settings.rrf_k)
     if mode in ("rerank", "hybrid_rerank"):
