@@ -1,0 +1,26 @@
+{
+  "k": 50,
+  "profile": "bge-m3",
+  "difficulty": "basic",
+  "questions": 68,
+  "skipped": 4,
+  "skipped_ids": [
+    "S-DEV-12",
+    "S-DEV-27",
+    "S-FINAL-12",
+    "S-FINAL-29"
+  ],
+  "threshold": 0.6,
+  "page_tolerance": 0,
+  "metrics": {
+    "hybrid": {
+      "Hit@1": 0.23529411764705882,
+      "Hit@3": 0.3088235294117647,
+      "Hit@5": 0.39705882352941174,
+      "Hit@50": 0.6323529411764706,
+      "MRR": 0.298440271936485,
+      "PageHit@1": 0.27941176470588236
+    }
+  },
+  "pairs": {}
+}
