@@ -190,7 +190,7 @@ def load_points(client, collection: str, levels: list[str]) -> tuple[list[Docume
         )
         for p in points:
             payload = p.payload or {}
-            vec = p.vector if not isinstance(p.vector, dict) else next(iter(p.vector.values()))
+            vec = p.vector.get("") if isinstance(p.vector, dict) else p.vector  # 261111 이정원, 청킹 수정이후 에러나서 수정
             docs.append(Document(page_content=payload.get("page_content", ""), metadata=dict(payload.get("metadata", {}))))
             vecs.append(vec)
         if offset is None:
