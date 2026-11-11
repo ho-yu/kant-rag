@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import time
 from functools import lru_cache
 from pathlib import Path
 from typing import Any
@@ -153,11 +154,33 @@ def index_text(doc: Document, use_context: bool = True) -> str:
     return "\n".join(x for x in (f"[{head}]", m.get("context") or "", doc.page_content) if x)
 
 
+_POINTS: dict[tuple[str, tuple[str, ...]], tuple[list[Document], np.ndarray]] = {}
+_SCROLL_RETRIES = 4
+
+
+def _scroll(client, **kwargs):
+    from qdrant_client.http.exceptions import ResponseHandlingException
+
+    for attempt in range(_SCROLL_RETRIES):
+        try:
+            return client.scroll(**kwargs)
+        except ResponseHandlingException as e:
+            if attempt == _SCROLL_RETRIES - 1:
+                raise
+            wait = 2**attempt
+            print(f"[hybrid] Qdrant 연결 끊김, {wait}초 뒤 재시도 ({attempt + 1}/{_SCROLL_RETRIES - 1}): {e}")
+            time.sleep(wait)
+
+
 def load_points(client, collection: str, levels: list[str]) -> tuple[list[Document], np.ndarray]:
+    key = (collection, tuple(levels))
+    if key in _POINTS:
+        return _POINTS[key]
     docs, vecs = [], []
     offset = None
     while True:
-        points, offset = client.scroll(
+        points, offset = _scroll(
+            client,
             collection_name=collection,
             scroll_filter=level_filter(levels),
             limit=256,
@@ -176,6 +199,7 @@ def load_points(client, collection: str, levels: list[str]) -> tuple[list[Docume
         raise RuntimeError(f"Qdrant 컬렉션 {collection!r}에서 {levels} 청크를 찾지 못했습니다.")
     mat = np.asarray(vecs, dtype=np.float32)
     mat /= np.linalg.norm(mat, axis=1, keepdims=True) + 1e-12
+    _POINTS[key] = (docs, mat)
     return docs, mat
 
 
@@ -184,13 +208,19 @@ def _doc_key(doc: Document, text: str) -> str:
     return f"{cid}:{hashlib.sha1(text.encode('utf-8')).hexdigest()[:12]}"
 
 
+_SPARSE_FILES: dict[Path, dict[str, Sparse]] = {}
+
+
 def doc_sparse_weights(
     docs: list[Document], encoder_fn, cache_path: Path, *, use_context: bool, batch_size: int
 ) -> list[Sparse]:
-    cache: dict[str, Sparse] = {}
-    if cache_path.exists():
-        with open(cache_path, encoding="utf-8") as f:
-            cache = json.load(f)
+    cache = _SPARSE_FILES.get(cache_path)
+    if cache is None:
+        cache = {}
+        if cache_path.exists():
+            with open(cache_path, encoding="utf-8") as f:
+                cache = json.load(f)
+        _SPARSE_FILES[cache_path] = cache
     texts = [index_text(d, use_context) for d in docs]
     keys = [_doc_key(d, t) for d, t in zip(docs, texts, strict=True)]
     todo = [i for i, k in enumerate(keys) if k not in cache]
