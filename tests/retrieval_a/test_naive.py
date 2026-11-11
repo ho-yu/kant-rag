@@ -15,8 +15,6 @@ from rag_service.retrieval_a.naive import (
 def test_config_loads_and_names_collection():
     cfg = load_config()
     assert collection_name(cfg) == "kant_shipping_basic_bge-m3"
-    with pytest.raises(ValueError):
-        collection_name(cfg, difficulty="advanced")
     assert collection_name(cfg, domain=" Shipping ", difficulty="BASIC") == "kant_shipping_basic_bge-m3"
 
 
@@ -62,6 +60,8 @@ def test_profiles_pick_model_and_collection_per_difficulty(tmp_path):
     cfg = load_config()
     assert collection_name(cfg, difficulty="intermediate") == "kant_shipping_intermediate_bge-m3"
     assert model_profile("intermediate")["embedding"] == "BAAI/bge-m3"
+    assert collection_name(cfg, difficulty="advanced") == "kant_shipping_advanced_bge-m3"
+    assert model_profile("advanced")["sparse"] == "bge-m3"
     assert model_slug("Qwen/Qwen3-Embedding-0.6B") == "qwen3-embedding-0.6b"
     assert model_profile("basic")["sparse"] == "bge-m3"
     bad = tmp_path / "models.yaml"
