@@ -184,9 +184,11 @@ def test_real_create_chain_docs_captured_and_langfuse_callback_kept(monkeypatch)
         "build_rerank_retriever",
     ):
         monkeypatch.setattr(chain_mod, name, lambda **kw: retriever)
+    # retrieval_a는 RetrieverPool로 검색기를 준비하므로 풀도 가짜로 바꾼다
+    monkeypatch.setattr(chain_mod, "RetrieverPool", lambda *a, **kw: SimpleNamespace(get=lambda mode: retriever))
     monkeypatch.setattr(chain_mod, "load_config", dict)
     monkeypatch.setattr(chain_mod, "collection_name", lambda *a, **kw: "test")
-    monkeypatch.setattr(chain_mod, "ChatOpenAI", FakeModel)
+    monkeypatch.setattr(chain_mod, "create_model", lambda role="answer": FakeModel())
     service_handler = CountingHandler()  # with_langfuse가 붙이는 콜백 대신
     monkeypatch.setattr(
         chain_mod,
@@ -377,8 +379,12 @@ def test_chain_picks_retriever_impl(monkeypatch):
         monkeypatch.setattr(chain_mod, name, lambda **kw: pytest.fail("retrieval_a 검색기를 부르면 안 됨"))
     monkeypatch.setattr(chain_mod, "load_config", dict)
     monkeypatch.setattr(chain_mod, "collection_name", lambda *a, **kw: "test")
-    monkeypatch.setattr(chain_mod, "ChatOpenAI", lambda **kw: SimpleNamespace(with_structured_output=lambda s: RunnableLambda(lambda p: ANSWER)))
-    chain_mod.create_chain("shipping", "advanced", impl="retrieval_b")
+    monkeypatch.setattr(chain_mod, "create_model", lambda role="answer": SimpleNamespace(with_structured_output=lambda s: RunnableLambda(lambda p: ANSWER)))
+    chain = chain_mod.create_chain("shipping", "advanced", impl="retrieval_b")
+    # 검색기는 처음 요청한 검색 방식만 그때 만든다 (만들 때는 아무것도 준비하지 않음)
+    assert seen == []
+    for mode in ("naive", "hybrid", "hybrid_rerank"):
+        chain.invoke({"question": "q", "retrieval_mode": mode})
     assert [n for n, _ in seen] == ["build_naive_retriever", "build_hybrid_retriever", "build_rerank_retriever"]
     assert all(kw == {"domain": "shipping", "difficulty": "advanced", "profile": None} for _, kw in seen)
 
