@@ -62,7 +62,7 @@ class QueryDecision(BaseModel):
         description="rag일 때 검색에 쓸 질문. 이전 대화가 필요 없으면 새 질문 그대로, 아니면 빈 문자열"
     )
     sub_questions: list[str] = Field(
-        description="search_question이 여러 내용을 물을 때 내용별로 나눈 검색 질문 (최대 3개). 한 가지만 물으면 빈 목록"
+        description="search_question이 여러 내용을 물을 때 내용별로 나눈 검색 질문 (최대 개수는 지시문). 한 가지만 물으면 빈 목록"
     )
     reason: str = Field(description="판단 이유 한 문장")
 

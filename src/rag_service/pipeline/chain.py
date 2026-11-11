@@ -1,5 +1,6 @@
 """개별 처리 블록을 연결하는 RAG 하위 체인과 전체 질문 처리 체인 구성."""
 
+import os
 from functools import lru_cache
 
 from langchain_core.documents import Document
@@ -9,6 +10,7 @@ from langchain_core.runnables import RunnableBranch, RunnableLambda, RunnablePas
 from rag_service.contracts.schemas import AnswerCheck, QueryDecision, RagAnswer
 from rag_service.generation.guard import (
     apply_answer_check,
+    apply_answer_rules,
     apply_query_decision,
     blocked_question_result,
 )
@@ -21,6 +23,7 @@ from rag_service.generation.prompt import (
     prepare_query_input,
     query_guard_prompt,
 )
+from rag_service.generation.rag_config import max_docs
 from rag_service.generation.sources import add_sources, build_answer_result
 from rag_service.observability import with_langfuse
 from rag_service.pipeline.prepare_retriever import RETRIEVAL_LOCK, RetrieverPool
@@ -32,7 +35,7 @@ from rag_service.retrieval_a import (
 from rag_service.retrieval_a.naive import collection_name, load_config
 from rag_service.storage.qdrant_store import get_pages
 
-MAX_DOCS = 8  # 나눠 찾기(sub_questions)로 합친 검색 결과를 LLM에 넘기는 최대 개수
+MAX_DOCS = max_docs()  # 나눠 찾기(sub_questions)로 합친 검색 결과를 LLM에 넘기는 최대 개수 (config/generation/rag.yaml)
 IMPLS = ("retrieval_a", "retrieval_b")  # 동일한 체인에서 선택 가능한 검색 구현
 
 
@@ -184,12 +187,18 @@ def create_service_chain():
         RunnableLambda(prepare_query_input) | query_guard_prompt
         | guard_model.with_structured_output(QueryDecision)
     ).with_fallbacks([RunnableLambda(lambda _: None)])
-    answer_check = (
-        RunnableLambda(lambda state: {
-            "question": state["request"].question, "answer": state["result"]["answer"],
-        })
-        | answer_guard_prompt | guard_model.with_structured_output(AnswerCheck)
-    ).with_fallbacks([RunnableLambda(lambda _: None)])
+    # 사후 검사: 기본은 규칙 검사만 (LLM 호출 2번). RAG_ANSWER_GUARD=llm이면 예전처럼 LLM 사후 검사 (3번)
+    #   보안 규칙은 answer_prompt(답변 단계)에 있어서 기본 경로에서도 답변 생성 시 함께 적용된다
+    if (os.getenv("RAG_ANSWER_GUARD") or "rule").strip().lower() == "llm":
+        answer_check = (
+            RunnableLambda(lambda state: {
+                "question": state["request"].question, "answer": state["result"]["answer"],
+            })
+            | answer_guard_prompt | guard_model.with_structured_output(AnswerCheck)
+        ).with_fallbacks([RunnableLambda(lambda _: None)])
+        check_step = RunnablePassthrough.assign(check=answer_check) | RunnableLambda(apply_answer_check)
+    else:
+        check_step = RunnableLambda(apply_answer_rules)
 
     # 직접 답변도 같은 위치에서 입력 준비와 모델 및 문자열 출력 처리를 연결
     direct_answer = (
@@ -233,7 +242,7 @@ def create_service_chain():
     # 입력 차단 안내는 그대로 통과하고 실제 생성한 답변에만 사후 검사 적용
     check_branch = RunnableBranch(
         (lambda state: state["route"] == "block", RunnablePassthrough()),
-        RunnablePassthrough.assign(check=answer_check) | RunnableLambda(apply_answer_check),
+        check_step,
     )
     # 요청별 상태 생성 후 사전 판단 → 답변 경로 선택 → 사후 검사 → 최종 응답 순서의 조립
     chain = (

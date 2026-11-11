@@ -1,0 +1,8 @@
+# RAG 답변 체인 설정 (rag_service/generation/rag_config.py가 읽음, 서버 재시작 시 반영)
+
+query_guard:
+  max_sub_questions: 3   # 질문 사전 판단에서 복합 질문을 나눠 찾는 검색 질문 최대 개수 (프롬프트·결과 자르기에 같이 사용)
+
+context:
+  max_docs: 12           # 나눠 찾은 검색 결과를 순위대로 번갈아 합친 뒤 LLM에 넘기는 최대 자료 수
+                         # (나눠 찾지 않은 질문은 검색기 top_k 그대로). 개수 정하기: client/client_test4.py

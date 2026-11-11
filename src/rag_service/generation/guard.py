@@ -5,8 +5,10 @@
 """
 
 import logging
+import re
 
 from rag_service.contracts.schemas import QueryDecision
+from rag_service.generation.rag_config import max_sub_questions
 
 logger = logging.getLogger(__name__)
 
@@ -28,7 +30,7 @@ def apply_query_decision(state):
         )
     decision = decision.model_copy(update={
         "search_question": decision.search_question.strip() or state["request"].question,
-        "sub_questions": [q.strip() for q in decision.sub_questions if q.strip()][:3],
+        "sub_questions": [q.strip() for q in decision.sub_questions if q.strip()][: max_sub_questions()],
     })
     return {**state, "decision": decision, "route": decision.action}
 
@@ -51,3 +53,34 @@ def apply_answer_check(state):
             "source_ids": [], "sources": [], "contexts": [], "invalid_source_ids": [],
         }}
     return state
+
+
+# 사후 검사 기본값: LLM 호출 없이 답변 본문을 규칙으로만 확인 (보안 규칙 자체는 prompt.answer_prompt에 있음)
+#   업무 문서에는 아래 형식이 나오지 않는 것을 확인함 (basic~advanced 청크 전체에서 0건)
+ANSWER_RULES = [
+    ("leak", re.compile(r"sk-[A-Za-z0-9_-]{16,}")),                                      # OpenAI 등 API 키
+    ("leak", re.compile(r"(?i)(api[_ -]?key|secret|password|비밀번호)\s*[:=]\s*\S{6,}")),
+    ("leak", re.compile(r"\[검색 자료를 읽는 규칙\]|\[답변에 넣지 않는 내용\]")),            # 시스템 프롬프트 노출
+    ("personal_info", re.compile(r"(?<!\d)\d{6}-[1-4]\d{6}(?!\d)")),                     # 주민등록번호
+    ("personal_info", re.compile(r"(?<!\d)01[016789]-?\d{3,4}-?\d{4}(?!\d)")),           # 휴대전화
+]
+
+
+def check_answer_rules(answer: str) -> str | None:
+    """답변 본문이 규칙에 걸리면 이유(category), 아니면 None."""
+    for category, pattern in ANSWER_RULES:
+        if pattern.search(answer or ""):
+            return category
+    return None
+
+
+def apply_answer_rules(state):
+    """규칙 검사에 걸린 답변을 차단 안내로 교체 (LLM 사후 검사 대신 쓰는 기본 경로)."""
+    category = check_answer_rules(state["result"].get("answer", ""))
+    if category is None:
+        return state
+    logger.warning("answer blocked by rule: %s", category)
+    return {**state, "route": "blocked_answer", "result": {
+        "answer": BLOCKED_ANSWER, "status": "blocked", "reason": f"규칙 검사: {category}",
+        "source_ids": [], "sources": [], "contexts": [], "invalid_source_ids": [],
+    }}

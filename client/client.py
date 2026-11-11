@@ -49,23 +49,33 @@ def fix_bold(text):
     )
 
 
+def strip_marks(text):
+    """답변 본문의 [S1][S3] 같은 인용 번호를 화면에서만 지움 (출처 상자는 그대로)."""
+    return re.sub(r"\s*\[S\d+\]", "", text)
+
+
 def show_message(message):
     """답변과 구조화된 출처 및 서버 요청 식별자 표시."""
     with st.chat_message(message["role"]):
         if message.get("error"):
             st.error(message["content"])
             return
-        st.markdown(fix_bold(message["content"]))
+        body = message["content"]
+        st.markdown(fix_bold(strip_marks(body) if message["role"] == "assistant" else body))
         sources = message.get("sources", [])
         if sources:
             with st.expander(f"출처 {len(sources)}건"):
-                for source in sources:
+                for i, source in enumerate(sources):
                     metadata = source["metadata"]
+                    if i:
+                        st.divider()
                     st.markdown(f"**[{source['id']}]**")
-                    st.caption(" · ".join(
-                        f"{key}: {metadata[key]}" for key in SOURCE_FIELDS if metadata.get(key)
+                    # 항목마다 한 줄씩 (줄 끝 공백 2개 = 마크다운 줄바꿈)
+                    st.markdown("  \n".join(
+                        f"{key} : {metadata[key]}" for key in SOURCE_FIELDS if metadata.get(key) is not None
                     ))
-                    st.text(source["content"])
+                    st.markdown("page_content :")
+                    st.markdown("\n".join(f"> {line}" for line in source["content"].splitlines()))
         if message.get("invalid_source_ids"):
             st.warning("일부 인용 번호에 대응하는 자료가 없어 출처 확인이 필요합니다.")
         if message.get("guard_errors"):
