@@ -1,0 +1,375 @@
+"""evaluation/langfuse_experiment.py 테스트.
+
+Langfuse 서버·OpenAI·Qdrant 없이: chain 출력 → 기록, 점수 ↔ Evaluation 변환, 평가기, 실행 요약을 본다.
+마지막 테스트는 실제 Langfuse SDK의 run_experiment를 서버 없이(로컬 문항) 돌려 평가기 연결을 확인한다.
+"""
+
+from __future__ import annotations
+
+import asyncio
+import importlib.util
+from datetime import UTC, datetime
+from types import SimpleNamespace
+
+import pytest
+from langchain_core.callbacks import BaseCallbackHandler
+from langchain_core.documents import Document
+from langchain_core.runnables import RunnableLambda, RunnablePassthrough
+
+from rag_service.contracts.schemas import RagAnswer
+from rag_service.pipeline import chain as chain_mod
+from rag_service.storage.corpus import repo_root
+
+
+def _load():
+    path = repo_root() / "evaluation" / "langfuse_experiment.py"
+    spec = importlib.util.spec_from_file_location("langfuse_experiment", path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+lx = _load()
+
+DOCS = [
+    Document(
+        page_content="대상 장비는 20GP와 40GP다.",
+        metadata={"book_id": "SB01", "page": 1, "chunk_id": "SB01-p1-c0"},
+    ),
+    Document(
+        page_content="반입 마감은 출항 2일 전이다.",
+        metadata={"book_id": "SB02", "page": 3, "chunk_id": "SB02-p3-c1"},
+    ),
+]
+ANSWER = RagAnswer(
+    status="answered",
+    answer="20GP와 40GP입니다 [S1]\n\n\n[출처]\n[S1]\nfile_name : SB01.pdf",
+    reason="문맥에 있음",
+    source_ids=["S1"],
+)
+GOLDEN = {
+    "reference_answer": "20GP와 40GP입니다.",
+    "required_facts": ["20GP"],
+    "expected_action": "answer",
+    "evidence_groups": [[{"book_id": "SB01", "page": 1, "quote": "q"}]],
+    "grading_notes": "",
+}
+
+
+class FakeChain:
+    """chain.py와 같은 모양의 작은 LangChain chain: retrieve_docs 단계 → 답(RagAnswer)만 돌려준다.
+
+    result가 Exception이면 검색 단계에서 그 오류를 낸다. step_name을 바꾸면 검색 단계 이름이 달라진다.
+    """
+
+    def __init__(self, result, docs=DOCS, step_name="retrieve_docs"):
+        self.requests = []
+
+        def retrieve_docs(request):
+            self.requests.append(
+                {k: request[k] for k in ("question", "retrieval_mode", "page_context")}
+            )
+            if isinstance(result, Exception):
+                raise result
+            return list(docs)
+
+        retrieve_docs.__name__ = step_name
+        self.runnable = RunnablePassthrough.assign(
+            docs=RunnableLambda(retrieve_docs)
+        ) | RunnableLambda(lambda request: result)
+
+    async def ainvoke(self, request, config=None):
+        return await self.runnable.ainvoke(request, config=config)
+
+
+class FakeScorer:
+    def __init__(self, scores):
+        self.scores, self.calls = scores, []
+
+    async def score(self, rec, golden):
+        self.calls.append((rec, golden))
+        return self.scores
+
+    def grading_usage(self):
+        return {"total": {"calls": 2, "input": 300, "output": 40, "unknown": 0}}
+
+
+def test_dataset_name_matches_uploader():
+    assert (
+        lx.dataset_name("shipping", "basic", "expansion_validation")
+        == "shipping-basic-expansion-validation-v1"
+    )
+
+
+def test_record_from_chain_strips_sources_and_keeps_final_context_order():
+    rec = lx.record_from_chain("질문", {"answer": ANSWER, "docs": DOCS})
+    assert rec["answer"] == "20GP와 40GP입니다 [S1]"
+    assert [c["sid"] for c in rec["contexts"]] == ["S1", "S2"]
+    assert rec["contexts"][1] == {
+        "sid": "S2",
+        "book_id": "SB02",
+        "page": 3,
+        "chunk_id": "SB02-p3-c1",
+        "text": "반입 마감은 출항 2일 전이다.",
+    }
+    assert rec["status"] == "answered" and rec["source_ids"] == ["S1"]
+
+
+def test_task_sends_only_question_and_records_service_error():
+    chain = FakeChain(ANSWER)
+    task = lx.make_task(chain, mode="hybrid_rerank", page_context=True)
+    item = SimpleNamespace(
+        input={"question": "일반 건화물 컨테이너 종류는?"}, expected_output=GOLDEN
+    )
+    rec = asyncio.run(task(item=item))
+    assert chain.requests == [
+        {
+            "question": "일반 건화물 컨테이너 종류는?",
+            "retrieval_mode": "hybrid_rerank",
+            "page_context": True,
+        }
+    ]  # 정답 칸은 chain에 가지 않는다
+    assert rec["status"] == "answered" and "latency_ms" in rec
+
+    rec = asyncio.run(
+        lx.make_task(FakeChain(RuntimeError("Qdrant 끊김")), mode="naive")(
+            item={"input": {"question": "q"}}
+        )
+    )
+    assert (
+        rec["status"] == "error"
+        and rec["error"] == "RuntimeError: Qdrant 끊김"
+        and rec["contexts"] == []
+    )
+
+
+def test_task_captures_final_context_without_changing_chain():
+    rec = asyncio.run(
+        lx.make_task(FakeChain(ANSWER), mode="naive")(item={"input": {"question": "q"}})
+    )
+    assert rec["status"] == "answered"
+    assert [c["chunk_id"] for c in rec["contexts"]] == ["SB01-p1-c0", "SB02-p3-c1"]
+
+
+def test_missing_retrieve_step_is_error_not_empty_context():
+    chain = FakeChain(ANSWER, step_name="search")  # chain.py에서 함수 이름이 바뀐 경우
+    rec = asyncio.run(
+        lx.make_task(chain, mode="naive")(item={"input": {"question": "q"}})
+    )
+    assert rec["status"] == "error" and "retrieve_docs" in rec["error"]
+
+
+class CountingHandler(BaseCallbackHandler):
+    def __init__(self):
+        self.starts = 0
+
+    def on_chain_start(self, *args, **kwargs):
+        self.starts += 1
+
+
+def test_real_create_chain_docs_captured_and_langfuse_callback_kept(monkeypatch):
+    """실제 pipeline/chain.py create_chain (검색기·LLM만 가짜)에서 최종 문맥을 꺼낸다."""
+
+    class FakeModel:
+        def __init__(self, **kwargs):
+            pass
+
+        def with_structured_output(self, schema):
+            return RunnableLambda(lambda prompt_value: ANSWER)
+
+    retriever = RunnableLambda(lambda question: list(DOCS))
+    for name in (
+        "build_naive_retriever",
+        "build_hybrid_retriever",
+        "build_rerank_retriever",
+    ):
+        monkeypatch.setattr(chain_mod, name, lambda **kw: retriever)
+    monkeypatch.setattr(chain_mod, "load_config", dict)
+    monkeypatch.setattr(chain_mod, "collection_name", lambda *a, **kw: "test")
+    monkeypatch.setattr(chain_mod, "ChatOpenAI", FakeModel)
+    service_handler = CountingHandler()  # with_langfuse가 붙이는 콜백 대신
+    monkeypatch.setattr(
+        chain_mod,
+        "with_langfuse",
+        lambda chain, **kw: chain.with_config(callbacks=[service_handler]),
+    )
+
+    chain = chain_mod.create_chain("shipping", "basic")
+    out = asyncio.run(
+        lx.invoke_with_docs(chain, {"question": "q", "retrieval_mode": "hybrid"})
+    )
+    assert out["answer"] == chain.invoke({"question": "q", "retrieval_mode": "hybrid"})
+    assert [d.metadata["chunk_id"] for d in out["docs"]] == ["SB01-p1-c0", "SB02-p3-c1"]
+    assert service_handler.starts > 0  # 서비스 쪽 콜백(Langfuse trace)도 그대로 불린다
+
+
+def test_to_evaluations_numeric_for_scored_categorical_state_otherwise():
+    scores = [
+        lx.quality.score("faithfulness", 0.75, "scored"),
+        lx.quality.score("context_recall", None, "na", "no_reference", "정답 없음"),
+        lx.quality.score(
+            "judge_facts", None, "unavailable", "grading_failed", "채점 실패: X"
+        ),
+    ]
+    ev = lx.to_evaluations(scores, status="answered")
+    assert (ev[0].name, ev[0].value, ev[0].data_type) == (
+        "faithfulness",
+        0.75,
+        "NUMERIC",
+    )
+    assert (ev[1].name, ev[1].value, ev[1].data_type) == (
+        "context_recall_state",
+        "na",
+        "CATEGORICAL",
+    )
+    assert ev[1].comment == "no_reference: 정답 없음"
+    assert ev[2].metadata == {
+        "state": "unavailable",
+        "cause": "grading_failed",
+        "status": "answered",
+    }
+    back = lx.from_evaluations(ev)
+    assert [(b["name"], b["state"], b["value"]) for b in back] == [
+        ("faithfulness", "scored", 0.75),
+        ("context_recall", "na", None),
+        ("judge_facts", "unavailable", None),
+    ]
+
+
+def test_answer_quality_evaluator_passes_record_and_golden():
+    scorer = FakeScorer([lx.quality.score("faithfulness", 1.0, "scored")])
+    evaluators = lx.make_evaluators(scorer)
+    assert [e.__name__ for e in evaluators] == ["answer_quality", "retrieval_judgement"]
+    out = asyncio.run(
+        evaluators[0](
+            input={"question": "q"},
+            output={"status": "answered", "answer": "a"},
+            expected_output=GOLDEN,
+            metadata=None,
+        )
+    )
+    assert out[0].name == "faithfulness"
+    rec, golden = scorer.calls[0]
+    assert rec["question"] == "q" and golden is GOLDEN
+
+
+def test_retrieval_evaluator_uploads_nothing_for_now_and_can_be_turned_off():
+    evaluators = lx.make_evaluators(FakeScorer([]))
+    out = evaluators[1](
+        input={}, output={"status": "answered"}, expected_output=GOLDEN, metadata=None
+    )
+    assert out == []  # 검색 판정 함수가 아직 점수를 만들지 않는다
+    names = [e.__name__ for e in lx.make_evaluators(FakeScorer([]), retrieval_k=None)]
+    assert names == ["answer_quality"]
+
+
+def test_retrieval_scores_are_converted_when_returned(monkeypatch):
+    monkeypatch.setattr(
+        lx.retrieval_scores,
+        "score_retrieval",
+        lambda rec, golden, k: [lx.quality.score(f"doc_hit_at_{k}", 1.0, "scored")],
+    )
+    evaluators = lx.make_evaluators(FakeScorer([]), retrieval_k=3)
+    out = evaluators[1](
+        input={}, output={"status": "answered"}, expected_output=GOLDEN, metadata=None
+    )
+    assert (out[0].name, out[0].value) == ("doc_hit_at_3", 1.0)
+
+
+def test_run_summary_means_counts_and_grading_tokens():
+    def item(status, scores):
+        return SimpleNamespace(
+            output={"status": status},
+            evaluations=lx.to_evaluations(scores, status=status),
+        )
+
+    q = lx.quality
+    items = [
+        item(
+            "answered",
+            [
+                q.score("faithfulness", 1.0, "scored"),
+                q.score("context_recall", None, "na", "no_reference"),
+            ],
+        ),
+        item(
+            "answered",
+            [
+                q.score("faithfulness", 0.5, "scored"),
+                q.score("context_recall", None, "na", "no_reference"),
+            ],
+        ),
+        item(
+            "error",
+            [
+                q.score("faithfulness", None, "unavailable", "service_error"),
+                q.score("context_recall", None, "unavailable", "service_error"),
+            ],
+        ),
+    ]
+    out = {e.name: e for e in lx.make_run_evaluator(FakeScorer([]))(item_results=items)}
+    assert out["faithfulness_mean"].value == 0.75
+    assert out["faithfulness_mean"].comment.startswith(
+        "평가 대상 2 · 해당 없음 0 · 평가 불가 1"
+    )
+    assert "context_recall_mean" not in out  # 평가 대상 0건이면 평균을 만들지 않는다
+    assert (
+        out["grading_tokens_input"].value == 300
+        and out["grading_tokens_output"].value == 40
+    )
+
+
+def test_run_name_for():
+    now = datetime(2026, 11, 11, 13, 5, tzinfo=UTC)
+    assert (
+        lx.run_name_for("hybrid_rerank", page_context=False, now=now)
+        == "hybrid_rerank_20261111-1305"
+    )
+    assert (
+        lx.run_name_for("naive", page_context=True, tag="r2", now=now)
+        == "naive_page_20261111-1305_r2"
+    )
+
+
+def test_real_run_experiment_wires_task_and_evaluators(monkeypatch):
+    """실제 Langfuse SDK(키 없음, 서버 없음)로 로컬 문항 두 개를 돌린다."""
+    for key in (
+        "LANGFUSE_PUBLIC_KEY",
+        "LANGFUSE_SECRET_KEY",
+        "LANGFUSE_HOST",
+        "LANGFUSE_BASE_URL",
+    ):
+        monkeypatch.delenv(key, raising=False)
+    from langfuse import Langfuse
+
+    langfuse = Langfuse(
+        public_key="pk-test",
+        secret_key="sk-test",
+        host="http://127.0.0.1:9",
+        tracing_enabled=False,
+    )
+    scorer = FakeScorer(
+        [
+            lx.quality.score("faithfulness", 0.9, "scored"),
+            lx.quality.score("judge_facts", None, "na", "judge_na", "되묻기"),
+        ]
+    )
+    data = [
+        {"input": {"question": "q1"}, "expected_output": GOLDEN},
+        {"input": {"question": "q2"}, "expected_output": GOLDEN},
+    ]
+    result = langfuse.run_experiment(
+        name="test",
+        run_name="local",
+        data=data,
+        task=lx.make_task(FakeChain(ANSWER), mode="naive"),
+        evaluators=lx.make_evaluators(scorer, retrieval_k=None),
+        run_evaluators=[lx.make_run_evaluator(scorer)],
+        max_concurrency=2,
+    )
+    assert len(result.item_results) == 2
+    names = {e.name for r in result.item_results for e in r.evaluations}
+    assert names == {"faithfulness", "judge_facts_state"}
+    run = {e.name: e.value for e in result.run_evaluations}
+    assert run["faithfulness_mean"] == pytest.approx(0.9)
+    assert lx.summarize_items(result.item_results)["judge_facts"]["n_na"] == 2
