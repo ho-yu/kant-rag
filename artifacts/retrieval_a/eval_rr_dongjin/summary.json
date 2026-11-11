@@ -1,0 +1,25 @@
+{
+  "k": 5,
+  "profile": "bge-m3-rr-dongjin",
+  "difficulty": "basic",
+  "questions": 68,
+  "skipped": 4,
+  "skipped_ids": [
+    "S-DEV-12",
+    "S-DEV-27",
+    "S-FINAL-12",
+    "S-FINAL-29"
+  ],
+  "threshold": 0.6,
+  "page_tolerance": 0,
+  "metrics": {
+    "rerank": {
+      "Hit@1": 0.25,
+      "Hit@3": 0.3235294117647059,
+      "Hit@5": 0.38235294117647056,
+      "MRR": 0.2985294117647059,
+      "PageHit@1": 0.29411764705882354
+    }
+  },
+  "pairs": {}
+}
