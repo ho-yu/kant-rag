@@ -23,15 +23,21 @@ Hybrid에서 몇 위였고, 리랭커가 순서를 바꾼 뒤 몇 위가 됐는�
 실행 (레포 맨 위에서, 노트북에서. 팀 Qdrant 읽기 + 리랭커 모델이 필요하다)
     uv run python evaluation/retrieval/rerank_diagnose.py
     uv run python evaluation/retrieval/rerank_diagnose.py --k 3 --rerank-n 30
+    uv run python evaluation/retrieval/rerank_diagnose.py --rerank-n 20 --cand 50
     uv run python evaluation/retrieval/rerank_diagnose.py --only 밀림 "후보 없음"
 
-결과: 화면 표 + results/diagnose/retrieval_b/rerank_{난이도}_{split}_k{k}_n{rerank_n}.json
+결과: 화면 표 + results/diagnose/retrieval_b/rerank_{난이도}_{split}_k{k}_n{rerank_n}{설정}.json
+      {설정}은 --levels·--cand·--rrf·--rerank-len이 기본값과 다를 때만 붙는다 (예: _cand50).
 평가 JSON(정답)은 채점에만 쓴다. 검색기와 리랭커에는 question만 넘긴다.
+
+[2026-11-11 리팩토링] 이유: 튜닝 값을 .env에서 읽지 않게 됨 → 효과: 다른 평가 스크립트와 같은 명령줄 옵션
+(--k, --levels, --cand, --rrf, --rerank-n, --rerank-len)으로 받아 Hybrid 후보와 리랭커에 그대로 넘긴다.
 """
 
 from __future__ import annotations
 
 import argparse
+import dataclasses
 import importlib.util
 import json
 import sys
@@ -51,6 +57,12 @@ from rag_service.retrieval_b.metrics import (
     gold_pages,
     golden_path,
     load_golden,
+)
+from rag_service.retrieval_b.settings import (
+    Settings,
+    add_settings_args,
+    settings_from_args,
+    settings_tag,
 )
 from rag_service.storage.corpus import repo_root
 
@@ -187,6 +199,14 @@ def summarize(rows: Sequence[dict[str, Any]], k: int) -> dict[str, Any]:
     }
 
 
+def extra_tag(settings: Settings) -> str:
+    """파일 이름 꼬리. k·rerank_n은 이름에 늘 들어가므로 뺀 나머지 바꾼 값만 (예: _cand50, _lvpage)."""
+    default = Settings()
+    return settings_tag(
+        dataclasses.replace(settings, k=default.k, rerank_n=default.rerank_n)
+    )
+
+
 # ---------- 화면 출력 ----------
 
 
@@ -293,11 +313,6 @@ def main(argv: list[str] | None = None) -> Path:
     parser.add_argument("--domain", default="shipping")
     parser.add_argument("--difficulty", default="basic")
     parser.add_argument("--split", choices=SPLITS, default="development")
-    parser.add_argument("--levels", nargs="+", default=["para", "table"])
-    parser.add_argument("--k", type=int, default=5, help="몇 위까지를 맞힘으로 볼지")
-    parser.add_argument(
-        "--rerank-n", type=int, default=50, help="리랭커에 넘길 후보 수"
-    )
     parser.add_argument(
         "--probe-n", type=int, default=100, help="후보 밖 정답을 어디까지 찾아볼지"
     )
@@ -319,11 +334,13 @@ def main(argv: list[str] | None = None) -> Path:
         default=None,
         help="실험 이름. 주면 results/experiments/<이름>/에 따로 저장",
     )
+    add_settings_args(
+        parser
+    )  # --k는 몇 위까지를 맞힘으로 볼지, --rerank-n은 리랭커 후보 수
     args = parser.parse_args(argv)
     exp = check_exp_arg(parser, args.exp)
-    if args.k < 1 or args.rerank_n < args.k:
-        parser.error("k는 1 이상, rerank-n은 k 이상이어야 합니다.")
-    probe_n = max(args.probe_n, args.rerank_n)
+    s = settings_from_args(args)  # rerank_n < k 같은 잘못된 값은 여기서 멈춘다
+    probe_n = max(args.probe_n, s.rerank_n)
 
     from rag_service.retrieval_b import build_hybrid_retriever
     from rag_service.retrieval_b.rerank import cross_encoder_scorer, rerank
@@ -338,12 +355,15 @@ def main(argv: list[str] | None = None) -> Path:
     common = {
         "domain": args.domain,
         "difficulty": args.difficulty,
-        "levels": list(args.levels),
+        "levels": list(s.levels),
+        "candidate_k": s.candidate_k,
+        "rrf_k": s.rrf_k,
     }
-    hybrid = build_hybrid_retriever(k=max(COMPARE_HYBRID_K, args.k), **common)
-    cands = build_hybrid_retriever(k=args.rerank_n, **common)
+    hybrid_k = max(COMPARE_HYBRID_K, s.k)
+    hybrid = build_hybrid_retriever(k=hybrid_k, **common)
+    cands = build_hybrid_retriever(k=s.rerank_n, **common)
     probe = build_hybrid_retriever(k=probe_n, **common)
-    score_fn = cross_encoder_scorer()
+    score_fn = cross_encoder_scorer(max_length=s.rerank_max_length)
 
     rows = []
     for n, item in enumerate(items, start=1):
@@ -357,20 +377,20 @@ def main(argv: list[str] | None = None) -> Path:
         )
         rows.append(
             diagnose_question(
-                item, hybrid.invoke(q), candidates, probe.invoke(q), reranked, args.k
+                item, hybrid.invoke(q), candidates, probe.invoke(q), reranked, s.k
             )
         )
     print()
 
-    summary = summarize(rows, args.k)
-    print_table(rows, summary, args.k, args.rerank_n, probe_n)
+    summary = summarize(rows, s.k)
+    print_table(rows, summary, s.k, s.rerank_n, probe_n)
     if args.only:
         print_details(rows, args.only)
 
     out = args.out or (
         results_base(exp)
         / OUT_DIR.relative_to("results")
-        / f"rerank_{args.difficulty}_{args.split}_k{args.k}_n{args.rerank_n}.json"
+        / f"rerank_{args.difficulty}_{args.split}_k{s.k}_n{s.rerank_n}{extra_tag(s)}.json"
     )
     out.parent.mkdir(parents=True, exist_ok=True)
     report = {
@@ -378,10 +398,11 @@ def main(argv: list[str] | None = None) -> Path:
         "settings": {
             **common,
             "split": args.split,
-            "k": args.k,
-            "rerank_n": args.rerank_n,
+            "k": s.k,
+            "rerank_n": s.rerank_n,
+            "rerank_max_length": s.rerank_max_length,
             "probe_n": probe_n,
-            "hybrid_k": max(COMPARE_HYBRID_K, args.k),
+            "hybrid_k": hybrid_k,
             "limit": args.limit,
             "exp": exp,
         },

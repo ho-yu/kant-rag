@@ -7,10 +7,11 @@ retrieval_b(내 구현)와 retrieval_a(팀원 구현)를 같은 기준으로 채
     uv run python evaluation/retrieval/retrieval_b_compare.py
     uv run python evaluation/retrieval/retrieval_b_compare.py --modes naive bm25 hybrid a_hybrid
     uv run python evaluation/retrieval/retrieval_b_compare.py --split additional --levels page
+    uv run python evaluation/retrieval/retrieval_b_compare.py --modes rerank --rerank-n 20   # 튜닝 실험
 
 결과: results/comparison/retrieval_b/{난이도}_{split}_{levels}{설정}{k}.json  (--exp 이름이면 results/experiments/<이름>/comparison/retrieval_b/)
       같은 이름의 .html도 만든다 (브라우저로 여는 결과 페이지, --open이면 바로 열림).
-      {설정}은 RETRIEVAL_B_* 튜닝 값이 기본값과 다를 때만 붙는다 (예: _n20, _cand50_rrf20).
+      {설정}은 명령줄로 준 튜닝 값(--cand, --rrf, --rerank-n, --rerank-len)이 기본값과 다를 때만 붙는다 (예: _n20, _cand50_rrf20).
       {k}는 --ks가 기본 목록과 다를 때 붙는다: k 하나면 _k5, 여러 개면 _ks3-7-9. --out을 주면 그 이름이 우선.
       그래서 설정을 바꿔 돌려도 기본 설정 결과를 덮어쓰지 않는다.
       실제로 쓴 튜닝 값은 JSON의 settings.retrieval_b에 남는다.
@@ -18,6 +19,7 @@ retrieval_b(내 구현)와 retrieval_a(팀원 구현)를 같은 기준으로 채
 
 [2026-11-10 추가] 이유: 환경변수로 바꾼 후보 수·RRF 상수·리랭커 후보 수가 결과에 남지 않고,
 같은 이름으로 덮어써져 실험끼리 비교할 수 없었음 → 효과: 설정이 결과 파일 이름과 JSON에 남는다.
+[2026-11-11 리팩토링] 이유: 튜닝 값을 .env(RETRIEVAL_B_*)에서 읽지 않게 됨 → 효과: 명령줄 옵션으로 받아 b 방식 검색기에 직접 넘긴다.
 """
 
 from __future__ import annotations
@@ -43,15 +45,21 @@ from rag_service.retrieval_b.metrics import (
     load_golden,
 )
 from rag_service.retrieval_b.report import page_link, write_html
-from rag_service.retrieval_b.settings import Settings, get_settings
+from rag_service.retrieval_b.settings import (
+    Settings,
+    add_settings_args,
+    retriever_kwargs,
+    settings_from_args,
+)
 from rag_service.storage.corpus import repo_root
 
 WARMUP_QUESTION = "부산에서 LA로 컨테이너를 예약할 때 필요한 정보는?"
 OUT_DIR = Path("results") / "comparison" / "retrieval_b"
 
-Builder = Callable[[str, str, int, list[str]], Any]
+# (domain, difficulty, k, 설정) → 검색기. k는 --ks 중 최댓값이고, 설정에서는 levels·튜닝 값을 쓴다.
+Builder = Callable[[str, str, int, Settings], Any]
 
-# retrieval_b 튜닝 값 → 파일 이름에 붙일 짧은 이름. k·levels는 이 스크립트의 인자로 따로 정한다.
+# retrieval_b 튜닝 값 → 파일 이름에 붙일 짧은 이름. k(--ks)·levels는 이름에 따로 들어간다.
 # 배치 크기는 점수를 바꾸지 않으므로 기록만 하고 이름에는 안 붙인다.
 TUNING_TAGS: dict[str, str | None] = {
     "candidate_k": "cand",
@@ -72,10 +80,9 @@ def ks_tag(ks: Sequence[int]) -> str:
     return "_ks" + "-".join(str(k) for k in ks)
 
 
-def tuning_values() -> dict[str, int]:
-    """retrieval_b 검색기가 이번 실행에서 실제로 쓰는 튜닝 값 (.env와 환경변수 반영)."""
-    s = get_settings()
-    return {name: getattr(s, name) for name in TUNING_TAGS}
+def tuning_values(settings: Settings) -> dict[str, int]:
+    """retrieval_b 검색기가 이번 실행에서 실제로 쓰는 튜닝 값 (명령줄 옵션 반영)."""
+    return {name: getattr(settings, name) for name in TUNING_TAGS}
 
 
 def tuning_tag(values: dict[str, Any]) -> str:
@@ -118,59 +125,65 @@ def refresh_board(exp: str | None = None) -> Path | None:
     return _paths().refresh_board(repo_root(), exp)
 
 
-def _b_naive(domain: str, difficulty: str, k: int, levels: list[str]):
+def _b_kwargs(s: Settings, mode: str, k: int) -> dict[str, Any]:
+    """b 검색기 인자: 설정의 levels·튜닝 값에 k만 --ks 최댓값으로 바꾼다."""
+    return {**retriever_kwargs(s, mode), "k": k}
+
+
+def _b_naive(domain: str, difficulty: str, k: int, s: Settings):
     from rag_service.retrieval_b import build_naive_retriever
 
     return build_naive_retriever(
-        domain=domain, difficulty=difficulty, k=k, levels=levels
+        domain=domain, difficulty=difficulty, **_b_kwargs(s, "naive", k)
     )
 
 
-def _b_bm25(domain: str, difficulty: str, k: int, levels: list[str]):
+def _b_bm25(domain: str, difficulty: str, k: int, s: Settings):
     from rag_service.retrieval_b import build_bm25_retriever
 
     return build_bm25_retriever(
-        domain=domain, difficulty=difficulty, k=k, levels=levels
+        domain=domain, difficulty=difficulty, **_b_kwargs(s, "bm25", k)
     )
 
 
-def _b_hybrid(domain: str, difficulty: str, k: int, levels: list[str]):
+def _b_hybrid(domain: str, difficulty: str, k: int, s: Settings):
     from rag_service.retrieval_b import build_hybrid_retriever
 
     return build_hybrid_retriever(
-        domain=domain, difficulty=difficulty, k=k, levels=levels
+        domain=domain, difficulty=difficulty, **_b_kwargs(s, "hybrid", k)
     )
 
 
-def _b_rerank(domain: str, difficulty: str, k: int, levels: list[str]):
+def _b_rerank(domain: str, difficulty: str, k: int, s: Settings):
     from rag_service.retrieval_b import build_rerank_retriever
 
     return build_rerank_retriever(
-        domain=domain, difficulty=difficulty, k=k, levels=levels
+        domain=domain, difficulty=difficulty, **_b_kwargs(s, "rerank", k)
     )
 
 
-def _a_naive(domain: str, difficulty: str, k: int, levels: list[str]):
+# a 방식은 levels만 이 설정에서 쓰고, 나머지 튜닝 값은 config/retrieval_a 설정을 쓴다.
+def _a_naive(domain: str, difficulty: str, k: int, s: Settings):
     from rag_service.retrieval_a import build_naive_retriever
 
     return build_naive_retriever(
-        domain=domain, difficulty=difficulty, top_k=k, levels=levels
+        domain=domain, difficulty=difficulty, top_k=k, levels=list(s.levels)
     )
 
 
-def _a_hybrid(domain: str, difficulty: str, k: int, levels: list[str]):
+def _a_hybrid(domain: str, difficulty: str, k: int, s: Settings):
     from rag_service.retrieval_a import build_hybrid_retriever
 
     return build_hybrid_retriever(
-        domain=domain, difficulty=difficulty, top_k=k, levels=levels
+        domain=domain, difficulty=difficulty, top_k=k, levels=list(s.levels)
     )
 
 
-def _a_rerank(domain: str, difficulty: str, k: int, levels: list[str]):
+def _a_rerank(domain: str, difficulty: str, k: int, s: Settings):
     from rag_service.retrieval_a import build_rerank_retriever
 
     return build_rerank_retriever(
-        domain=domain, difficulty=difficulty, top_k=k, levels=levels
+        domain=domain, difficulty=difficulty, top_k=k, levels=list(s.levels)
     )
 
 
@@ -232,8 +245,13 @@ def main(argv: list[str] | None = None) -> Path:
     parser.add_argument("--difficulty", default="basic")
     parser.add_argument("--split", choices=SPLITS, default="development")
     parser.add_argument("--modes", nargs="+", choices=sorted(MODES), default=["naive"])
-    parser.add_argument("--levels", nargs="+", default=["para", "table"])
-    parser.add_argument("--ks", nargs="+", type=int, default=list(DEFAULT_KS))
+    parser.add_argument(
+        "--ks",
+        nargs="+",
+        type=int,
+        default=list(DEFAULT_KS),
+        help="채점할 k 목록 (검색은 가장 큰 k로 한 번)",
+    )
     parser.add_argument(
         "--limit", type=int, default=None, help="앞에서 N개 질문만 (빠른 확인용)"
     )
@@ -253,11 +271,13 @@ def main(argv: list[str] | None = None) -> Path:
         default=None,
         help="실험 이름. 주면 results/experiments/<이름>/에 따로 저장",
     )
+    add_settings_args(parser, skip=("k",))  # k는 --ks로 정한다
     args = parser.parse_args(argv)
     exp = check_exp_arg(parser, args.exp)
+    settings = settings_from_args(args)
 
     load_dotenv(repo_root() / ".env")
-    tuning = tuning_values()
+    tuning = tuning_values(settings)
     tag = tuning_tag(tuning)
     print(
         "[설정] "
@@ -277,9 +297,7 @@ def main(argv: list[str] | None = None) -> Path:
         print(f"[{mode}] 검색기 준비 중 ...", flush=True)
         try:
             started = time.perf_counter()
-            retriever = MODES[mode](
-                args.domain, args.difficulty, ks[-1], list(args.levels)
-            )
+            retriever = MODES[mode](args.domain, args.difficulty, ks[-1], settings)
             # 모델 로딩·첫 호출 지연을 검색 시간에서 뺀다
             retriever.invoke(WARMUP_QUESTION)
             build_s = round(time.perf_counter() - started, 1)
@@ -292,7 +310,7 @@ def main(argv: list[str] | None = None) -> Path:
         res["build_seconds"] = build_s
         results[mode] = res
 
-    levels_tag = "-".join(args.levels)
+    levels_tag = "-".join(settings.levels)
     out = args.out or (
         results_base(exp)
         / OUT_DIR.relative_to("results")
@@ -306,7 +324,7 @@ def main(argv: list[str] | None = None) -> Path:
             "domain": args.domain,
             "difficulty": args.difficulty,
             "split": args.split,
-            "levels": list(args.levels),
+            "levels": list(settings.levels),
             "ks": ks,
             "limit": args.limit,
             "modes": list(args.modes),

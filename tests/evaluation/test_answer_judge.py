@@ -402,48 +402,36 @@ def test_write_summary_and_report(tmp_path):
 
 # ---------- 답변 폴더 (run_answers.py, faithfulness.py와 같은 규칙) ----------
 
-SETTINGS_VARS = (
-    "K",
-    "LEVELS",
-    "CANDIDATE_K",
-    "RRF_K",
-    "RERANK_N",
-    "RERANK_MAX_LENGTH",
-    "RERANK_BATCH_SIZE",
-)
 
-
-@pytest.fixture
-def default_settings(monkeypatch):
-    """.env 값이 결과를 바꾸지 않게 RETRIEVAL_B_*를 비우고, 끝나면 설정 캐시를 지운다."""
-    from rag_service.retrieval_b.settings import get_settings
-
-    for name in SETTINGS_VARS:
-        monkeypatch.setenv(f"RETRIEVAL_B_{name}", "")
-    get_settings.cache_clear()
-    yield monkeypatch
-    get_settings.cache_clear()
-
-
-def _answer_dir(root, name):
-    d = root / "results" / "answer" / "retrieval_b" / name
+def _answer_dir(root, name, exp=None, line="{}"):
+    base = root / "results" if exp is None else root / "results" / "experiments" / exp
+    d = base / "answer" / "retrieval_b" / name
     d.mkdir(parents=True)
-    (d / "answers_naive.jsonl").write_text("{}", encoding="utf-8")
+    (d / "answers_naive.jsonl").write_text(line, encoding="utf-8")
     return d
 
 
-def test_out_dir_follows_settings_and_run_overrides(default_settings):
-    from rag_service.retrieval_b.settings import get_settings
+# --summary-only로 요약까지 도는 답변 한 줄 (채점 기록은 없음)
+ANSWER_LINE = json.dumps({"id": "S-DEV-01", "mode": "naive", "status": "answered"})
+
+
+def test_out_dir_follows_settings_and_run_overrides():
+    from rag_service.retrieval_b.settings import Settings
 
     assert jd.out_dir_for("basic", "development").name == "basic_development"
     assert jd.out_dir_for("basic", "development", tag="r2").name == (
         "basic_development_r2"
     )
-    default_settings.setenv("RETRIEVAL_B_K", "3")
-    get_settings.cache_clear()
-    assert jd.out_dir_for("basic", "development").name == "basic_development_k3"
+    s = Settings(k=3)
+    assert (
+        jd.out_dir_for("basic", "development", settings=s).name
+        == "basic_development_k3"
+    )
     # --run은 폴더 이름 전체라서 설정 태그와 --tag를 무시한다
-    assert jd.out_dir_for("basic", "development", run="mine", tag="r2").name == "mine"
+    assert (
+        jd.out_dir_for("basic", "development", run="mine", tag="r2", settings=s).name
+        == "mine"
+    )
 
 
 def test_available_runs_lists_only_answer_folders(tmp_path, monkeypatch):
@@ -461,7 +449,7 @@ def test_available_runs_lists_only_answer_folders(tmp_path, monkeypatch):
     ]
 
 
-def test_main_stops_when_answer_folder_missing(tmp_path, monkeypatch, default_settings):
+def test_main_stops_when_answer_folder_missing(tmp_path, monkeypatch):
     monkeypatch.setattr(jd, "repo_root", lambda: tmp_path)
     _answer_dir(tmp_path, "basic_development_k3")
     with pytest.raises(SystemExit) as stop:
@@ -525,3 +513,66 @@ def test_real_chain_with_fake_openai(monkeypatch):
     assert "대상 장비는 20GP와 40GP다." in sent  # 실제 최종 문맥
     assert "일반 건화물 20GP" in sent  # 필수 사실
     assert "정답 근거 원문" not in sent  # 근거 그룹은 보내지 않는다
+
+
+# ---------- 튜닝 옵션, --exp, 실험 비교판 ----------
+
+
+def test_main_finds_folder_from_cli_tuning(tmp_path, monkeypatch, capsys):
+    """run_answers.py --rerank-n 20 으로 만든 폴더를 같은 옵션으로 찾는다."""
+    monkeypatch.setattr(jd, "repo_root", lambda: tmp_path)
+    monkeypatch.setattr(jd, "refresh_board", lambda *a: None)
+    _answer_dir(tmp_path, "basic_development_n20", line=ANSWER_LINE)
+    jd.main(["--rerank-n", "20", "--modes", "naive", "--summary-only"])
+    assert "basic_development_n20" in capsys.readouterr().out
+    with pytest.raises(SystemExit, match="basic_development_n20"):
+        jd.main(["--modes", "naive", "--summary-only"])  # 기본 설정 폴더는 없다
+
+
+def test_out_dir_and_available_runs_with_exp(tmp_path, monkeypatch):
+    monkeypatch.setattr(jd, "repo_root", lambda: tmp_path)
+    folder = _answer_dir(tmp_path, "basic_development_k9", exp="page_k")
+    assert (
+        jd.out_dir_for("basic", "development", run="basic_development_k9", exp="page_k")
+        == folder
+    )
+    assert jd.available_runs("basic", "development", "page_k") == [
+        "basic_development_k9"
+    ]
+    assert jd.available_runs("basic", "development") == []  # 기본 폴더에는 없음
+
+
+def test_main_with_exp_reads_experiment_folder(tmp_path, monkeypatch, capsys):
+    monkeypatch.setattr(jd, "repo_root", lambda: tmp_path)
+    calls = []
+    monkeypatch.setattr(jd, "refresh_board", lambda exp=None: calls.append(exp))
+    folder = _answer_dir(tmp_path, "basic_development", exp="page_k", line=ANSWER_LINE)
+    jd.main(["--exp", "page_k", "--modes", "naive", "--summary-only"])
+    out = capsys.readouterr().out
+    assert "[실험] page_k (results/experiments/page_k)" in out
+    assert (folder / "judge_summary.json").exists()
+    assert calls == ["page_k"]  # 그 실험의 비교판을 다시 만든다
+
+
+def test_main_refreshes_board_unless_no_board(tmp_path, monkeypatch):
+    monkeypatch.setattr(jd, "repo_root", lambda: tmp_path)
+    _answer_dir(tmp_path, "basic_development", line=ANSWER_LINE)
+    calls = []
+    monkeypatch.setattr(jd, "refresh_board", lambda *a: calls.append(1))
+    jd.main(["--modes", "naive", "--summary-only"])
+    assert calls == [1]
+    jd.main(["--modes", "naive", "--summary-only", "--no-board"])
+    assert calls == [1]
+
+
+def test_refresh_board_is_silent_without_board_file(tmp_path, monkeypatch, capsys):
+    monkeypatch.setattr(jd, "repo_root", lambda: tmp_path)  # 비교판 스크립트가 없는 곳
+    assert jd.refresh_board() is None
+    assert jd.refresh_board("page_k") is None
+    assert capsys.readouterr().out == ""
+
+
+def test_main_rejects_bad_exp(tmp_path, monkeypatch):
+    monkeypatch.setattr(jd, "repo_root", lambda: tmp_path)
+    with pytest.raises(SystemExit):
+        jd.main(["--exp", "../oops", "--summary-only"])

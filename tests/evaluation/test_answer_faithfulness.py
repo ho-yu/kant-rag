@@ -314,21 +314,30 @@ def test_real_ragas_no_statements_is_na():
     assert row["state"] == "na" and row["cause"] == "no_claims"
 
 
-def test_out_dir_matches_run_answers_and_run_overrides(monkeypatch, tmp_path):
-    from rag_service.retrieval_b import settings as settings_mod
+def test_out_dir_matches_run_answers_and_run_overrides():
+    from rag_service.retrieval_b.settings import Settings
 
-    for var in ("K", "LEVELS", "CANDIDATE_K", "RRF_K", "RERANK_N", "RERANK_MAX_LENGTH"):
-        monkeypatch.setenv(f"RETRIEVAL_B_{var}", "")
-    monkeypatch.setenv("RETRIEVAL_B_K", "3")
-    settings_mod.get_settings.cache_clear()
-    try:
-        assert fa.run_name("basic", "development") == "basic_development_k3"
-        assert (
-            fa.run_name("basic", "development", tag="r2") == "basic_development_k3_r2"
-        )
-        assert fa.out_dir_for("basic", "development", run="mine").name == "mine"
-    finally:
-        settings_mod.get_settings.cache_clear()
+    s = Settings(k=3)
+    assert fa.run_name("basic", "development") == "basic_development"
+    assert fa.run_name("basic", "development", settings=s) == "basic_development_k3"
+    assert (
+        fa.run_name("basic", "development", tag="r2", settings=s)
+        == "basic_development_k3_r2"
+    )
+    assert fa.out_dir_for("basic", "development", run="mine", settings=s).name == "mine"
+
+
+def test_main_finds_folder_from_cli_tuning(monkeypatch, tmp_path, capsys):
+    """run_answers.py --rerank-n 20 으로 만든 폴더를 같은 옵션으로 찾는다."""
+    monkeypatch.setattr(fa, "repo_root", lambda: tmp_path)
+    folder = tmp_path / fa.OUT_DIR / "basic_development_n20"
+    folder.mkdir(parents=True)
+    (folder / "answers_naive.jsonl").write_text("", encoding="utf-8")
+    monkeypatch.setattr(fa, "refresh_board", lambda *a: None)
+    fa.main(["--rerank-n", "20", "--summary-only"])
+    assert "[답변 폴더] results" in capsys.readouterr().out
+    with pytest.raises(SystemExit, match="basic_development_n20"):
+        fa.main(["--summary-only"])  # 기본 설정 폴더는 없다 → 있는 폴더 목록에 n20
 
 
 def test_available_runs_lists_only_answer_folders(monkeypatch, tmp_path):

@@ -12,7 +12,7 @@
 - prev_rank: 리랭크 전 Hybrid 순위 (1부터), hybrid_score: 리랭크 전 RRF 점수
 - dense_rank, bm25_rank 등 Hybrid가 붙인 값은 그대로 남는다
 
-[2026-11-10 리팩토링] 이유: RERANK_N·MAX_LENGTH·BATCH_SIZE가 코드 상수라 바꾸려면 코드 수정이 필요했음 → 효과: Settings(환경변수) 값을 쓰고 인자 없이 불러도 같은 설정이 적용됨.
+[2026-11-10 리팩토링] 이유: RERANK_N·MAX_LENGTH·BATCH_SIZE가 코드 상수라 바꾸려면 코드 수정이 필요했음 → 효과: Settings 값을 쓰고 인자 없이 불러도 같은 설정이 적용됨.
 """
 
 from __future__ import annotations
@@ -72,7 +72,7 @@ def cross_encoder_scorer(
 ) -> ScoreFn:
     """실제 리랭커 점수 함수. 모델은 처음 부를 때 불러온다 (만들 때는 안 불러옴).
 
-    max_length, batch_size를 안 넘기면 Settings 값(RETRIEVAL_B_RERANK_*)을 쓴다.
+    max_length, batch_size를 안 넘기면 Settings 기본값을 쓴다.
     """
     name = model_name_from_env(model_name)
     if max_length is None or batch_size is None:

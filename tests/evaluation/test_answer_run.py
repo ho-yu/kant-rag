@@ -320,28 +320,66 @@ def test_run_config_records_same_settings_for_all_modes(monkeypatch):
     assert "사전 판단" in cfg["pipeline"]
 
 
-def test_out_dir_name_follows_changed_settings(monkeypatch):
-    from rag_service.retrieval_b import settings as settings_mod
+def test_out_dir_name_follows_changed_settings():
+    from rag_service.retrieval_b.settings import Settings
 
-    for var in ("K", "LEVELS", "CANDIDATE_K", "RRF_K", "RERANK_N", "RERANK_MAX_LENGTH"):
-        monkeypatch.setenv(f"RETRIEVAL_B_{var}", "")  # 빈 값 = 기본값 (.env보다 먼저)
-    settings_mod.get_settings.cache_clear()
-    try:
-        assert ra.run_name("basic", "development") == "basic_development"
-        assert ra.run_name("basic", "development", tag="r2") == "basic_development_r2"
-        assert (
-            ra.run_name("basic", "development", model="other")
-            == "basic_development_other"
-        )
-        monkeypatch.setenv("RETRIEVAL_B_K", "3")
-        monkeypatch.setenv("RETRIEVAL_B_RERANK_N", "100")
-        settings_mod.get_settings.cache_clear()
-        assert ra.run_name("basic", "development") == "basic_development_k3_n100"
-        assert (
-            ra.out_dir_for("basic", "development").name == "basic_development_k3_n100"
-        )
-    finally:
-        settings_mod.get_settings.cache_clear()
+    assert ra.run_name("basic", "development") == "basic_development"
+    assert ra.run_name("basic", "development", tag="r2") == "basic_development_r2"
+    assert (
+        ra.run_name("basic", "development", model="other") == "basic_development_other"
+    )
+    s = Settings(k=3, rerank_n=100)
+    assert (
+        ra.run_name("basic", "development", settings=s) == "basic_development_k3_n100"
+    )
+    assert (
+        ra.out_dir_for("basic", "development", settings=s).name
+        == "basic_development_k3_n100"
+    )
+
+
+def _fake_main_parts(monkeypatch, tmp_path, seen):
+    monkeypatch.setattr(ra, "repo_root", lambda: tmp_path)
+    monkeypatch.setattr(ra, "load_questions", lambda path: [])
+    monkeypatch.setattr(
+        ra,
+        "check_or_write_config",
+        lambda out_dir, config: seen.update(out_dir=out_dir, config=config),
+    )
+    monkeypatch.setattr(ra, "make_answer_chain", lambda model: None)
+
+    def fake_run_mode(mode, questions, path, *, retriever_factory, answer_chain):
+        seen.setdefault("factories", {})[mode] = retriever_factory
+
+    monkeypatch.setattr(ra, "run_mode", fake_run_mode)
+
+
+def test_main_passes_cli_tuning_to_folder_config_and_retrievers(
+    monkeypatch, tmp_path, capsys
+):
+    """--rerank-n 20 → 폴더 이름·config.json·검색기 인자가 모두 같은 값을 쓴다."""
+    import rag_service.retrieval_b as rb
+
+    seen: dict = {}
+    _fake_main_parts(monkeypatch, tmp_path, seen)
+    built: dict = {}
+    for name in ("build_naive_retriever", "build_rerank_retriever"):
+        monkeypatch.setattr(rb, name, lambda _n=name, **kw: built.update({_n: kw}))
+    ra.main(["--modes", "naive", "hybrid_rerank", "--rerank-n", "20", "--no-board"])
+    assert seen["out_dir"].name == "basic_development_n20"
+    assert seen["config"]["retrieval"]["rerank_n"] == 20
+    for factory in seen["factories"].values():
+        factory()
+    assert built["build_rerank_retriever"]["rerank_n"] == 20
+    assert built["build_rerank_retriever"]["k"] == 5
+    assert "rerank_n" not in built["build_naive_retriever"]  # naive는 안 쓰는 값
+    assert "rerank-n=20*" in capsys.readouterr().out
+
+
+def test_main_stops_on_bad_tuning_values(monkeypatch, tmp_path):
+    _fake_main_parts(monkeypatch, tmp_path, {})
+    with pytest.raises(SystemExit, match=r"rerank_n\(5\)은 k\(9\) 이상"):
+        ra.main(["--k", "9", "--rerank-n", "5", "--no-board"])
 
 
 # ---------- 실험 비교판 자동 갱신 ----------

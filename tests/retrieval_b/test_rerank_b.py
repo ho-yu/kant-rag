@@ -206,7 +206,7 @@ def test_rerank_n_below_k_raises(fake_hybrid):
 
 
 def test_rerank_n_below_settings_k_raises(fake_hybrid, default_settings):
-    """k를 설정(RETRIEVAL_B_K)에서 가져와도 rerank_n과 비교한다."""
+    """k를 Settings에서 가져와도 rerank_n과 비교한다."""
     default_settings(k=8, rerank_n=10)
     with pytest.raises(ValueError):
         build_rerank_retriever(**SCOPE, rerank_n=6, score_fn=zeta_first)

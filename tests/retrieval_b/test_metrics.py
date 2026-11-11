@@ -360,8 +360,8 @@ def test_compare_writes_report(
     """가짜 검색기로 development 앞 3문항을 돌려 결과 파일 모양을 확인한다."""
     built = []
 
-    def fake_builder(domain, difficulty, k, levels):
-        built.append((domain, difficulty, k, levels))
+    def fake_builder(domain, difficulty, k, settings):
+        built.append((domain, difficulty, k, list(settings.levels)))
         answers = {x["question"]: [doc(*min(gold_pages(x)))] for x in dev_items[:3]}
         answers[compare_module.WARMUP_QUESTION] = []
         return RunnableLambda(lambda q: answers[q])
@@ -408,10 +408,6 @@ def test_compare_default_output_name(compare_module, monkeypatch, tmp_path):
         compare_module.MODES, "naive", lambda *a: RunnableLambda(lambda q: [])
     )
     monkeypatch.setattr(compare_module, "repo_root", lambda: tmp_path)
-    # 내 .env의 RETRIEVAL_B_* 값과 상관없이 기본값일 때의 이름을 본다
-    monkeypatch.setattr(
-        compare_module, "tuning_values", lambda: _default_tuning(compare_module)
-    )
     out = compare_module.main(["--limit", "1", "--levels", "page"])
     expected = tmp_path / "results" / "comparison" / "retrieval_b"
     assert out == expected / "basic_development_page.json"
@@ -428,35 +424,45 @@ def test_tuning_tag(compare_module):
     assert compare_module.tuning_tag(values) == "_cand50_n20"
 
 
-def test_compare_records_env_tuning(compare_module, monkeypatch, tmp_path, capsys):
-    """RETRIEVAL_B_RERANK_N=20으로 돌리면 기본 결과를 덮어쓰지 않고 _n20 파일에 값이 남는다."""
-    monkeypatch.setitem(
-        compare_module.MODES, "naive", lambda *a: RunnableLambda(lambda q: [])
-    )
+def test_compare_records_cli_tuning(compare_module, monkeypatch, tmp_path, capsys):
+    """--rerank-n 20으로 돌리면 기본 결과를 덮어쓰지 않고 _n20 파일에 값이 남는다."""
+    built = []
+
+    def fake_builder(domain, difficulty, k, settings):
+        built.append(settings)
+        return RunnableLambda(lambda q: [])
+
+    monkeypatch.setitem(compare_module.MODES, "naive", fake_builder)
     monkeypatch.setattr(compare_module, "repo_root", lambda: tmp_path)
-    monkeypatch.setattr(
-        compare_module,
-        "tuning_values",
-        lambda: {**_default_tuning(compare_module), "rerank_n": 20},
-    )
-    out = compare_module.main(["--limit", "1"])
-    assert out.name == "basic_development_para-table_n20.json"
+    out = compare_module.main(["--limit", "1", "--rerank-n", "20", "--cand", "40"])
+    assert out.name == "basic_development_para-table_cand40_n20.json"
     report = json.loads(out.read_text(encoding="utf-8"))
     assert report["settings"]["retrieval_b"]["rerank_n"] == 20
-    assert "기본값과 다름: n20" in capsys.readouterr().out
+    assert report["settings"]["retrieval_b"]["candidate_k"] == 40
+    assert (built[0].rerank_n, built[0].candidate_k) == (20, 40)  # 검색기에도 넘어간다
+    assert "기본값과 다름: cand40_n20" in capsys.readouterr().out
 
 
-def test_tuning_values_reads_env(compare_module, monkeypatch):
+def test_compare_ignores_old_env_values(compare_module, monkeypatch, tmp_path):
+    """예전 RETRIEVAL_B_* 환경변수는 더 이상 결과 이름·설정을 바꾸지 않는다."""
     from rag_service.retrieval_b.settings import get_settings
 
+    _fake_naive(compare_module, monkeypatch)
+    monkeypatch.setattr(compare_module, "repo_root", lambda: tmp_path)
     monkeypatch.setenv("RETRIEVAL_B_RERANK_N", "20")
-    monkeypatch.setenv("RETRIEVAL_B_CANDIDATE_K", "40")
     get_settings.cache_clear()
     try:
-        values = compare_module.tuning_values()
+        with pytest.warns(UserWarning, match="RETRIEVAL_B_RERANK_N"):
+            out = compare_module.main(["--limit", "1"])
     finally:
-        monkeypatch.undo()
         get_settings.cache_clear()
+    assert out.name == "basic_development_para-table.json"
+
+
+def test_tuning_values_follow_settings(compare_module):
+    values = compare_module.tuning_values(
+        compare_module.Settings(rerank_n=20, candidate_k=40)
+    )
     assert values["rerank_n"] == 20 and values["candidate_k"] == 40
 
 
@@ -537,9 +543,6 @@ def test_compare_exp_writes_into_experiment_folder(
 ):
     _fake_naive(compare_module, monkeypatch)
     monkeypatch.setattr(compare_module, "repo_root", lambda: tmp_path)
-    monkeypatch.setattr(
-        compare_module, "tuning_values", lambda: _default_tuning(compare_module)
-    )
     out = compare_module.main(
         ["--exp", "page_k", "--levels", "page", "--ks", "3", "--limit", "1"]
     )

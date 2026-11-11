@@ -5,8 +5,10 @@
     uv run python -m rag_service.retrieval_b "질문" --k 3 --levels page
     uv run python -m rag_service.retrieval_b "질문" --mode hybrid
     uv run python -m rag_service.retrieval_b "질문" --mode rerank   (처음엔 모델 내려받기)
+    uv run python -m rag_service.retrieval_b "질문" --mode rerank --rerank-n 20 --cand 50
 
 [2026-11-10 리팩토링] 이유: --k·--levels 기본값이 삭제된 상수(DEFAULT_K·DEFAULT_LEVELS)에 묶여 있었음 → 효과: 옵션을 생략하면 서버 설정(RETRIEVAL_B_*)을 그대로 따름.
+[2026-11-11 리팩토링] 이유: 튜닝 값을 .env에서 읽지 않게 됨 → 효과: 평가 스크립트와 같은 튜닝 옵션(--cand, --rrf, --rerank-n, --rerank-len)을 씀.
 """
 
 from __future__ import annotations
@@ -19,6 +21,11 @@ from rag_service.retrieval_b.retrievers import (
     build_hybrid_retriever,
     build_naive_retriever,
     build_rerank_retriever,
+)
+from rag_service.retrieval_b.settings import (
+    add_settings_args,
+    retriever_kwargs,
+    settings_from_args,
 )
 
 BUILDERS = {
@@ -35,19 +42,14 @@ def main(argv: list[str] | None = None) -> None:
     parser.add_argument("--mode", choices=sorted(BUILDERS), default="naive")
     parser.add_argument("--domain", default="shipping")
     parser.add_argument("--difficulty", default="basic")
-    parser.add_argument(
-        "--k", type=int, default=None, help="결과 수 (기본: RETRIEVAL_B_K 또는 5)"
-    )
-    parser.add_argument(
-        "--levels",
-        nargs="+",
-        default=None,
-        help="검색할 청크 레벨 (기본: RETRIEVAL_B_LEVELS 또는 para table)",
-    )
+    add_settings_args(parser)
     args = parser.parse_args(argv)
+    settings = settings_from_args(args)
 
     retriever = BUILDERS[args.mode](
-        domain=args.domain, difficulty=args.difficulty, k=args.k, levels=args.levels
+        domain=args.domain,
+        difficulty=args.difficulty,
+        **retriever_kwargs(settings, args.mode),
     )
     for rank, doc in enumerate(retriever.invoke(args.question), 1):
         m = doc.metadata
