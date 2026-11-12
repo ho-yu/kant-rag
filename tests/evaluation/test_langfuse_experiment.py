@@ -510,3 +510,26 @@ def test_real_run_experiment_wires_task_and_evaluators(monkeypatch):
     run = {e.name: e.value for e in result.run_evaluations}
     assert run["faithfulness_mean"] == pytest.approx(0.9)
     assert lx.summarize_items(result.item_results)["judge_facts"]["n_na"] == 2
+
+
+def test_top_k_reaches_retrievers(monkeypatch):
+    from rag_service import retrieval_b
+    from rag_service.pipeline import prepare_retriever as pr
+
+    seen = []
+    for name in ("build_naive_retriever", "build_hybrid_retriever", "build_rerank_retriever"):
+        monkeypatch.setattr(retrieval_b, name, lambda _n=name, **kw: seen.append((_n, kw)) or RunnableLambda(lambda q: list(DOCS)))
+    monkeypatch.setattr(chain_mod, "load_config", dict)
+    monkeypatch.setattr(chain_mod, "collection_name", lambda *a, **kw: "test")
+    monkeypatch.setattr(chain_mod, "ChatOpenAI", lambda **kw: SimpleNamespace(with_structured_output=lambda s: RunnableLambda(lambda p: ANSWER)), raising=False)
+    chain = chain_mod.create_chain("shipping", "basic", impl="retrieval_b", top_k=8, trace=False)
+    try:
+        chain.invoke({"question": "q", "retrieval_mode": "naive"})
+    except Exception:  # noqa: BLE001 — 답변 단계는 이 테스트의 관심이 아님
+        pass
+    assert seen and seen[0][1]["k"] == 8
+
+    pool_seen = {}
+    monkeypatch.setattr(pr, "build_naive_retriever", lambda **kw: pool_seen.update(kw) or "r")
+    assert pr.RetrieverPool("shipping", "basic", top_k=3).get("naive") == "r"
+    assert pool_seen["top_k"] == 3

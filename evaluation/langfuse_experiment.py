@@ -397,7 +397,8 @@ def run_mode(
     """방식 하나를 실험 한 번으로 돌린다. chain·채점기는 방식마다 새로 만든다 (실험마다 이벤트 루프가 새로 생김)."""
     from rag_service.pipeline import create_chain
 
-    chain = create_chain(domain=args.domain, difficulty=args.difficulty, impl=args.impl)
+    chain = create_chain(domain=args.domain, difficulty=args.difficulty, impl=args.impl,
+                         top_k=getattr(args, "top_k", None))
     code_judge = bool(args.code_answer_scores)
     scorer = (
         None
@@ -423,6 +424,7 @@ def run_mode(
         max_concurrency=args.concurrency,
         metadata={
             "impl": args.impl,
+            "top_k": str(getattr(args, "top_k", None) or "default"),
             "mode": mode,
             "page_context": str(args.page_context),
             "ragas": "code" if scorer else "off",
@@ -436,6 +438,7 @@ def run_mode(
         "run_name": run_name,
         "dataset": args.dataset,
         "impl": args.impl,
+        "top_k": getattr(args, "top_k", None),
         "mode": mode,
         "page_context": args.page_context,
         "ragas": "code" if scorer else "off",
@@ -494,8 +497,14 @@ def main(argv: Sequence[str] | None = None) -> None:
     p.add_argument(
         "--k",
         type=int,
-        default=retrieval_scores.K,
-        help="검색 판정 k (모든 방식에 같게)",
+        default=None,
+        help="검색 판정 k (모든 방식에 같게). 기본: --top-k가 있으면 그 값, 없으면 5",
+    )
+    p.add_argument(
+        "--top-k",
+        type=int,
+        default=None,
+        help="답변에 넣을 최종 문맥 수 (검색기 top_k 덮어쓰기, k 비교 실험용). 기본: 설정 파일·Settings 값",
     )
     p.add_argument(
         "--no-retrieval", action="store_true", help="검색 판정 점수를 올리지 않는다"
@@ -506,6 +515,8 @@ def main(argv: Sequence[str] | None = None) -> None:
     args = p.parse_args(argv)
     if args.no_ragas and args.code_answer_scores:
         p.error("--no-ragas와 --code-answer-scores는 같이 쓸 수 없습니다")
+    if args.k is None:  # 검색 판정 k는 실제로 넣은 문맥 수와 같게
+        args.k = args.top_k or retrieval_scores.K
     args.dataset = dataset_name(args.domain, args.difficulty, args.split)
 
     from langfuse import get_client

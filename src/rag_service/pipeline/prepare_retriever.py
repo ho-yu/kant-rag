@@ -21,8 +21,9 @@ RETRIEVAL_LOCK = RLock()
 class RetrieverPool:
     """한 체인에서 사용하는 검색기의 최초 요청 시 생성 및 자원 재사용."""
 
-    def __init__(self, domain, difficulty, profile=None):
+    def __init__(self, domain, difficulty, profile=None, top_k=None):
         self.scope = {"domain": domain, "difficulty": difficulty, "profile": profile}
+        self.top_k = top_k  # 최종 문맥 수 덮어쓰기 (None이면 설정 파일 값)
         # 검색 방식별 실행 객체와 설정 파일별 Hybrid 원본의 별도 보관
         self.retrievers, self.hybrids = {}, {}
         self.lock = RLock()
@@ -42,9 +43,9 @@ class RetrieverPool:
         with self.lock:
             if mode not in self.retrievers:
                 if mode == "naive":
-                    retriever = build_naive_retriever(**self.scope)
+                    retriever = build_naive_retriever(**self.scope, top_k=self.top_k)
                 elif mode == "hybrid":
-                    retriever = self._hybrid(HYBRID_CONFIG)
+                    retriever = self._hybrid(HYBRID_CONFIG, self.top_k)
                 elif mode == "hybrid_rerank":
                     cfg = load_config(RERANK_CONFIG)
                     hybrid_path = REPO_ROOT / cfg["hybrid_config"]
@@ -57,7 +58,7 @@ class RetrieverPool:
                         score_fn=make_scorer(
                             cfg, model_profile(self.scope["profile"] or difficulty)["reranker"]
                         ),
-                        top_k=cfg["search"]["top_k"],
+                        top_k=self.top_k or cfg["search"]["top_k"],
                         use_context=cfg["reranker"].get("use_context", True),
                     )
                 else:

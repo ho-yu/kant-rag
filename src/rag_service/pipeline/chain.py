@@ -92,7 +92,7 @@ def retriever_builders(impl="retrieval_a"):
 
 def create_chain(
     domain, difficulty, profile=None, impl="retrieval_a", *,
-    include_context=False, trace=True, retriever_pool=None,
+    include_context=False, trace=True, retriever_pool=None, top_k=None,
 ):
     """기본 RagAnswer 반환 및 API 요청 시 실제 모델 입력 자료의 추가 반환."""
     # 검색 구현 검증 및 객체 생성 전 검색 방식별 생성 함수 보관
@@ -101,7 +101,8 @@ def create_chain(
     answer_chain = RunnableLambda(prepare_answer_input) | answer_prompt | create_model().with_structured_output(RagAnswer)
     # A의 Hybrid 공유 유지 및 B의 선택한 검색기만 최초 호출 시 생성
     # 서버에서 사전 준비한 검색 자원 주입 및 기존 독립 호출의 자체 준비 유지
-    pool = (retriever_pool or RetrieverPool(domain, difficulty, profile)) if impl == "retrieval_a" else None
+    # top_k: 답변에 넣을 최종 문맥 수 (None이면 설정 파일·Settings 기본값). k 비교 실험용
+    pool = (retriever_pool or RetrieverPool(domain, difficulty, profile, top_k=top_k)) if impl == "retrieval_a" else None
     retrievers = {}
 
     def retrieve_docs(request):
@@ -117,7 +118,8 @@ def create_chain(
                 retriever = pool.get(mode)
             else:
                 if mode not in retrievers:
-                    retrievers[mode] = builders[mode](domain=domain, difficulty=difficulty, profile=profile)
+                    extra = {"k": top_k} if top_k else {}
+                    retrievers[mode] = builders[mode](domain=domain, difficulty=difficulty, profile=profile, **extra)
                 retriever = retrievers[mode]
             sub_questions = [q.strip() for q in request.get("sub_questions") or [] if q and q.strip()]
             if sub_questions:
