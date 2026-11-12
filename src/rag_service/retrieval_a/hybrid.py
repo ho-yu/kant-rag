@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import time
 from functools import lru_cache
 from pathlib import Path
@@ -394,7 +395,10 @@ def build_hybrid_retriever(
     kind = "m3" if profile["sparse"] == "bge-m3" else "bm25"
     client = _connect_client(name)
 
-    if sp.get("source", "qdrant") == "qdrant":
+    source = (os.getenv("RETRIEVAL_A_SPARSE_SOURCE") or sp.get("source", "qdrant")).strip().lower()
+    if source not in ("qdrant", "local"):
+        raise ValueError(f"sparse.source(RETRIEVAL_A_SPARSE_SOURCE)는 qdrant 또는 local이어야 합니다: {source!r}")
+    if source == "qdrant":
         if _sparse_in_qdrant(client, name, kind):
             return QdrantHybridRetriever(
                 client=client,

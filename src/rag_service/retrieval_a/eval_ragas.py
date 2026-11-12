@@ -243,11 +243,12 @@ def _main() -> None:
     p.add_argument("--limit", type=int, default=0)
     p.add_argument("--batch", type=int, default=10)
     p.add_argument("--workers", type=int, default=4)
-    p.add_argument("--out", default=None, help="기본: artifacts/retrieval_a/ragas_<모델 설정>[_<난이도>]")
+    p.add_argument("--out", default=None, help="기본: artifacts/retrieval_a/ragas_<모델 설정>[_<난이도>]_k<k>")
     args = p.parse_args()
     if not args.out:
+        # 폴더에 k를 넣는다: 같은 폴더면 이미 만든 답변을 재사용하므로 --k만 바꾸면 예전 k의 답변으로 채점된다
         name = args.profile if args.difficulty == "basic" else f"{args.profile}_{args.difficulty}"
-        args.out = f"artifacts/retrieval_a/ragas_{name}"
+        args.out = f"artifacts/retrieval_a/ragas_{name}_k{args.k}"
     print_report(run(args))
 
 

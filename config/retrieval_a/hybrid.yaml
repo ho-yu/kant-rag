@@ -15,12 +15,12 @@ search:
 
 sparse:
   source: qdrant        # qdrant: 컬렉션의 sparse 벡터(m3·bm25)로 후보 검색 / local: 청크를 모두 받아 직접 계산
-  candidate_k: 100      # qdrant: dense·sparse에서 각각 받을 후보 수 (그 안에서 min-max)
+  candidate_k: 500      # qdrant: dense·sparse에서 각각 받을 후보 수 (그 안에서 min-max). 1000부터는 시간만 늘고 품질 그대로
   use_context: true     # local
   cache_dir: artifacts/retrieval_a/sparse_cache   # local
 
 fusion:
   method: minmax
-  dense_weight: 0.7
-  sparse_weight: 0.3
+  dense_weight: 0.5     # 0.7/0.3 → 0.5/0.5: advanced hybrid Hit@5 상승, basic·intermediate 차이 없음 (가중치 실험)
+  sparse_weight: 0.5
   rrf_k: 60

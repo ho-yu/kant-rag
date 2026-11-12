@@ -1,0 +1,104 @@
+[
+ {
+  "difficulty": "basic",
+  "order": 1,
+  "question_id": "S-DEV-01",
+  "question": "가온루트해운 부산–LA 안내에서 일반 건화물로 예약할 수 있는 컨테이너 종류는 무엇인가요?",
+  "expected_action": "answer",
+  "seconds": 4.9,
+  "server_elapsed": 4.678,
+  "status": "answered",
+  "n_sub_questions": 0,
+  "sub_questions": [],
+  "n_contexts": 5,
+  "answer_chars": 69,
+  "at": "2026-11-12T12:53:43"
+ },
+ {
+  "difficulty": "basic",
+  "order": 2,
+  "question_id": "S-DEV-02",
+  "question": "가온루트 부산–LA 일반 건화물 40GP로 2026년 11월 6일 출항을 처음 신청하려고 합니다. 예약 메일에 넣을 정보와 창구, 그 일정으로 예약이 확정됐을 때 준비할 SI 마감과 제출처를 한 번에 정리해 주세요.",
+  "expected_action": "answer",
+  "seconds": 9.65,
+  "server_elapsed": 9.063,
+  "status": "answered",
+  "n_sub_questions": 3,
+  "sub_questions": [
+   "가온루트 부산–LA 일반 건화물 40GP의 2026년 11월 6일 출항 예약을 처음 신청할 때 예약 메일에 기재할 정보는 무엇이며, 예약 신청 창구는 어디인가요?",
+   "가온루트 부산–LA 일반 건화물 40GP의 2026년 11월 6일 출항 예약이 확정된 경우 SI 마감은 언제인가요?",
+   "가온루트 부산–LA 일반 건화물 40GP의 2026년 11월 6일 출항 예약이 확정된 경우 SI 제출처는 어디인가요?"
+  ],
+  "n_contexts": 12,
+  "answer_chars": 500,
+  "at": "2026-11-12T12:53:52"
+ },
+ {
+  "difficulty": "intermediate",
+  "order": 1,
+  "question_id": "IS-DEV-01",
+  "question": "가온루트해운 부산–LA 안내에서 일반 건화물로 예약할 수 있는 컨테이너 종류는 무엇인가요?",
+  "expected_action": "answer",
+  "seconds": 4.96,
+  "server_elapsed": 4.37,
+  "status": "answered",
+  "n_sub_questions": 0,
+  "sub_questions": [],
+  "n_contexts": 5,
+  "answer_chars": 59,
+  "at": "2026-11-12T12:53:57"
+ },
+ {
+  "difficulty": "intermediate",
+  "order": 2,
+  "question_id": "IS-DEV-02",
+  "question": "가온루트 부산–LA 일반 건화물 40GP로 2026년 11월 6일 출항을 처음 신청하려고 합니다. 예약 메일에 넣을 정보와 창구, 그 일정으로 예약이 확정됐을 때 준비할 SI 마감과 제출처를 한 번에 정리해 주세요.",
+  "expected_action": "answer",
+  "seconds": 11.65,
+  "server_elapsed": 10.752,
+  "status": "needs_clarification",
+  "n_sub_questions": 3,
+  "sub_questions": [
+   "가온루트 부산–LA 일반 건화물 40GP의 2026년 11월 6일 출항 예약 메일에 필요한 정보는 무엇인가요?",
+   "가온루트 부산–LA 일반 건화물 40GP의 2026년 11월 6일 출항 예약 문의 창구는 어디인가요?",
+   "가온루트 부산–LA 일반 건화물 40GP의 2026년 11월 6일 출항 예약 확정 후 SI 마감과 제출처는 무엇인가요?"
+  ],
+  "n_contexts": 12,
+  "answer_chars": 400,
+  "at": "2026-11-12T12:54:09"
+ },
+ {
+  "difficulty": "advanced",
+  "order": 1,
+  "question_id": "AS-DEV01",
+  "question": "가온루트해운 부산–LA 안내에서 일반 건화물로 예약할 수 있는 컨테이너 종류는 무엇인가요?",
+  "expected_action": "answer",
+  "seconds": 5.27,
+  "server_elapsed": 4.876,
+  "status": "answered",
+  "n_sub_questions": 0,
+  "sub_questions": [],
+  "n_contexts": 5,
+  "answer_chars": 101,
+  "at": "2026-11-12T12:54:14"
+ },
+ {
+  "difficulty": "advanced",
+  "order": 2,
+  "question_id": "AS-DEV02",
+  "question": "가온루트 부산–LA 일반 건화물 40GP로 2026년 11월 6일 출항을 처음 신청하려고 합니다. 예약 메일에 넣을 정보와 창구, 그 일정으로 예약이 확정됐을 때 준비할 SI 마감과 제출처를 한 번에 정리해 주세요.",
+  "expected_action": "answer",
+  "seconds": 13.87,
+  "server_elapsed": 13.109,
+  "status": "needs_clarification",
+  "n_sub_questions": 3,
+  "sub_questions": [
+   "가온루트 부산–LA 일반 건화물 40GP, 2026년 11월 6일 출항을 처음 신청할 때 예약 메일에 포함할 정보는 무엇인가요?",
+   "가온루트 부산–LA 일반 건화물 40GP, 2026년 11월 6일 출항 예약의 예약 신청 창구는 어디인가요?",
+   "가온루트 부산–LA 일반 건화물 40GP, 2026년 11월 6일 출항 예약 확정 후 SI 마감 시각과 제출처는 무엇인가요?"
+  ],
+  "n_contexts": 12,
+  "answer_chars": 408,
+  "at": "2026-11-12T12:54:28"
+ }
+]
