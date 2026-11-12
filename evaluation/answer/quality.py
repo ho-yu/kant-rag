@@ -528,7 +528,8 @@ class QualityScorer:
     """RAGAS 4개 + Judge 4항목을 한 문항에 대해 동시에 계산한다.
 
     metrics: {"faithfulness": 객체, ...} 각 객체는 ascore(**kwargs)를 가진다 (테스트는 가짜를 넣는다)
-    judge:   invoke(inputs) → JudgeResult (make_judge)
+    judge:   invoke(inputs) → JudgeResult (make_judge). None이면 RAGAS 4개만 매긴다
+             (Judge는 Langfuse 서버 evaluator가 채점할 때)
     ragas_usage / judge_usage: 채점 토큰 합계. 실행이 끝난 뒤 grading_usage()로 읽는다.
     """
 
@@ -557,12 +558,14 @@ class QualityScorer:
         embeddings: Any = None,
         client: Any = None,
         judge: Any = None,
+        with_judge: bool = True,
     ) -> "QualityScorer":
         """실제 평가 LLM으로 만든다. 만들 때는 API를 부르지 않는다 (임베딩 모델은 여기서 읽는다).
 
         client: RAGAS용 AsyncOpenAI (테스트에서 가짜 응답 클라이언트). 없으면 .env의 OPENAI_API_KEY로 만든다.
         embeddings: LangChain 임베딩. 없으면 팀 bge-m3.
         judge: 없으면 make_judge(model).
+        with_judge: False면 Judge 없이 RAGAS 4개만 (judge 인자는 무시)
         """
         from openai import AsyncOpenAI
         from ragas.llms import llm_factory
@@ -589,7 +592,7 @@ class QualityScorer:
         }
         return cls(
             metrics=metrics,
-            judge=judge or make_judge(model),
+            judge=(judge or make_judge(model)) if with_judge else None,
             ragas_usage=counter,
             model=model,
         )
@@ -597,10 +600,12 @@ class QualityScorer:
     async def score(
         self, rec: Record, golden: Mapping[str, Any] | None
     ) -> list[Record]:
-        """문항 하나의 점수 8개 (RAGAS 4 + Judge 4). 순서는 ALL_NAMES와 같다."""
+        """문항 하나의 점수 8개 (RAGAS 4 + Judge 4). 순서는 ALL_NAMES와 같다. Judge가 없으면 RAGAS 4개."""
         ragas = [
             ragas_score(name, self.metrics[name], rec, golden) for name in RAGAS_METRICS
         ]
+        if self.judge is None:
+            return list(await asyncio.gather(*ragas))
         judge = asyncio.to_thread(
             judge_scores, self.judge, rec, golden, self.judge_usage
         )
