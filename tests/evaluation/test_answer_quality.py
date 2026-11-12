@@ -120,6 +120,28 @@ def test_score_returns_eight_named_scores_in_order():
     assert all(s["state"] == "scored" for s in scores)
 
 
+def test_without_judge_only_ragas_scores_are_returned():
+    metrics = {name: FakeMetric(0.8) for name in q.RAGAS_METRICS}
+    scorer = q.QualityScorer(metrics=metrics, judge=None)
+    scores = asyncio.run(scorer.score(_rec(), GOLDEN))
+    assert [s["name"] for s in scores] == list(q.RAGAS_METRICS)
+    assert scorer.grading_usage()["judge"]["calls"] == 0
+
+
+def test_create_without_judge_does_not_build_one():
+    emb = FakeEmbeddings()
+    client = _fake_openai(lambda _: {}, [])
+    scorer = q.QualityScorer.create(
+        "gpt-6-luna",
+        embeddings=emb,
+        client=client,
+        judge=FakeJudge(_judge_result()),
+        with_judge=False,
+    )
+    assert scorer.judge is None
+    assert set(scorer.metrics) == set(q.RAGAS_METRICS)
+
+
 def test_ragas_inputs_match_ragas_043_signatures():
     scorer = _scorer()
     asyncio.run(scorer.score(_rec(), GOLDEN))

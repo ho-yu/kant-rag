@@ -404,11 +404,12 @@ def test_run_mode_passes_impl_to_chain(monkeypatch, tmp_path):
             return SimpleNamespace(item_results=[], dataset_run_url=None)
 
     monkeypatch.setattr(pipeline, "create_chain", fake_create_chain)
-    monkeypatch.setattr(lx.quality.QualityScorer, "create", classmethod(lambda cls, model: FakeScorer([])))
+    monkeypatch.setattr(lx.quality.QualityScorer, "create", classmethod(lambda cls, model, **kw: FakeScorer([])))
     monkeypatch.setattr(lx, "ROOT", tmp_path)
     args = SimpleNamespace(
         domain="shipping", difficulty="basic", impl="retrieval_b", page_context=False, tag="",
-        no_retrieval=False, code_answer_scores=True, k=5, model="m", dataset="d", concurrency=1,
+        no_retrieval=False, no_ragas=False, code_answer_scores=True, k=5, model="m", dataset="d",
+        concurrency=1,
     )
     payload = lx.run_mode(FakeLangfuse(), [], args, "naive")
     assert seen["impl"] == "retrieval_b" and seen["difficulty"] == "basic"
@@ -416,11 +417,20 @@ def test_run_mode_passes_impl_to_chain(monkeypatch, tmp_path):
     assert payload["impl"] == "retrieval_b"
 
 
-@pytest.mark.parametrize("code_answer_scores", [False, True])
-def test_answer_scores_come_from_langfuse_unless_code_flag(monkeypatch, tmp_path, code_answer_scores):
+@pytest.mark.parametrize(
+    ("no_ragas", "code_answer_scores", "ragas", "judge"),
+    [
+        (False, False, "code", "langfuse_evaluator"),  # 기본: RAGAS는 코드, Judge는 서버 evaluator
+        (False, True, "code", "code"),  # 비교용: Judge도 코드
+        (True, False, "off", "langfuse_evaluator"),  # 검색 점수만
+    ],
+)
+def test_ragas_in_code_and_judge_on_server_by_default(
+    monkeypatch, tmp_path, no_ragas, code_answer_scores, ragas, judge
+):
     from rag_service import pipeline
 
-    seen = {"created": 0}
+    seen = {"created": 0, "with_judge": []}
 
     class FakeLangfuse:
         def run_experiment(self, **kw):
@@ -428,8 +438,9 @@ def test_answer_scores_come_from_langfuse_unless_code_flag(monkeypatch, tmp_path
             seen["metadata"], seen["description"] = kw["metadata"], kw["description"]
             return SimpleNamespace(item_results=[], dataset_run_url=None)
 
-    def fake_create(cls, model):
+    def fake_create(cls, model, *, with_judge=True):
         seen["created"] += 1
+        seen["with_judge"].append(with_judge)
         return FakeScorer([])
 
     monkeypatch.setattr(pipeline, "create_chain", lambda **kw: FakeChain(ANSWER))
@@ -438,17 +449,23 @@ def test_answer_scores_come_from_langfuse_unless_code_flag(monkeypatch, tmp_path
     monkeypatch.setattr(lx, "ROOT", tmp_path)
     args = SimpleNamespace(
         domain="shipping", difficulty="basic", impl="retrieval_a", page_context=False, tag="",
-        no_retrieval=False, code_answer_scores=code_answer_scores, k=5, model="m", dataset="d",
-        concurrency=1,
+        no_retrieval=False, no_ragas=no_ragas, code_answer_scores=code_answer_scores, k=5,
+        model="m", dataset="d", concurrency=1,
     )
     payload = lx.run_mode(FakeLangfuse(), [], args, "naive")
-    assert seen["created"] == int(code_answer_scores)
-    expected = ["answer_quality", "retrieval_judgement"] if code_answer_scores else ["retrieval_judgement"]
+    assert seen["created"] == int(not no_ragas)
+    assert seen["with_judge"] == ([] if no_ragas else [code_answer_scores])
+    expected = ["retrieval_judgement"] if no_ragas else ["answer_quality", "retrieval_judgement"]
     assert seen["evaluators"] == expected
-    assert seen["metadata"]["code_answer_scores"] == str(code_answer_scores)
-    assert payload["code_answer_scores"] is code_answer_scores
-    assert (payload["grading_usage"] is None) is not code_answer_scores
+    assert (seen["metadata"]["ragas"], seen["metadata"]["judge"]) == (ragas, judge)
+    assert (payload["ragas"], payload["judge"]) == (ragas, judge)
+    assert (payload["grading_usage"] is None) is no_ragas
     assert ("Langfuse evaluator" in seen["description"]) is not code_answer_scores
+
+
+def test_no_ragas_and_code_judge_cannot_be_combined():
+    with pytest.raises(SystemExit):
+        lx.main(["--no-ragas", "--code-answer-scores"])
 
 
 def test_real_run_experiment_wires_task_and_evaluators(monkeypatch):
