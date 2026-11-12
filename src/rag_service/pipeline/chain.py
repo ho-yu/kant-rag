@@ -1,7 +1,6 @@
 """개별 처리 블록을 연결하는 RAG 하위 체인과 전체 질문 처리 체인 구성."""
 
 import os
-from functools import lru_cache
 
 from langchain_core.documents import Document
 from langchain_core.output_parsers import StrOutputParser
@@ -26,7 +25,11 @@ from rag_service.generation.prompt import (
 from rag_service.generation.rag_config import max_docs
 from rag_service.generation.sources import add_sources, build_answer_result
 from rag_service.observability import with_langfuse
-from rag_service.pipeline.prepare_retriever import RETRIEVAL_LOCK, RetrieverPool
+from rag_service.pipeline.prepare_retriever import (
+    RESOURCE_INIT_LOCK,
+    RetrieverPool,
+    warmup_retriever,
+)
 from rag_service.retrieval_a import (
     build_hybrid_retriever,
     build_naive_retriever,
@@ -98,38 +101,41 @@ def create_chain(
     # 검색 구현 검증 및 객체 생성 전 검색 방식별 생성 함수 보관
     builders = dict(zip(("naive", "hybrid", "hybrid_rerank"), retriever_builders(impl), strict=True))
     # 기존 검색 후 답변 기능의 독립 실행 유지 및 전체 서비스 체인의 RAG 분기로 재사용
-    answer_chain = RunnableLambda(prepare_answer_input) | answer_prompt | create_model().with_structured_output(RagAnswer)
+    answer_model = create_model().with_structured_output(RagAnswer).with_config(metadata={"ui_answer": "json"})
+    answer_chain = RunnableLambda(prepare_answer_input) | answer_prompt | answer_model
     # A의 Hybrid 공유 유지 및 B의 선택한 검색기만 최초 호출 시 생성
     # 서버에서 사전 준비한 검색 자원 주입 및 기존 독립 호출의 자체 준비 유지
     pool = (retriever_pool or RetrieverPool(domain, difficulty, profile)) if impl == "retrieval_a" else None
     retrievers = {}
 
     def retrieve_docs(request):
-        """선택한 검색기만 호출 및 기존 하위 질문별 결과 병합 유지."""
-        # ainvoke에서는 이 동기 함수가 작업 스레드에서 실행되므로 이벤트 루프 대기 방지
-        # 기존 검색기의 공유 모델과 캐시 파일 보호를 위해 검색 구간만 순차 실행
-        with RETRIEVAL_LOCK:
-            search_question = request.get("search_question") or request.get("question")
-            mode = request.get("retrieval_mode", "naive")
-            if mode not in builders:
-                raise ValueError(f"지원하지 않는 검색 방식: {mode}")
-            if pool is not None:
-                retriever = pool.get(mode)
-            else:
-                if mode not in retrievers:
-                    retrievers[mode] = builders[mode](domain=domain, difficulty=difficulty, profile=profile)
-                retriever = retrievers[mode]
-            sub_questions = [q.strip() for q in request.get("sub_questions") or [] if q and q.strip()]
-            if sub_questions:
-                queries = list(dict.fromkeys([search_question, *sub_questions]))
-                docs = merge_docs([retriever.invoke(q) for q in queries])
-            else:
-                docs = retriever.invoke(search_question)
+        """준비된 검색기를 고르고 LangChain map으로 질문별 검색을 동시에 실행한다."""
+        mode = request.get("retrieval_mode", "naive")
+        if mode not in builders:
+            raise ValueError(f"지원하지 않는 검색 방식: {mode}")
+        if pool is not None:
+            retriever = pool.get(mode)
+        else:
+            if mode not in retrievers:
+                with RESOURCE_INIT_LOCK:
+                    if mode not in retrievers:
+                        retriever = builders[mode](domain=domain, difficulty=difficulty, profile=profile)
+                        warmup_retriever(retriever, mode)
+                        retrievers[mode] = retriever
+            retriever = retrievers[mode]
+        question = request.get("search_question") or request.get("question")
+        sub_questions = [q.strip() for q in request.get("sub_questions") or [] if q and q.strip()]
+        queries = list(dict.fromkeys([question, *sub_questions]))
+
+        def finish_search(results):
+            docs = merge_docs(results) if sub_questions else results[0]
             if request.get("page_context"):
-                # 페이지 확장 요청에만 컬렉션 설정 확인
                 collection = collection_name(load_config(), domain=domain, difficulty=difficulty, profile=profile)
                 docs = to_pages(docs, collection)
             return docs
+
+        # ainvoke 시 동기 준비/페이지 조회는 작업 스레드, 검색은 abatch로 실행된다.
+        return RunnableLambda(lambda _: queries) | retriever.map() | RunnableLambda(finish_search)
 
     def retrieve_context(request):
         return format_docs(request["docs"])
@@ -153,29 +159,27 @@ def create_chain(
     return chain.with_config(run_name="rag-answer")
 
 
-@lru_cache(maxsize=3)
-def _cached_rag_resources(domain, difficulty):
-    """서비스의 세 난이도별 체인과 검색 자원 보관 및 준비한 객체의 재사용."""
-    # 호출한 난이도만 생성하며 난이도 전환 시 기존 워밍업 자원의 캐시 퇴출 방지
-    pool = RetrieverPool(domain, difficulty)
-    chain = create_chain(
-        domain=domain, difficulty=difficulty, include_context=True, trace=False, retriever_pool=pool,
-    )
-    return chain, pool
+_rag_resources = {}
 
 
 def get_rag_chain(domain, difficulty):
-    """동시 최초 요청에서도 동일한 RAG 체인을 한 번만 생성하도록 캐시 조회 보호."""
-    # lru_cache의 최초 계산 중 중복 실행을 막기 위해 캐시 조회 바깥에서 잠금 확보
-    with RETRIEVAL_LOCK:
-        return _cached_rag_resources(domain, difficulty)[0]
+    """준비된 자원은 잠금 없이 읽고, 아직 없는 난이도만 한 번 생성한다."""
+    key = (domain, difficulty)
+    if key not in _rag_resources:
+        with RESOURCE_INIT_LOCK:
+            if key not in _rag_resources:
+                pool = RetrieverPool(domain, difficulty)
+                chain = create_chain(
+                    domain=domain, difficulty=difficulty, include_context=True, trace=False, retriever_pool=pool,
+                )
+                _rag_resources[key] = (chain, pool)
+    return _rag_resources[key][0]
 
 
 def warmup_service(domain, difficulty, modes):
     """실제 서비스 체인이 재사용할 검색 자원 준비 및 답변·검사 모델 호출 제외."""
-    with RETRIEVAL_LOCK:
-        _, pool = _cached_rag_resources(domain, difficulty)
-        pool.warmup(modes)
+    get_rag_chain(domain, difficulty)
+    _rag_resources[(domain, difficulty)][1].warmup(modes)
 
 
 def create_service_chain():
@@ -199,10 +203,11 @@ def create_service_chain():
         check_step = RunnablePassthrough.assign(check=answer_check) | RunnableLambda(apply_answer_check)
     else:
         check_step = RunnableLambda(apply_answer_rules)
+    check_step = check_step.with_config(run_name="check_answer")
 
     # 직접 답변도 같은 위치에서 입력 준비와 모델 및 문자열 출력 처리를 연결
     direct_answer = (
-        RunnableLambda(prepare_direct_input) | create_model() | StrOutputParser()
+        RunnableLambda(prepare_direct_input) | create_model().with_config(metadata={"ui_answer": "text"}) | StrOutputParser()
         | RunnableLambda(lambda text: {"answer": text, "status": "answered"})
     )
 

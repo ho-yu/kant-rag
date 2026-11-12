@@ -14,8 +14,15 @@ from rag_service.retrieval_a.naive import (
 from rag_service.retrieval_a.rerank import CONFIG_PATH as RERANK_CONFIG
 from rag_service.retrieval_a.rerank import HybridRerankRetriever, make_scorer
 
-# 난이도별 체인에서도 공유하는 로컬 검색 모델의 초기화와 실행 보호
-RETRIEVAL_LOCK = RLock()
+# 난이도·체인이 공유하는 모델/캐시의 최초 준비만 보호한다. 검색 실행에는 사용하지 않는다.
+RESOURCE_INIT_LOCK = RLock()
+
+
+def warmup_retriever(retriever, mode):
+    """지연 로딩과 토크나이저 설정을 완료한 뒤 검색기를 요청에 공개한다."""
+    docs = retriever.invoke("해상 운송")
+    if mode == "hybrid_rerank" and not docs:
+        retriever.score_fn("해상 운송", ["해상 운송"])
 
 
 class RetrieverPool:
@@ -25,7 +32,6 @@ class RetrieverPool:
         self.scope = {"domain": domain, "difficulty": difficulty, "profile": profile}
         # 검색 방식별 실행 객체와 설정 파일별 Hybrid 원본의 별도 보관
         self.retrievers, self.hybrids = {}, {}
-        self.lock = RLock()
 
     def _hybrid(self, path, top_k=None):
         """동일 설정의 원문과 벡터 및 Sparse 점수 함수 공유."""
@@ -38,8 +44,10 @@ class RetrieverPool:
         return base if top_k is None else base.model_copy(update={"top_k": top_k}, deep=False)
 
     def get(self, mode):
-        """선택한 검색기만 준비 및 동시 최초 요청의 중복 생성 방지."""
-        with self.lock:
+        """준비된 검색기는 즉시 반환하고 최초 준비만 한 번 수행한다."""
+        if mode in self.retrievers:
+            return self.retrievers[mode]
+        with RESOURCE_INIT_LOCK:
             if mode not in self.retrievers:
                 if mode == "naive":
                     retriever = build_naive_retriever(**self.scope)
@@ -62,16 +70,11 @@ class RetrieverPool:
                     )
                 else:
                     raise ValueError(f"지원하지 않는 검색 방식: {mode}")
+                warmup_retriever(retriever, mode)
                 self.retrievers[mode] = retriever
             return self.retrievers[mode]
 
     def warmup(self, modes):
         """답변 생성 없이 검색 실행으로 지연 로딩 모델과 검색 자료의 사전 준비."""
-        # 실제 요청과 같은 잠금과 검색 객체 사용 및 워밍업 중 중복 초기화 방지
-        with RETRIEVAL_LOCK:
-            for mode in modes:
-                retriever = self.get(mode)
-                docs = retriever.invoke("해상 운송")
-                # 검색 결과가 없어도 첫 점수 계산 때 로드되는 리랭커의 사전 준비
-                if mode == "hybrid_rerank" and not docs:
-                    retriever.score_fn("해상 운송", ["해상 운송"])
+        for mode in modes:
+            self.get(mode)
