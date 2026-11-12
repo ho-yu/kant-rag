@@ -14,8 +14,10 @@ search:
   levels: [para, table]
 
 sparse:
-  use_context: true
-  cache_dir: artifacts/retrieval_a/sparse_cache
+  source: qdrant        # qdrant: 컬렉션의 sparse 벡터(m3·bm25)로 후보 검색 / local: 청크를 모두 받아 직접 계산
+  candidate_k: 100      # qdrant: dense·sparse에서 각각 받을 후보 수 (그 안에서 min-max)
+  use_context: true     # local
+  cache_dir: artifacts/retrieval_a/sparse_cache   # local
 
 fusion:
   method: minmax

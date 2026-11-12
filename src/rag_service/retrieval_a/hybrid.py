@@ -158,18 +158,23 @@ _POINTS: dict[tuple[str, tuple[str, ...]], tuple[list[Document], np.ndarray]] = 
 _SCROLL_RETRIES = 4
 
 
-def _scroll(client, **kwargs):
+def _with_retry(call):
+    """Qdrant가 응답 없이 연결을 끊으면 1·2·4초 뒤 다시 부른다."""
     from qdrant_client.http.exceptions import ResponseHandlingException
 
     for attempt in range(_SCROLL_RETRIES):
         try:
-            return client.scroll(**kwargs)
+            return call()
         except ResponseHandlingException as e:
             if attempt == _SCROLL_RETRIES - 1:
                 raise
             wait = 2**attempt
             print(f"[hybrid] Qdrant 연결 끊김, {wait}초 뒤 재시도 ({attempt + 1}/{_SCROLL_RETRIES - 1}): {e}")
             time.sleep(wait)
+
+
+def _scroll(client, **kwargs):
+    return _with_retry(lambda: client.scroll(**kwargs))
 
 
 def load_points(client, collection: str, levels: list[str]) -> tuple[list[Document], np.ndarray]:
@@ -276,6 +281,99 @@ class HybridRetriever(BaseRetriever):
         return out
 
 
+def _candidate_scores(hits: list[dict], key: str) -> np.ndarray:
+    """한쪽 검색에만 나온 후보는 다른 쪽 점수를 꼴찌보다 조금 낮게 채운다 (min-max에서 0, 순위는 맨 뒤)."""
+    vals = [h[key] for h in hits if h[key] is not None]
+    if not vals:
+        return np.zeros(len(hits), dtype=np.float32)
+    floor = min(vals) - ((max(vals) - min(vals)) or 1.0) * 1e-3
+    return np.asarray([floor if h[key] is None else h[key] for h in hits], dtype=np.float32)
+
+
+class QdrantHybridRetriever(BaseRetriever):
+    """dense·sparse 후보를 Qdrant에서 각각 받아, 후보 안에서만 점수를 합친다 (컬렉션 전체를 내려받지 않음)."""
+
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
+    client: Any
+    collection: str
+    encode_query: Any
+    sparse_kind: str = "m3"
+    levels: list[str]
+    candidate_k: int = 100
+    top_k: int = 5
+    method: str = "minmax"
+    dense_weight: float = 0.7
+    sparse_weight: float = 0.3
+    rrf_k: int = 60
+
+    def _get_relevant_documents(self, query: str, *, run_manager: CallbackManagerForRetrieverRun) -> list[Document]:
+        from rag_service.storage import qdrant_store
+
+        q_dense, q_sparse = self.encode_query(query)
+        hits = _with_retry(
+            lambda: qdrant_store.search_dense_sparse(
+                self.client,
+                self.collection,
+                [float(x) for x in q_dense],
+                q_sparse,
+                kind=self.sparse_kind,
+                levels=self.levels,
+                limit=max(self.candidate_k, self.top_k),
+            )
+        )
+        if not hits:
+            return []
+        dense, sparse = _candidate_scores(hits, "dense_score"), _candidate_scores(hits, "sparse_score")
+        fused = fuse(
+            dense,
+            sparse,
+            method=self.method,
+            dense_weight=self.dense_weight,
+            sparse_weight=self.sparse_weight,
+            rrf_k=self.rrf_k,
+        )
+        d_rank, s_rank = ranks_of(dense), ranks_of(sparse)
+        out = []
+        for i in np.argsort(-fused, kind="stable")[: self.top_k]:
+            payload = hits[i]["payload"]
+            meta = {
+                **dict(payload.get("metadata", {})),
+                "hybrid_score": round(float(fused[i]), 6),
+                "dense_score": round(float(dense[i]), 6),
+                "sparse_score": round(float(sparse[i]), 6),
+                "dense_rank": int(d_rank[i]),
+                "sparse_rank": int(s_rank[i]),
+            }
+            out.append(Document(page_content=payload.get("page_content", ""), metadata=meta))
+        return out
+
+
+def _sparse_in_qdrant(client, name: str, kind: str) -> bool:
+    from rag_service.storage import qdrant_store
+
+    try:
+        return qdrant_store.has_sparse(client, name, [kind])
+    except Exception:  # noqa: BLE001 — 확인 실패면 기존 방식으로
+        return False
+
+
+def _query_encoder(profile: dict[str, str], emb: dict[str, Any], kind: str):
+    """질문 → (dense, sparse). 색인 때와 같은 모델·규칙 (m3: BGEM3Encoder, bm25: qdrant_store.bm25_query)."""
+    if kind == "m3":
+
+        def encode(q: str):
+            dense, sparse = _encoder(profile["embedding"], emb["device"], emb.get("max_length", 1024)).encode([q])
+            return dense[0], sparse[0]
+
+        return encode
+
+    from rag_service.storage.qdrant_store import bm25_query
+
+    embedder = _embeddings(profile["embedding"], emb["device"], True, profile["query_prefix"])
+    return lambda q: (embedder.embed_query(q), bm25_query(q))
+
+
 def build_hybrid_retriever(
     *,
     domain: str | None = None,
@@ -290,10 +388,30 @@ def build_hybrid_retriever(
     domain, difficulty = resolve_scope(cfg, domain, difficulty)
     name = collection_name(cfg, domain=domain, difficulty=difficulty, profile=profile)
     profile = model_profile(profile or difficulty)
-    docs, dense_matrix = load_points(_connect_client(name), name, levels)
-
     emb = cfg["embedding"]
     sp = cfg["sparse"]
+    fusion = cfg["fusion"]
+    kind = "m3" if profile["sparse"] == "bge-m3" else "bm25"
+    client = _connect_client(name)
+
+    if sp.get("source", "qdrant") == "qdrant":
+        if _sparse_in_qdrant(client, name, kind):
+            return QdrantHybridRetriever(
+                client=client,
+                collection=name,
+                encode_query=_query_encoder(profile, emb, kind),
+                sparse_kind=kind,
+                levels=list(levels),
+                candidate_k=sp.get("candidate_k", 100),
+                top_k=top_k or cfg["search"]["top_k"],
+                method=fusion.get("method", "minmax"),
+                dense_weight=fusion["dense_weight"],
+                sparse_weight=fusion["sparse_weight"],
+                rrf_k=fusion.get("rrf_k", 60),
+            )
+        print(f"[hybrid] {name}에 sparse 벡터 {kind!r}가 없어 청크를 모두 받아 직접 계산합니다 (sparse.source: local)")
+
+    docs, dense_matrix = load_points(client, name, levels)
     use_context = sp.get("use_context", True)
 
     if profile["sparse"] == "bge-m3":
@@ -320,7 +438,6 @@ def build_hybrid_retriever(
         def score_query(q: str):
             return embedder.embed_query(q), bm25.get_scores(tokenize(q))
 
-    fusion = cfg["fusion"]
     return HybridRetriever(
         docs=docs,
         dense_matrix=dense_matrix,

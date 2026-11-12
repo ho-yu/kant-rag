@@ -159,3 +159,61 @@ def test_non_bge_m3_profile_uses_bm25(monkeypatch):
     assert seen["name"] == f"kant_shipping_basic_{model_slug(profile['embedding'])}"
     got = r.invoke("SI 마감")
     assert got[0].metadata["sparse_rank"] == 1 and got[0].metadata["chunk_id"] == "B-1"
+
+
+def _hit(cid, dense, sparse):
+    return {"payload": {"page_content": cid, "metadata": {"chunk_id": cid, "book_id": cid[0]}}, "dense_score": dense, "sparse_score": sparse}
+
+
+def test_qdrant_hybrid_fuses_candidates_and_fills_missing_scores(monkeypatch):
+    from rag_service.storage import qdrant_store
+
+    seen = {}
+
+    def fake_search(client, collection, dense, sparse, *, kind, levels, limit):
+        seen.update(collection=collection, kind=kind, levels=levels, limit=limit, sparse=sparse)
+        return [_hit("A-1", 0.9, None), _hit("B-1", 0.5, 8.0), _hit("C-1", None, 10.0)]
+
+    monkeypatch.setattr(qdrant_store, "search_dense_sparse", fake_search)
+    r = hybrid.QdrantHybridRetriever(
+        client=object(), collection="col", encode_query=lambda q: ([1.0, 0.0], {"7": 0.3}),
+        sparse_kind="m3", levels=["para", "table"], candidate_k=100, top_k=3,
+        method="minmax", dense_weight=0.7, sparse_weight=0.3,
+    )
+    got = r.invoke("q")
+    assert seen == {"collection": "col", "kind": "m3", "levels": ["para", "table"], "limit": 100, "sparse": {"7": 0.3}}
+    assert [d.metadata["chunk_id"] for d in got] == ["A-1", "C-1", "B-1"]
+    assert got[0].metadata["sparse_rank"] == 3 and got[1].metadata["dense_rank"] == 3
+    assert r.model_copy(update={"top_k": 150}).invoke("q") and seen["limit"] == 150
+
+
+def test_qdrant_hybrid_empty_result(monkeypatch):
+    from rag_service.storage import qdrant_store
+
+    monkeypatch.setattr(qdrant_store, "search_dense_sparse", lambda *a, **k: [])
+    r = hybrid.QdrantHybridRetriever(client=None, collection="c", encode_query=lambda q: ([0.0], {}), levels=["para"])
+    assert r.invoke("q") == []
+
+
+def test_builder_uses_qdrant_sparse_when_collection_has_it(monkeypatch):
+    monkeypatch.setattr(hybrid, "_connect_client", lambda name: "client")
+    monkeypatch.setattr(hybrid, "_sparse_in_qdrant", lambda c, n, k: True)
+    monkeypatch.setattr(hybrid, "load_points", lambda *a: (_ for _ in ()).throw(AssertionError("전체를 받으면 안 됨")))
+    monkeypatch.setattr(hybrid, "_embeddings", lambda *a: None)
+    r = build_hybrid_retriever(domain="shipping", difficulty="basic")
+    assert isinstance(r, hybrid.QdrantHybridRetriever)
+    assert (r.collection, r.sparse_kind, r.candidate_k, r.method) == ("kant_shipping_basic_bge-m3", "m3", 100, "minmax")
+    r2 = build_hybrid_retriever(domain="shipping", difficulty="basic", profile="bge-m3-bm25")
+    assert r2.sparse_kind == "bm25"
+
+
+def test_builder_falls_back_to_local_without_sparse(monkeypatch):
+    monkeypatch.setattr(hybrid, "_connect_client", lambda name: "client")
+    monkeypatch.setattr(hybrid, "_sparse_in_qdrant", lambda c, n, k: False)
+    monkeypatch.setattr(hybrid, "load_points", lambda c, n, l: ([_doc("A-1", "a")], np.array([[1.0, 0.0]], dtype=np.float32)))
+    monkeypatch.setattr(hybrid, "doc_sparse_weights", lambda *a, **k: [{}])
+    assert isinstance(build_hybrid_retriever(domain="shipping", difficulty="basic"), HybridRetriever)
+
+
+def test_sparse_in_qdrant_false_on_error():
+    assert hybrid._sparse_in_qdrant(object(), "c", "m3") is False
