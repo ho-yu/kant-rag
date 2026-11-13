@@ -1,0 +1,95 @@
+{
+  "run_name": "naive_20261112-1024_cmp_qdrant_intermediate",
+  "dataset": "shipping-intermediate-development-v1",
+  "impl": "retrieval_a",
+  "mode": "naive",
+  "page_context": false,
+  "code_answer_scores": false,
+  "judge_model": null,
+  "n_items": 30,
+  "summary": {
+    "hit_at_5": {
+      "mean": 1.0,
+      "n_scored": 28,
+      "n_zero": 0,
+      "n_na": 2,
+      "n_unavailable": 0,
+      "causes": {
+        "no_evidence": 2
+      },
+      "by_status": {
+        "answered": {
+          "mean": 1.0,
+          "n_scored": 22,
+          "n": 22
+        },
+        "needs_clarification": {
+          "mean": 1.0,
+          "n_scored": 5,
+          "n": 7
+        },
+        "abstained": {
+          "mean": 1.0,
+          "n_scored": 1,
+          "n": 1
+        }
+      }
+    },
+    "recall_at_5": {
+      "mean": 0.6849,
+      "n_scored": 28,
+      "n_zero": 0,
+      "n_na": 2,
+      "n_unavailable": 0,
+      "causes": {
+        "no_evidence": 2
+      },
+      "by_status": {
+        "answered": {
+          "mean": 0.7365,
+          "n_scored": 22,
+          "n": 22
+        },
+        "needs_clarification": {
+          "mean": 0.5286,
+          "n_scored": 5,
+          "n": 7
+        },
+        "abstained": {
+          "mean": 0.3333,
+          "n_scored": 1,
+          "n": 1
+        }
+      }
+    },
+    "mrr_at_5": {
+      "mean": 0.9643,
+      "n_scored": 28,
+      "n_zero": 0,
+      "n_na": 2,
+      "n_unavailable": 0,
+      "causes": {
+        "no_evidence": 2
+      },
+      "by_status": {
+        "answered": {
+          "mean": 0.9545,
+          "n_scored": 22,
+          "n": 22
+        },
+        "needs_clarification": {
+          "mean": 1.0,
+          "n_scored": 5,
+          "n": 7
+        },
+        "abstained": {
+          "mean": 1.0,
+          "n_scored": 1,
+          "n": 1
+        }
+      }
+    }
+  },
+  "grading_usage": null,
+  "url": "http://10.2.17.122:3000/project/cmw4irryu0007pc6a7n3sy3al/experiments/results?baseline=4004ff534315f33c"
+}

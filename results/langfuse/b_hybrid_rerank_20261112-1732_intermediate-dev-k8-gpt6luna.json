@@ -1,0 +1,217 @@
+{
+  "run_name": "b_hybrid_rerank_20261112-1732_intermediate-dev-k8-gpt6luna",
+  "dataset": "shipping-intermediate-development-v1",
+  "impl": "retrieval_b",
+  "top_k": 8,
+  "mode": "hybrid_rerank",
+  "page_context": false,
+  "ragas": "code",
+  "judge": "langfuse_evaluator",
+  "grading_model": "gpt-6-luna",
+  "n_items": 30,
+  "summary": {
+    "faithfulness": {
+      "mean": 0.8895,
+      "n_scored": 30,
+      "n_zero": 0,
+      "n_na": 0,
+      "n_unavailable": 0,
+      "causes": {},
+      "by_status": {
+        "answered": {
+          "mean": 0.899,
+          "n_scored": 21,
+          "n": 21
+        },
+        "needs_clarification": {
+          "mean": 0.862,
+          "n_scored": 6,
+          "n": 6
+        },
+        "abstained": {
+          "mean": 0.8783,
+          "n_scored": 3,
+          "n": 3
+        }
+      }
+    },
+    "answer_relevancy": {
+      "mean": 0.7025,
+      "n_scored": 30,
+      "n_zero": 2,
+      "n_na": 0,
+      "n_unavailable": 0,
+      "causes": {},
+      "by_status": {
+        "answered": {
+          "mean": 0.7419,
+          "n_scored": 21,
+          "n": 21
+        },
+        "needs_clarification": {
+          "mean": 0.5525,
+          "n_scored": 6,
+          "n": 6
+        },
+        "abstained": {
+          "mean": 0.7266,
+          "n_scored": 3,
+          "n": 3
+        }
+      }
+    },
+    "context_precision": {
+      "mean": 0.8971,
+      "n_scored": 30,
+      "n_zero": 0,
+      "n_na": 0,
+      "n_unavailable": 0,
+      "causes": {},
+      "by_status": {
+        "answered": {
+          "mean": 0.9142,
+          "n_scored": 21,
+          "n": 21
+        },
+        "needs_clarification": {
+          "mean": 0.7887,
+          "n_scored": 6,
+          "n": 6
+        },
+        "abstained": {
+          "mean": 0.994,
+          "n_scored": 3,
+          "n": 3
+        }
+      }
+    },
+    "context_recall": {
+      "mean": 0.8278,
+      "n_scored": 30,
+      "n_zero": 0,
+      "n_na": 0,
+      "n_unavailable": 0,
+      "causes": {},
+      "by_status": {
+        "answered": {
+          "mean": 0.9159,
+          "n_scored": 21,
+          "n": 21
+        },
+        "needs_clarification": {
+          "mean": 0.5444,
+          "n_scored": 6,
+          "n": 6
+        },
+        "abstained": {
+          "mean": 0.7778,
+          "n_scored": 3,
+          "n": 3
+        }
+      }
+    },
+    "hit_at_8": {
+      "mean": 1.0,
+      "n_scored": 28,
+      "n_zero": 0,
+      "n_na": 2,
+      "n_unavailable": 0,
+      "causes": {
+        "no_evidence": 2
+      },
+      "by_status": {
+        "answered": {
+          "mean": 1.0,
+          "n_scored": 21,
+          "n": 21
+        },
+        "needs_clarification": {
+          "mean": 1.0,
+          "n_scored": 4,
+          "n": 6
+        },
+        "abstained": {
+          "mean": 1.0,
+          "n_scored": 3,
+          "n": 3
+        }
+      }
+    },
+    "recall_at_8": {
+      "mean": 0.7755,
+      "n_scored": 28,
+      "n_zero": 0,
+      "n_na": 2,
+      "n_unavailable": 0,
+      "causes": {
+        "no_evidence": 2
+      },
+      "by_status": {
+        "answered": {
+          "mean": 0.8175,
+          "n_scored": 21,
+          "n": 21
+        },
+        "needs_clarification": {
+          "mean": 0.6786,
+          "n_scored": 4,
+          "n": 6
+        },
+        "abstained": {
+          "mean": 0.6111,
+          "n_scored": 3,
+          "n": 3
+        }
+      }
+    },
+    "mrr_at_8": {
+      "mean": 1.0,
+      "n_scored": 28,
+      "n_zero": 0,
+      "n_na": 2,
+      "n_unavailable": 0,
+      "causes": {
+        "no_evidence": 2
+      },
+      "by_status": {
+        "answered": {
+          "mean": 1.0,
+          "n_scored": 21,
+          "n": 21
+        },
+        "needs_clarification": {
+          "mean": 1.0,
+          "n_scored": 4,
+          "n": 6
+        },
+        "abstained": {
+          "mean": 1.0,
+          "n_scored": 3,
+          "n": 3
+        }
+      }
+    }
+  },
+  "grading_usage": {
+    "model": "gpt-6-luna",
+    "ragas": {
+      "calls": 420,
+      "input": 575938,
+      "output": 113795,
+      "unknown": 0
+    },
+    "judge": {
+      "calls": 0,
+      "input": 0,
+      "output": 0,
+      "unknown": 0
+    },
+    "total": {
+      "calls": 420,
+      "input": 575938,
+      "output": 113795,
+      "unknown": 0
+    }
+  },
+  "url": "http://10.2.17.122:3000/project/cmw4irryu0007pc6a7n3sy3al/experiments/results?baseline=5ef663651db6c68b"
+}

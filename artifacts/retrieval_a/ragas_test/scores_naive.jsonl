@@ -1,0 +1,3 @@
+{"id": "S-DEV-01", "faithfulness": 1.0, "answer_relevancy": 0.9918825577705617, "context_precision": 0.49999999995, "context_recall": 1.0}
+{"id": "S-DEV-02", "faithfulness": 0.7142857142857143, "answer_relevancy": 0.631706143919246, "context_precision": 0.99999999998, "context_recall": 0.5}
+{"id": "S-DEV-03", "faithfulness": 1.0, "answer_relevancy": 0.9342267905435828, "context_precision": 0.99999999998, "context_recall": 1.0}

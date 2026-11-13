@@ -1,0 +1,362 @@
+{
+  "domain": "shipping",
+  "difficulty": "basic",
+  "k": 5,
+  "questions": 3,
+  "systems": [
+    {
+      "profile": "basic",
+      "mode": "naive",
+      "summary": {
+        "n": 3,
+        "page_hit@1": 0.6666666666666666,
+        "page_hit@k": 1.0,
+        "page_mrr": 0.7777777777777778,
+        "quote_hit@1": 0.3333333333333333,
+        "quote_hit@k": 1.0,
+        "quote_mrr": 0.611111111111111,
+        "group_recall": 0.8666666666666667,
+        "sec_per_q": 0.3701407114664714
+      },
+      "rows": [
+        {
+          "id": "S-DEV-01",
+          "set": "development",
+          "page_rank": 1,
+          "quote_rank": 2,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB01-p1-c1",
+            "SB01-p1-c2",
+            "SB01-p7-c2",
+            "SB01-p18-c1",
+            "SB01-p18-c3"
+          ]
+        },
+        {
+          "id": "S-DEV-02",
+          "set": "development",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 0.6,
+          "retrieved": [
+            "SB11-p1-c1",
+            "SB01-p12-c3",
+            "SB01-p2-c1",
+            "SB01-p5-c1",
+            "SB01-p10-c3"
+          ]
+        },
+        {
+          "id": "S-DEV-03",
+          "set": "development",
+          "page_rank": 3,
+          "quote_rank": 3,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB12-p5-c1",
+            "SB02-p1-c4",
+            "SB01-p3-c1",
+            "SB02-p24-c4",
+            "SB01-p23-c2"
+          ]
+        }
+      ]
+    },
+    {
+      "profile": "basic",
+      "mode": "hybrid",
+      "summary": {
+        "n": 3,
+        "page_hit@1": 1.0,
+        "page_hit@k": 1.0,
+        "page_mrr": 1.0,
+        "quote_hit@1": 0.6666666666666666,
+        "quote_hit@k": 1.0,
+        "quote_mrr": 0.8333333333333334,
+        "group_recall": 0.8666666666666667,
+        "sec_per_q": 1.8022940158843994
+      },
+      "rows": [
+        {
+          "id": "S-DEV-01",
+          "set": "development",
+          "page_rank": 1,
+          "quote_rank": 2,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB01-p1-c1",
+            "SB01-p1-c2",
+            "SB01-p7-c2",
+            "SB01-p18-c1",
+            "SB01-p18-c3"
+          ]
+        },
+        {
+          "id": "S-DEV-02",
+          "set": "development",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 0.6,
+          "retrieved": [
+            "SB11-p1-c1",
+            "SB01-p12-c3",
+            "SB11-p5-c2",
+            "SB14-p6-c3",
+            "SB01-p2-c1"
+          ]
+        },
+        {
+          "id": "S-DEV-03",
+          "set": "development",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB01-p3-c1",
+            "SB12-p5-c1",
+            "SB02-p24-c4",
+            "SB01-p23-c2",
+            "SB02-p1-c4"
+          ]
+        }
+      ]
+    },
+    {
+      "profile": "basic",
+      "mode": "rerank",
+      "summary": {
+        "n": 3,
+        "page_hit@1": 1.0,
+        "page_hit@k": 1.0,
+        "page_mrr": 1.0,
+        "quote_hit@1": 1.0,
+        "quote_hit@k": 1.0,
+        "quote_mrr": 1.0,
+        "group_recall": 0.7999999999999999,
+        "sec_per_q": 2.2987900575002036
+      },
+      "rows": [
+        {
+          "id": "S-DEV-01",
+          "set": "development",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB01-p1-c2",
+            "SB01-p1-c1",
+            "SB01-p7-c1",
+            "SB01-p18-c1",
+            "SB01-p7-c2"
+          ]
+        },
+        {
+          "id": "S-DEV-02",
+          "set": "development",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 0.4,
+          "retrieved": [
+            "SB11-p1-c1",
+            "SB01-p12-c3",
+            "SB03-p5-c4",
+            "SB14-p21-c2",
+            "SB14-p6-c3"
+          ]
+        },
+        {
+          "id": "S-DEV-03",
+          "set": "development",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB12-p1-c2",
+            "SB01-p23-c2",
+            "SB01-p3-c1",
+            "SB01-p5-c2",
+            "SB01-p14-c2"
+          ]
+        }
+      ]
+    },
+    {
+      "profile": "qwen3",
+      "mode": "naive",
+      "summary": {
+        "n": 3,
+        "page_hit@1": 1.0,
+        "page_hit@k": 1.0,
+        "page_mrr": 1.0,
+        "quote_hit@1": 1.0,
+        "quote_hit@k": 1.0,
+        "quote_mrr": 1.0,
+        "group_recall": 0.8666666666666667,
+        "sec_per_q": 0.07936811447143555
+      },
+      "rows": [
+        {
+          "id": "S-DEV-01",
+          "set": "development",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB01-p1-c2",
+            "SB01-p1-c1",
+            "SB01-p18-c3",
+            "SB01-p7-c2",
+            "SB01-p18-c1"
+          ]
+        },
+        {
+          "id": "S-DEV-02",
+          "set": "development",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 0.6,
+          "retrieved": [
+            "SB11-p1-c1",
+            "SB01-p12-c3",
+            "SB01-p18-c4",
+            "SB01-p5-c1",
+            "SB01-p2-c2"
+          ]
+        },
+        {
+          "id": "S-DEV-03",
+          "set": "development",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB01-p3-c1",
+            "SB12-p5-c1",
+            "SB12-p1-c2",
+            "SB01-p5-c2",
+            "SB12-p5-c4"
+          ]
+        }
+      ]
+    },
+    {
+      "profile": "qwen3",
+      "mode": "hybrid",
+      "summary": {
+        "n": 3,
+        "page_hit@1": 1.0,
+        "page_hit@k": 1.0,
+        "page_mrr": 1.0,
+        "quote_hit@1": 0.6666666666666666,
+        "quote_hit@k": 1.0,
+        "quote_mrr": 0.7777777777777778,
+        "group_recall": 0.7999999999999999,
+        "sec_per_q": 0.05094122886657715
+      },
+      "rows": [
+        {
+          "id": "S-DEV-01",
+          "set": "development",
+          "page_rank": 1,
+          "quote_rank": 3,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB01-p1-c1",
+            "SB01-p7-c2",
+            "SB01-p1-c2",
+            "SB01-p18-c3",
+            "SB01-p18-c1"
+          ]
+        },
+        {
+          "id": "S-DEV-02",
+          "set": "development",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 0.4,
+          "retrieved": [
+            "SB11-p1-c1",
+            "SB01-p12-c3",
+            "SB15-p1-c2",
+            "SB01-p7-c2",
+            "SB01-p5-c1"
+          ]
+        },
+        {
+          "id": "S-DEV-03",
+          "set": "development",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB01-p3-c1",
+            "SB12-p1-c1",
+            "SB12-p1-c2",
+            "SB01-p5-c2",
+            "SB01-p23-c2"
+          ]
+        }
+      ]
+    },
+    {
+      "profile": "qwen3",
+      "mode": "rerank",
+      "summary": {
+        "n": 3,
+        "page_hit@1": 1.0,
+        "page_hit@k": 1.0,
+        "page_mrr": 1.0,
+        "quote_hit@1": 1.0,
+        "quote_hit@k": 1.0,
+        "quote_mrr": 1.0,
+        "group_recall": 0.7999999999999999,
+        "sec_per_q": 0.34131447474161786
+      },
+      "rows": [
+        {
+          "id": "S-DEV-01",
+          "set": "development",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB01-p1-c2",
+            "SB01-p1-c1",
+            "SB01-p7-c1",
+            "SB01-p18-c1",
+            "SB01-p7-c2"
+          ]
+        },
+        {
+          "id": "S-DEV-02",
+          "set": "development",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 0.4,
+          "retrieved": [
+            "SB11-p1-c1",
+            "SB01-p12-c3",
+            "SB03-p5-c4",
+            "SB14-p21-c2",
+            "SB14-p6-c3"
+          ]
+        },
+        {
+          "id": "S-DEV-03",
+          "set": "development",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB12-p1-c2",
+            "SB01-p23-c2",
+            "SB01-p3-c1",
+            "SB01-p5-c2",
+            "SB01-p14-c2"
+          ]
+        }
+      ]
+    }
+  ]
+}

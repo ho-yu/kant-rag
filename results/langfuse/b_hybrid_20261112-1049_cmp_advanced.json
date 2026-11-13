@@ -1,0 +1,113 @@
+{
+  "run_name": "b_hybrid_20261112-1049_cmp_advanced",
+  "dataset": "shipping-advanced-development-v1",
+  "impl": "retrieval_b",
+  "mode": "hybrid",
+  "page_context": false,
+  "code_answer_scores": false,
+  "judge_model": null,
+  "n_items": 30,
+  "summary": {
+    "hit_at_5": {
+      "mean": 0.9231,
+      "n_scored": 26,
+      "n_zero": 2,
+      "n_na": 1,
+      "n_unavailable": 3,
+      "causes": {
+        "service_error": 3,
+        "no_evidence": 1
+      },
+      "by_status": {
+        "answered": {
+          "mean": 1.0,
+          "n_scored": 12,
+          "n": 12
+        },
+        "needs_clarification": {
+          "mean": 0.8889,
+          "n_scored": 9,
+          "n": 10
+        },
+        "abstained": {
+          "mean": 0.8,
+          "n_scored": 5,
+          "n": 5
+        },
+        "error": {
+          "mean": null,
+          "n_scored": 0,
+          "n": 3
+        }
+      }
+    },
+    "recall_at_5": {
+      "mean": 0.5994,
+      "n_scored": 26,
+      "n_zero": 2,
+      "n_na": 1,
+      "n_unavailable": 3,
+      "causes": {
+        "service_error": 3,
+        "no_evidence": 1
+      },
+      "by_status": {
+        "answered": {
+          "mean": 0.8125,
+          "n_scored": 12,
+          "n": 12
+        },
+        "needs_clarification": {
+          "mean": 0.4444,
+          "n_scored": 9,
+          "n": 10
+        },
+        "abstained": {
+          "mean": 0.3667,
+          "n_scored": 5,
+          "n": 5
+        },
+        "error": {
+          "mean": null,
+          "n_scored": 0,
+          "n": 3
+        }
+      }
+    },
+    "mrr_at_5": {
+      "mean": 0.6776,
+      "n_scored": 26,
+      "n_zero": 2,
+      "n_na": 1,
+      "n_unavailable": 3,
+      "causes": {
+        "service_error": 3,
+        "no_evidence": 1
+      },
+      "by_status": {
+        "answered": {
+          "mean": 0.8361,
+          "n_scored": 12,
+          "n": 12
+        },
+        "needs_clarification": {
+          "mean": 0.6296,
+          "n_scored": 9,
+          "n": 10
+        },
+        "abstained": {
+          "mean": 0.3833,
+          "n_scored": 5,
+          "n": 5
+        },
+        "error": {
+          "mean": null,
+          "n_scored": 0,
+          "n": 3
+        }
+      }
+    }
+  },
+  "grading_usage": null,
+  "url": "http://10.2.17.122:3000/project/cmw4irryu0007pc6a7n3sy3al/experiments/results?baseline=09f149e2c6581365"
+}

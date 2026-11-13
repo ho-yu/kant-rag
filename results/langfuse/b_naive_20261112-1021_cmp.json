@@ -1,0 +1,95 @@
+{
+  "run_name": "b_naive_20261112-1021_cmp",
+  "dataset": "shipping-basic-development-v1",
+  "impl": "retrieval_b",
+  "mode": "naive",
+  "page_context": false,
+  "code_answer_scores": false,
+  "judge_model": null,
+  "n_items": 30,
+  "summary": {
+    "hit_at_5": {
+      "mean": 0.9643,
+      "n_scored": 28,
+      "n_zero": 1,
+      "n_na": 2,
+      "n_unavailable": 0,
+      "causes": {
+        "no_evidence": 2
+      },
+      "by_status": {
+        "answered": {
+          "mean": 1.0,
+          "n_scored": 22,
+          "n": 22
+        },
+        "needs_clarification": {
+          "mean": 1.0,
+          "n_scored": 4,
+          "n": 6
+        },
+        "abstained": {
+          "mean": 0.5,
+          "n_scored": 2,
+          "n": 2
+        }
+      }
+    },
+    "recall_at_5": {
+      "mean": 0.5897,
+      "n_scored": 28,
+      "n_zero": 1,
+      "n_na": 2,
+      "n_unavailable": 0,
+      "causes": {
+        "no_evidence": 2
+      },
+      "by_status": {
+        "answered": {
+          "mean": 0.6369,
+          "n_scored": 22,
+          "n": 22
+        },
+        "needs_clarification": {
+          "mean": 0.5417,
+          "n_scored": 4,
+          "n": 6
+        },
+        "abstained": {
+          "mean": 0.1667,
+          "n_scored": 2,
+          "n": 2
+        }
+      }
+    },
+    "mrr_at_5": {
+      "mean": 0.8065,
+      "n_scored": 28,
+      "n_zero": 1,
+      "n_na": 2,
+      "n_unavailable": 0,
+      "causes": {
+        "no_evidence": 2
+      },
+      "by_status": {
+        "answered": {
+          "mean": 0.9091,
+          "n_scored": 22,
+          "n": 22
+        },
+        "needs_clarification": {
+          "mean": 0.3958,
+          "n_scored": 4,
+          "n": 6
+        },
+        "abstained": {
+          "mean": 0.5,
+          "n_scored": 2,
+          "n": 2
+        }
+      }
+    }
+  },
+  "grading_usage": null,
+  "url": "http://10.2.17.122:3000/project/cmw4irryu0007pc6a7n3sy3al/experiments/results?baseline=bedbcbf9098198bd"
+}

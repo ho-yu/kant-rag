@@ -1,0 +1,95 @@
+{
+  "run_name": "b_naive_20261112-1104_cmp_basic_add",
+  "dataset": "shipping-basic-additional-v1",
+  "impl": "retrieval_b",
+  "mode": "naive",
+  "page_context": false,
+  "code_answer_scores": false,
+  "judge_model": null,
+  "n_items": 30,
+  "summary": {
+    "hit_at_5": {
+      "mean": 0.8929,
+      "n_scored": 28,
+      "n_zero": 3,
+      "n_na": 2,
+      "n_unavailable": 0,
+      "causes": {
+        "no_evidence": 2
+      },
+      "by_status": {
+        "answered": {
+          "mean": 0.9524,
+          "n_scored": 21,
+          "n": 21
+        },
+        "needs_clarification": {
+          "mean": 0.6667,
+          "n_scored": 3,
+          "n": 5
+        },
+        "abstained": {
+          "mean": 0.75,
+          "n_scored": 4,
+          "n": 4
+        }
+      }
+    },
+    "recall_at_5": {
+      "mean": 0.5531,
+      "n_scored": 28,
+      "n_zero": 3,
+      "n_na": 2,
+      "n_unavailable": 0,
+      "causes": {
+        "no_evidence": 2
+      },
+      "by_status": {
+        "answered": {
+          "mean": 0.6151,
+          "n_scored": 21,
+          "n": 21
+        },
+        "needs_clarification": {
+          "mean": 0.3571,
+          "n_scored": 3,
+          "n": 5
+        },
+        "abstained": {
+          "mean": 0.375,
+          "n_scored": 4,
+          "n": 4
+        }
+      }
+    },
+    "mrr_at_5": {
+      "mean": 0.6917,
+      "n_scored": 28,
+      "n_zero": 3,
+      "n_na": 2,
+      "n_unavailable": 0,
+      "causes": {
+        "no_evidence": 2
+      },
+      "by_status": {
+        "answered": {
+          "mean": 0.7397,
+          "n_scored": 21,
+          "n": 21
+        },
+        "needs_clarification": {
+          "mean": 0.6667,
+          "n_scored": 3,
+          "n": 5
+        },
+        "abstained": {
+          "mean": 0.4583,
+          "n_scored": 4,
+          "n": 4
+        }
+      }
+    }
+  },
+  "grading_usage": null,
+  "url": "http://10.2.17.122:3000/project/cmw4irryu0007pc6a7n3sy3al/experiments/results?baseline=daac3ffd6ec736a5"
+}

@@ -1,0 +1,32 @@
+{
+  "profile": "bge-m3",
+  "difficulty": "basic",
+  "llm": "gpt-6-luna",
+  "k": 5,
+  "questions": 3,
+  "skipped": [
+    "S-DEV-12",
+    "S-DEV-27",
+    "S-FINAL-12",
+    "S-FINAL-29"
+  ],
+  "modes": {
+    "naive": {
+      "faithfulness": 0.9047619047619048,
+      "answer_relevancy": 0.8526051640777969,
+      "context_precision": 0.8333333333033334,
+      "context_recall": 0.8333333333333334,
+      "status": {
+        "answered": 2,
+        "needs_clarification": 1,
+        "abstained": 0
+      }
+    }
+  },
+  "tokens_this_run": {
+    "answer_in": 0,
+    "answer_out": 0,
+    "judge_in": 30290,
+    "judge_out": 6750
+  }
+}

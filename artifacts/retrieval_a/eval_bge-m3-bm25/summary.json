@@ -1,0 +1,82 @@
+{
+  "k": 5,
+  "profile": "bge-m3-bm25",
+  "difficulty": "basic",
+  "questions": 68,
+  "skipped": 4,
+  "skipped_ids": [
+    "S-DEV-12",
+    "S-DEV-27",
+    "S-FINAL-12",
+    "S-FINAL-29"
+  ],
+  "threshold": 0.6,
+  "page_tolerance": 0,
+  "metrics": {
+    "naive": {
+      "Hit@1": 0.1323529411764706,
+      "Hit@3": 0.3088235294117647,
+      "Hit@5": 0.35294117647058826,
+      "MRR": 0.21470588235294116,
+      "PageHit@1": 0.16176470588235295
+    },
+    "hybrid": {
+      "Hit@1": 0.16176470588235295,
+      "Hit@3": 0.3088235294117647,
+      "Hit@5": 0.38235294117647056,
+      "MRR": 0.24166666666666667,
+      "PageHit@1": 0.19117647058823528
+    },
+    "rerank": {
+      "Hit@1": 0.2647058823529412,
+      "Hit@3": 0.35294117647058826,
+      "Hit@5": 0.36764705882352944,
+      "MRR": 0.30269607843137253,
+      "PageHit@1": 0.3235294117647059
+    }
+  },
+  "pairs": {
+    "naive-hybrid": {
+      "Hit@1": {
+        "a_only": 1,
+        "b_only": 3,
+        "both": 8,
+        "neither": 56
+      },
+      "Hit@5": {
+        "a_only": 3,
+        "b_only": 5,
+        "both": 21,
+        "neither": 39
+      }
+    },
+    "naive-rerank": {
+      "Hit@1": {
+        "a_only": 1,
+        "b_only": 10,
+        "both": 8,
+        "neither": 49
+      },
+      "Hit@5": {
+        "a_only": 3,
+        "b_only": 4,
+        "both": 21,
+        "neither": 40
+      }
+    },
+    "hybrid-rerank": {
+      "Hit@1": {
+        "a_only": 0,
+        "b_only": 7,
+        "both": 11,
+        "neither": 50
+      },
+      "Hit@5": {
+        "a_only": 5,
+        "b_only": 4,
+        "both": 21,
+        "neither": 38
+      }
+    }
+  }
+}

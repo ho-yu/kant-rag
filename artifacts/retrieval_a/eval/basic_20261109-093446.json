@@ -1,0 +1,5822 @@
+{
+  "domain": "shipping",
+  "difficulty": "basic",
+  "k": 5,
+  "questions": 68,
+  "systems": [
+    {
+      "profile": "basic",
+      "mode": "naive",
+      "summary": {
+        "n": 68,
+        "page_hit@1": 0.29411764705882354,
+        "page_hit@k": 0.6029411764705882,
+        "page_mrr": 0.41250000000000003,
+        "quote_hit@1": 0.25,
+        "quote_hit@k": 0.5294117647058824,
+        "quote_mrr": 0.3625,
+        "group_recall": 0.43529411764705883,
+        "sec_per_q": 0.3413652847794926
+      },
+      "rows": [
+        {
+          "id": "S-DEV-01",
+          "set": "development",
+          "page_rank": 1,
+          "quote_rank": 2,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB01-p1-c1",
+            "SB01-p1-c2",
+            "SB01-p7-c2",
+            "SB01-p18-c1",
+            "SB01-p18-c3"
+          ]
+        },
+        {
+          "id": "S-DEV-02",
+          "set": "development",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 0.6,
+          "retrieved": [
+            "SB11-p1-c1",
+            "SB01-p12-c3",
+            "SB01-p2-c1",
+            "SB01-p5-c1",
+            "SB01-p10-c3"
+          ]
+        },
+        {
+          "id": "S-DEV-03",
+          "set": "development",
+          "page_rank": 3,
+          "quote_rank": 3,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB12-p5-c1",
+            "SB02-p1-c4",
+            "SB01-p3-c1",
+            "SB02-p24-c4",
+            "SB01-p23-c2"
+          ]
+        },
+        {
+          "id": "S-DEV-04",
+          "set": "development",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 0.5,
+          "retrieved": [
+            "SB07-p2-c3",
+            "SB08-p19-c1",
+            "SB05-p12-c1",
+            "SB07-p18-c1",
+            "SB08-p6-c3"
+          ]
+        },
+        {
+          "id": "S-DEV-05",
+          "set": "development",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 0.6666666666666666,
+          "retrieved": [
+            "SB11-p1-c1",
+            "SB03-p10-c1",
+            "SB14-p6-c3",
+            "SB15-p1-c2",
+            "SB11-p5-c2"
+          ]
+        },
+        {
+          "id": "S-DEV-06",
+          "set": "development",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB08-p12-c4",
+            "SB08-p20-c3",
+            "SB14-p21-c2",
+            "SB08-p6-c3",
+            "SB11-p15-c2"
+          ]
+        },
+        {
+          "id": "S-DEV-07",
+          "set": "development",
+          "page_rank": 2,
+          "quote_rank": 2,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB04-p16-c2",
+            "SB04-p1-c2",
+            "SB04-p1-c1",
+            "SB04-p1-c3",
+            "SB04-p20-c1"
+          ]
+        },
+        {
+          "id": "S-DEV-08",
+          "set": "development",
+          "page_rank": 2,
+          "quote_rank": 2,
+          "group_recall": 0.5,
+          "retrieved": [
+            "SB15-p4-c1",
+            "SB05-p3-c1",
+            "SB05-p1-c4",
+            "SB10-p20-c2",
+            "SB05-p3-c3"
+          ]
+        },
+        {
+          "id": "S-DEV-09",
+          "set": "development",
+          "page_rank": 2,
+          "quote_rank": 2,
+          "group_recall": 0.25,
+          "retrieved": [
+            "SB12-p8-c4",
+            "SB07-p4-c2",
+            "SB12-p19-c5",
+            "SB08-p6-c3",
+            "SB08-p12-c4"
+          ]
+        },
+        {
+          "id": "S-DEV-10",
+          "set": "development",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB15-p3-c2",
+            "SB04-p16-c1",
+            "SB12-p6-c1",
+            "SB02-p16-c4",
+            "SB15-p7-c1"
+          ]
+        },
+        {
+          "id": "S-DEV-11",
+          "set": "development",
+          "page_rank": 3,
+          "quote_rank": 3,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB10-p19-c3",
+            "SB15-p16-c1",
+            "SB10-p3-c2",
+            "SB12-p12-c1",
+            "SB15-p14-c5"
+          ]
+        },
+        {
+          "id": "S-DEV-13",
+          "set": "development",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB14-p6-c3",
+            "SB03-p5-c4",
+            "SB03-p10-c1",
+            "SB13-p13-c2",
+            "SB11-p5-c2"
+          ]
+        },
+        {
+          "id": "S-DEV-14",
+          "set": "development",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB11-p6-c1",
+            "SB03-p20-c4",
+            "SB03-p20-c1",
+            "SB14-p21-c2",
+            "SB12-p9-c2"
+          ]
+        },
+        {
+          "id": "S-DEV-15",
+          "set": "development",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB10-p12-c3",
+            "SB05-p12-c3",
+            "SB05-p7-c5",
+            "SB05-p9-c3",
+            "SB10-p5-c4"
+          ]
+        },
+        {
+          "id": "S-DEV-16",
+          "set": "development",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB11-p17-c3",
+            "SB11-p11-c1",
+            "SB15-p21-c1",
+            "SB03-p20-c4",
+            "SB11-p8-c5"
+          ]
+        },
+        {
+          "id": "S-DEV-17",
+          "set": "development",
+          "page_rank": 3,
+          "quote_rank": 3,
+          "group_recall": 0.5,
+          "retrieved": [
+            "SB05-p8-c1",
+            "SB05-p8-c5",
+            "SB10-p1-c2",
+            "SB10-p9-c3",
+            "SB10-p8-c4"
+          ]
+        },
+        {
+          "id": "S-DEV-18",
+          "set": "development",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB09-p11-c1",
+            "SB07-p11-c4",
+            "SB09-p11-c3",
+            "SB05-p7-c3",
+            "SB10-p12-c3"
+          ]
+        },
+        {
+          "id": "S-DEV-19",
+          "set": "development",
+          "page_rank": 2,
+          "quote_rank": 2,
+          "group_recall": 0.5,
+          "retrieved": [
+            "SB09-p12-c1",
+            "SB09-p3-c2",
+            "SB07-p2-c3",
+            "SB12-p19-c1",
+            "SB03-p22-c3"
+          ]
+        },
+        {
+          "id": "S-DEV-20",
+          "set": "development",
+          "page_rank": 5,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB05-p7-c2",
+            "SB05-p7-c4",
+            "SB05-p7-c1",
+            "SB05-p7-c3",
+            "SB05-p2-c2"
+          ]
+        },
+        {
+          "id": "S-DEV-21",
+          "set": "development",
+          "page_rank": 2,
+          "quote_rank": 2,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB04-p19-c3",
+            "SB04-p2-c1",
+            "SB04-p4-c4",
+            "SB04-p2-c3",
+            "SB04-p11-c1"
+          ]
+        },
+        {
+          "id": "S-DEV-22",
+          "set": "development",
+          "page_rank": 3,
+          "quote_rank": 3,
+          "group_recall": 0.3333333333333333,
+          "retrieved": [
+            "SB06-p2-c3",
+            "SB06-p13-c1",
+            "SB13-p3-c1",
+            "SB06-p21-c1",
+            "SB10-p20-c3"
+          ]
+        },
+        {
+          "id": "S-DEV-23",
+          "set": "development",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB14-p3-c1",
+            "SB01-p18-c3",
+            "SB01-p1-c1",
+            "SB12-p1-c1",
+            "SB15-p5-c1"
+          ]
+        },
+        {
+          "id": "S-DEV-24",
+          "set": "development",
+          "page_rank": 2,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB03-p21-c5",
+            "SB06-p3-c3",
+            "SB12-p22-c5",
+            "SB08-p24-c4",
+            "SB03-p18-c4"
+          ]
+        },
+        {
+          "id": "S-DEV-25",
+          "set": "development",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB15-p2-c3",
+            "SB11-p11-c3",
+            "SB14-p16-c2",
+            "SB08-p13-c4",
+            "SB11-p17-c1"
+          ]
+        },
+        {
+          "id": "S-DEV-26",
+          "set": "development",
+          "page_rank": 1,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB15-p1-c5",
+            "SB13-p8-c1",
+            "SB11-p8-c3",
+            "SB11-p10-c3",
+            "SB13-p24-c2"
+          ]
+        },
+        {
+          "id": "S-DEV-28",
+          "set": "development",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB06-p6-c2",
+            "SB01-p10-c5",
+            "SB06-p6-c3",
+            "SB01-p22-c3",
+            "SB01-p10-c3"
+          ]
+        },
+        {
+          "id": "S-DEV-29",
+          "set": "development",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB15-p10-c3",
+            "SB09-p9-c1",
+            "SB07-p10-c1",
+            "SB15-p10-c1",
+            "SB09-p20-c1"
+          ]
+        },
+        {
+          "id": "S-DEV-30",
+          "set": "development",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB15-p23-c1",
+            "SB15-p23-c3",
+            "SB03-p10-c2",
+            "SB12-p8-c1",
+            "SB07-p13-c2"
+          ]
+        },
+        {
+          "id": "S-FINAL-01",
+          "set": "additional",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB01-p1-c2",
+            "SB06-p6-c2",
+            "SB01-p1-c1",
+            "SB03-p1-c2",
+            "SB10-p2-c1"
+          ]
+        },
+        {
+          "id": "S-FINAL-02",
+          "set": "additional",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB13-p13-c2",
+            "SB15-p1-c2",
+            "SB15-p1-c3",
+            "SB11-p10-c1",
+            "SB15-p20-c1"
+          ]
+        },
+        {
+          "id": "S-FINAL-03",
+          "set": "additional",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB15-p22-c1",
+            "SB15-p22-c3",
+            "SB12-p5-c1",
+            "SB01-p20-c2",
+            "SB08-p16-c5"
+          ]
+        },
+        {
+          "id": "S-FINAL-04",
+          "set": "additional",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB07-p1-c2",
+            "SB10-p8-c4",
+            "SB07-p7-c1",
+            "SB07-p7-c5",
+            "SB09-p21-c1"
+          ]
+        },
+        {
+          "id": "S-FINAL-05",
+          "set": "additional",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB14-p6-c3",
+            "SB03-p5-c4",
+            "SB11-p5-c2",
+            "SB03-p10-c1",
+            "SB15-p1-c2"
+          ]
+        },
+        {
+          "id": "S-FINAL-06",
+          "set": "additional",
+          "page_rank": 1,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB07-p4-c2",
+            "SB15-p17-c3",
+            "SB08-p12-c4",
+            "SB09-p11-c4",
+            "SB11-p13-c3"
+          ]
+        },
+        {
+          "id": "S-FINAL-07",
+          "set": "additional",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB12-p15-c3",
+            "SB12-p14-c3",
+            "SB02-p15-c4",
+            "SB02-p3-c2",
+            "SB04-p15-c3"
+          ]
+        },
+        {
+          "id": "S-FINAL-08",
+          "set": "additional",
+          "page_rank": 4,
+          "quote_rank": 4,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB15-p4-c2",
+            "SB12-p18-c3",
+            "SB06-p14-c2",
+            "SB06-p2-c2",
+            "SB06-p2-c1"
+          ]
+        },
+        {
+          "id": "S-FINAL-09",
+          "set": "additional",
+          "page_rank": 5,
+          "quote_rank": 5,
+          "group_recall": 0.3333333333333333,
+          "retrieved": [
+            "SB14-p21-c2",
+            "SB15-p2-c1",
+            "SB04-p13-c3",
+            "SB04-p16-c1",
+            "SB04-p4-c2"
+          ]
+        },
+        {
+          "id": "S-FINAL-10",
+          "set": "additional",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB11-p15-c1",
+            "SB13-p11-c2",
+            "SB14-p10-c2",
+            "SB08-p17-c5",
+            "SB11-p2-c3"
+          ]
+        },
+        {
+          "id": "S-FINAL-11",
+          "set": "additional",
+          "page_rank": 3,
+          "quote_rank": 3,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB05-p20-c3",
+            "SB05-p20-c1",
+            "SB05-p4-c3",
+            "SB14-p7-c3",
+            "SB05-p20-c2"
+          ]
+        },
+        {
+          "id": "S-FINAL-13",
+          "set": "additional",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB03-p10-c1",
+            "SB14-p6-c3",
+            "SB03-p5-c4",
+            "SB09-p9-c1",
+            "SB09-p15-c4"
+          ]
+        },
+        {
+          "id": "S-FINAL-14",
+          "set": "additional",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB11-p17-c3",
+            "SB11-p11-c1",
+            "SB15-p21-c1",
+            "SB11-p8-c5",
+            "SB11-p5-c4"
+          ]
+        },
+        {
+          "id": "S-FINAL-15",
+          "set": "additional",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB08-p12-c4",
+            "SB11-p22-c2",
+            "SB08-p6-c3",
+            "SB11-p13-c3",
+            "SB11-p15-c2"
+          ]
+        },
+        {
+          "id": "S-FINAL-16",
+          "set": "additional",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB15-p3-c2",
+            "SB02-p16-c2",
+            "SB02-p21-c5",
+            "SB12-p6-c1",
+            "SB12-p9-c2"
+          ]
+        },
+        {
+          "id": "S-FINAL-17",
+          "set": "additional",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB05-p7-c5",
+            "SB05-p7-c2",
+            "SB05-p7-c1",
+            "SB10-p16-c5",
+            "SB05-p7-c4"
+          ]
+        },
+        {
+          "id": "S-FINAL-18",
+          "set": "additional",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 0.25,
+          "retrieved": [
+            "SB11-p1-c3",
+            "SB13-p6-c2",
+            "SB11-p21-c2",
+            "SB03-p10-c2",
+            "SB07-p13-c3"
+          ]
+        },
+        {
+          "id": "S-FINAL-19",
+          "set": "additional",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 0.5,
+          "retrieved": [
+            "SB10-p1-c2",
+            "SB05-p8-c1",
+            "SB07-p23-c1",
+            "SB07-p7-c2",
+            "SB07-p1-c3"
+          ]
+        },
+        {
+          "id": "S-FINAL-20",
+          "set": "additional",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB09-p3-c1",
+            "SB09-p11-c1",
+            "SB09-p11-c3",
+            "SB09-p11-c2",
+            "SB09-p2-c1"
+          ]
+        },
+        {
+          "id": "S-FINAL-21",
+          "set": "additional",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB05-p22-c4",
+            "SB05-p13-c4",
+            "SB03-p6-c4",
+            "SB12-p11-c2",
+            "SB07-p5-c5"
+          ]
+        },
+        {
+          "id": "S-FINAL-22",
+          "set": "additional",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB06-p12-c1",
+            "SB06-p12-c4",
+            "SB06-p12-c2",
+            "SB12-p14-c4",
+            "SB06-p12-c3"
+          ]
+        },
+        {
+          "id": "S-FINAL-23",
+          "set": "additional",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB05-p3-c4",
+            "SB05-p17-c1",
+            "SB05-p1-c1",
+            "SB06-p13-c1",
+            "SB05-p8-c5"
+          ]
+        },
+        {
+          "id": "S-FINAL-24",
+          "set": "additional",
+          "page_rank": 5,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB11-p14-c1",
+            "SB11-p15-c1",
+            "SB11-p17-c1",
+            "SB13-p11-c2",
+            "SB11-p3-c2"
+          ]
+        },
+        {
+          "id": "S-FINAL-25",
+          "set": "additional",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 0.6666666666666666,
+          "retrieved": [
+            "SB15-p1-c5",
+            "SB15-p20-c3",
+            "SB11-p7-c3",
+            "SB11-p10-c3",
+            "SB11-p1-c2"
+          ]
+        },
+        {
+          "id": "S-FINAL-26",
+          "set": "additional",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB08-p13-c4",
+            "SB11-p17-c1",
+            "SB11-p15-c1",
+            "SB11-p2-c3",
+            "SB11-p16-c4"
+          ]
+        },
+        {
+          "id": "S-FINAL-27",
+          "set": "additional",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB11-p20-c1",
+            "SB14-p21-c2",
+            "SB15-p2-c1",
+            "SB11-p10-c1",
+            "SB03-p20-c4"
+          ]
+        },
+        {
+          "id": "S-FINAL-28",
+          "set": "additional",
+          "page_rank": 2,
+          "quote_rank": 2,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB02-p13-c3",
+            "SB12-p3-c1",
+            "SB12-p15-c2",
+            "SB04-p19-c3",
+            "SB12-p14-c3"
+          ]
+        },
+        {
+          "id": "S-FINAL-30",
+          "set": "additional",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB06-p22-c2",
+            "SB04-p3-c1",
+            "SB06-p22-c1",
+            "SB04-p22-c5",
+            "SB04-p3-c4"
+          ]
+        },
+        {
+          "id": "S-VAL-DEV-01",
+          "set": "expansion_validation",
+          "page_rank": 2,
+          "quote_rank": 2,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB14-p11-c3",
+            "SB01-p19-c4",
+            "SB06-p20-c2",
+            "SB05-p22-c4",
+            "SB01-p19-c2"
+          ]
+        },
+        {
+          "id": "S-VAL-DEV-02",
+          "set": "expansion_validation",
+          "page_rank": 3,
+          "quote_rank": 3,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB15-p7-c1",
+            "SB02-p8-c1",
+            "SB02-p9-c4",
+            "SB02-p10-c1",
+            "SB02-p16-c1"
+          ]
+        },
+        {
+          "id": "S-VAL-DEV-03",
+          "set": "expansion_validation",
+          "page_rank": 2,
+          "quote_rank": 2,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB02-p12-c3",
+            "SB03-p14-c2",
+            "SB07-p17-c2",
+            "SB02-p21-c3",
+            "SB07-p17-c1"
+          ]
+        },
+        {
+          "id": "S-VAL-DEV-04",
+          "set": "expansion_validation",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB04-p14-c2",
+            "SB04-p14-c3",
+            "SB04-p14-c4",
+            "SB04-p23-c4",
+            "SB04-p12-c4"
+          ]
+        },
+        {
+          "id": "S-VAL-DEV-05",
+          "set": "expansion_validation",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB05-p14-c1",
+            "SB05-p20-c4",
+            "SB10-p17-c5",
+            "SB05-p14-c4",
+            "SB05-p23-c1"
+          ]
+        },
+        {
+          "id": "S-VAL-DEV-06",
+          "set": "expansion_validation",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB06-p15-c2",
+            "SB06-p7-c2",
+            "SB06-p7-c1",
+            "SB06-p24-c2",
+            "SB06-p11-c2"
+          ]
+        },
+        {
+          "id": "S-VAL-FINAL-01",
+          "set": "expansion_validation",
+          "page_rank": 5,
+          "quote_rank": 5,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB07-p11-c1",
+            "SB09-p11-c3",
+            "SB07-p11-c4",
+            "SB09-p11-c1",
+            "SB07-p20-c1"
+          ]
+        },
+        {
+          "id": "S-VAL-FINAL-02",
+          "set": "expansion_validation",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB08-p8-c2",
+            "SB08-p8-c4",
+            "SB08-p8-c1",
+            "SB08-p8-c5",
+            "SB08-p8-c3"
+          ]
+        },
+        {
+          "id": "S-VAL-FINAL-03",
+          "set": "expansion_validation",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB09-p10-c1",
+            "SB09-p10-c3",
+            "SB09-p20-c1",
+            "SB15-p10-c1",
+            "SB09-p20-c3"
+          ]
+        },
+        {
+          "id": "S-VAL-FINAL-04",
+          "set": "expansion_validation",
+          "page_rank": 2,
+          "quote_rank": 2,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB10-p9-c2",
+            "SB10-p5-c2",
+            "SB10-p11-c1",
+            "SB10-p5-c3",
+            "SB10-p2-c2"
+          ]
+        },
+        {
+          "id": "S-VAL-FINAL-05",
+          "set": "expansion_validation",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB11-p19-c1",
+            "SB11-p20-c4",
+            "SB11-p2-c2",
+            "SB11-p20-c2",
+            "SB11-p13-c1"
+          ]
+        },
+        {
+          "id": "S-VAL-FINAL-06",
+          "set": "expansion_validation",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB11-p5-c4",
+            "SB11-p17-c3",
+            "SB03-p20-c4",
+            "SB11-p11-c1",
+            "SB11-p8-c3"
+          ]
+        }
+      ]
+    },
+    {
+      "profile": "basic",
+      "mode": "hybrid",
+      "summary": {
+        "n": 68,
+        "page_hit@1": 0.35294117647058826,
+        "page_hit@k": 0.6470588235294118,
+        "page_mrr": 0.45416666666666666,
+        "quote_hit@1": 0.3382352941176471,
+        "quote_hit@k": 0.5882352941176471,
+        "quote_mrr": 0.4291666666666667,
+        "group_recall": 0.486764705882353,
+        "sec_per_q": 0.08564068639979643
+      },
+      "rows": [
+        {
+          "id": "S-DEV-01",
+          "set": "development",
+          "page_rank": 1,
+          "quote_rank": 2,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB01-p1-c1",
+            "SB01-p1-c2",
+            "SB01-p7-c2",
+            "SB01-p18-c1",
+            "SB01-p18-c3"
+          ]
+        },
+        {
+          "id": "S-DEV-02",
+          "set": "development",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 0.6,
+          "retrieved": [
+            "SB11-p1-c1",
+            "SB01-p12-c3",
+            "SB11-p5-c2",
+            "SB14-p6-c3",
+            "SB01-p2-c1"
+          ]
+        },
+        {
+          "id": "S-DEV-03",
+          "set": "development",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB01-p3-c1",
+            "SB12-p5-c1",
+            "SB02-p24-c4",
+            "SB01-p23-c2",
+            "SB02-p1-c4"
+          ]
+        },
+        {
+          "id": "S-DEV-04",
+          "set": "development",
+          "page_rank": 2,
+          "quote_rank": 2,
+          "group_recall": 0.5,
+          "retrieved": [
+            "SB08-p19-c1",
+            "SB07-p2-c3",
+            "SB08-p1-c1",
+            "SB05-p12-c1",
+            "SB08-p20-c3"
+          ]
+        },
+        {
+          "id": "S-DEV-05",
+          "set": "development",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 0.6666666666666666,
+          "retrieved": [
+            "SB11-p1-c1",
+            "SB03-p10-c1",
+            "SB14-p6-c3",
+            "SB11-p5-c2",
+            "SB15-p1-c2"
+          ]
+        },
+        {
+          "id": "S-DEV-06",
+          "set": "development",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB08-p12-c4",
+            "SB14-p21-c2",
+            "SB08-p20-c3",
+            "SB11-p15-c2",
+            "SB15-p2-c1"
+          ]
+        },
+        {
+          "id": "S-DEV-07",
+          "set": "development",
+          "page_rank": 2,
+          "quote_rank": 2,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB04-p16-c2",
+            "SB04-p1-c2",
+            "SB04-p1-c1",
+            "SB04-p1-c3",
+            "SB04-p20-c1"
+          ]
+        },
+        {
+          "id": "S-DEV-08",
+          "set": "development",
+          "page_rank": 2,
+          "quote_rank": 5,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB15-p4-c1",
+            "SB05-p3-c3",
+            "SB12-p3-c3",
+            "SB05-p1-c4",
+            "SB10-p3-c3"
+          ]
+        },
+        {
+          "id": "S-DEV-09",
+          "set": "development",
+          "page_rank": 3,
+          "quote_rank": 3,
+          "group_recall": 0.25,
+          "retrieved": [
+            "SB12-p8-c4",
+            "SB12-p19-c5",
+            "SB07-p4-c2",
+            "SB11-p5-c2",
+            "SB14-p6-c3"
+          ]
+        },
+        {
+          "id": "S-DEV-10",
+          "set": "development",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB15-p3-c2",
+            "SB04-p16-c1",
+            "SB12-p6-c1",
+            "SB02-p17-c4",
+            "SB02-p11-c4"
+          ]
+        },
+        {
+          "id": "S-DEV-11",
+          "set": "development",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB10-p3-c2",
+            "SB15-p16-c1",
+            "SB10-p19-c2",
+            "SB10-p19-c3",
+            "SB12-p12-c1"
+          ]
+        },
+        {
+          "id": "S-DEV-13",
+          "set": "development",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB14-p6-c3",
+            "SB03-p10-c1",
+            "SB03-p5-c4",
+            "SB13-p13-c2",
+            "SB11-p5-c2"
+          ]
+        },
+        {
+          "id": "S-DEV-14",
+          "set": "development",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB14-p21-c2",
+            "SB03-p20-c1",
+            "SB15-p21-c4",
+            "SB15-p2-c1",
+            "SB11-p6-c1"
+          ]
+        },
+        {
+          "id": "S-DEV-15",
+          "set": "development",
+          "page_rank": 5,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB10-p12-c3",
+            "SB05-p12-c3",
+            "SB05-p7-c5",
+            "SB10-p5-c4",
+            "SB05-p2-c2"
+          ]
+        },
+        {
+          "id": "S-DEV-16",
+          "set": "development",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB15-p21-c1",
+            "SB11-p17-c3",
+            "SB11-p11-c1",
+            "SB03-p20-c4",
+            "SB13-p14-c2"
+          ]
+        },
+        {
+          "id": "S-DEV-17",
+          "set": "development",
+          "page_rank": 2,
+          "quote_rank": 2,
+          "group_recall": 0.5,
+          "retrieved": [
+            "SB05-p8-c1",
+            "SB10-p1-c2",
+            "SB05-p8-c5",
+            "SB10-p9-c3",
+            "SB10-p9-c5"
+          ]
+        },
+        {
+          "id": "S-DEV-18",
+          "set": "development",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB10-p12-c3",
+            "SB07-p11-c4",
+            "SB05-p12-c1",
+            "SB10-p24-c2",
+            "SB05-p17-c2"
+          ]
+        },
+        {
+          "id": "S-DEV-19",
+          "set": "development",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 0.5,
+          "retrieved": [
+            "SB09-p3-c2",
+            "SB09-p12-c1",
+            "SB12-p19-c1",
+            "SB07-p2-c3",
+            "SB03-p22-c3"
+          ]
+        },
+        {
+          "id": "S-DEV-20",
+          "set": "development",
+          "page_rank": 5,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB05-p7-c2",
+            "SB05-p7-c1",
+            "SB05-p7-c4",
+            "SB05-p7-c3",
+            "SB05-p2-c2"
+          ]
+        },
+        {
+          "id": "S-DEV-21",
+          "set": "development",
+          "page_rank": 2,
+          "quote_rank": 2,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB04-p19-c3",
+            "SB04-p2-c1",
+            "SB04-p10-c3",
+            "SB04-p11-c1",
+            "SB04-p19-c5"
+          ]
+        },
+        {
+          "id": "S-DEV-22",
+          "set": "development",
+          "page_rank": 4,
+          "quote_rank": 4,
+          "group_recall": 0.3333333333333333,
+          "retrieved": [
+            "SB06-p2-c3",
+            "SB06-p13-c1",
+            "SB10-p20-c3",
+            "SB13-p3-c1",
+            "SB06-p21-c1"
+          ]
+        },
+        {
+          "id": "S-DEV-23",
+          "set": "development",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB14-p3-c1",
+            "SB01-p1-c1",
+            "SB01-p18-c3",
+            "SB01-p1-c2",
+            "SB12-p1-c1"
+          ]
+        },
+        {
+          "id": "S-DEV-24",
+          "set": "development",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB08-p24-c4",
+            "SB03-p18-c4",
+            "SB15-p24-c1",
+            "SB15-p24-c4",
+            "SB11-p11-c5"
+          ]
+        },
+        {
+          "id": "S-DEV-25",
+          "set": "development",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB15-p2-c3",
+            "SB14-p16-c2",
+            "SB12-p9-c2",
+            "SB11-p17-c1",
+            "SB11-p11-c3"
+          ]
+        },
+        {
+          "id": "S-DEV-26",
+          "set": "development",
+          "page_rank": 3,
+          "quote_rank": 3,
+          "group_recall": 0.3333333333333333,
+          "retrieved": [
+            "SB13-p20-c2",
+            "SB13-p8-c1",
+            "SB13-p1-c2",
+            "SB13-p21-c1",
+            "SB13-p15-c2"
+          ]
+        },
+        {
+          "id": "S-DEV-28",
+          "set": "development",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB06-p6-c2",
+            "SB01-p10-c5",
+            "SB01-p10-c2",
+            "SB01-p22-c3",
+            "SB11-p1-c1"
+          ]
+        },
+        {
+          "id": "S-DEV-29",
+          "set": "development",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB15-p10-c3",
+            "SB07-p10-c3",
+            "SB09-p9-c1",
+            "SB15-p10-c1",
+            "SB07-p10-c1"
+          ]
+        },
+        {
+          "id": "S-DEV-30",
+          "set": "development",
+          "page_rank": 5,
+          "quote_rank": 5,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB15-p23-c1",
+            "SB15-p23-c3",
+            "SB03-p10-c2",
+            "SB13-p1-c2",
+            "SB14-p3-c2"
+          ]
+        },
+        {
+          "id": "S-FINAL-01",
+          "set": "additional",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB01-p1-c2",
+            "SB06-p6-c2",
+            "SB10-p2-c1",
+            "SB01-p1-c1",
+            "SB06-p1-c1"
+          ]
+        },
+        {
+          "id": "S-FINAL-02",
+          "set": "additional",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB13-p13-c2",
+            "SB15-p1-c2",
+            "SB14-p6-c3",
+            "SB11-p10-c1",
+            "SB11-p5-c2"
+          ]
+        },
+        {
+          "id": "S-FINAL-03",
+          "set": "additional",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB15-p22-c3",
+            "SB01-p20-c2",
+            "SB14-p24-c1",
+            "SB15-p22-c1",
+            "SB01-p20-c5"
+          ]
+        },
+        {
+          "id": "S-FINAL-04",
+          "set": "additional",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB07-p1-c2",
+            "SB07-p7-c1",
+            "SB10-p8-c4",
+            "SB07-p7-c2",
+            "SB10-p7-c1"
+          ]
+        },
+        {
+          "id": "S-FINAL-05",
+          "set": "additional",
+          "page_rank": 5,
+          "quote_rank": 5,
+          "group_recall": 0.6666666666666666,
+          "retrieved": [
+            "SB14-p6-c3",
+            "SB11-p5-c2",
+            "SB03-p10-c1",
+            "SB03-p5-c4",
+            "SB11-p1-c1"
+          ]
+        },
+        {
+          "id": "S-FINAL-06",
+          "set": "additional",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB08-p12-c4",
+            "SB14-p10-c3",
+            "SB01-p7-c3",
+            "SB07-p2-c3",
+            "SB15-p17-c3"
+          ]
+        },
+        {
+          "id": "S-FINAL-07",
+          "set": "additional",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB12-p15-c3",
+            "SB02-p15-c4",
+            "SB02-p16-c4",
+            "SB02-p3-c2",
+            "SB02-p13-c3"
+          ]
+        },
+        {
+          "id": "S-FINAL-08",
+          "set": "additional",
+          "page_rank": 2,
+          "quote_rank": 2,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB15-p4-c2",
+            "SB06-p2-c2",
+            "SB06-p14-c2",
+            "SB12-p18-c3",
+            "SB12-p4-c3"
+          ]
+        },
+        {
+          "id": "S-FINAL-09",
+          "set": "additional",
+          "page_rank": 4,
+          "quote_rank": 4,
+          "group_recall": 0.3333333333333333,
+          "retrieved": [
+            "SB14-p21-c2",
+            "SB15-p2-c1",
+            "SB04-p13-c3",
+            "SB04-p4-c2",
+            "SB11-p5-c2"
+          ]
+        },
+        {
+          "id": "S-FINAL-10",
+          "set": "additional",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB11-p15-c1",
+            "SB13-p11-c2",
+            "SB14-p10-c2",
+            "SB15-p18-c1",
+            "SB15-p19-c2"
+          ]
+        },
+        {
+          "id": "S-FINAL-11",
+          "set": "additional",
+          "page_rank": 3,
+          "quote_rank": 3,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB05-p20-c1",
+            "SB05-p20-c3",
+            "SB05-p4-c3",
+            "SB14-p7-c3",
+            "SB10-p4-c2"
+          ]
+        },
+        {
+          "id": "S-FINAL-13",
+          "set": "additional",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB14-p6-c3",
+            "SB03-p10-c1",
+            "SB03-p5-c4",
+            "SB09-p9-c1",
+            "SB11-p5-c2"
+          ]
+        },
+        {
+          "id": "S-FINAL-14",
+          "set": "additional",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB11-p17-c3",
+            "SB15-p21-c1",
+            "SB11-p11-c1",
+            "SB11-p8-c5",
+            "SB13-p14-c2"
+          ]
+        },
+        {
+          "id": "S-FINAL-15",
+          "set": "additional",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB08-p12-c4",
+            "SB11-p22-c2",
+            "SB11-p13-c3",
+            "SB15-p21-c4",
+            "SB12-p19-c4"
+          ]
+        },
+        {
+          "id": "S-FINAL-16",
+          "set": "additional",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB15-p3-c2",
+            "SB12-p6-c1",
+            "SB12-p6-c3",
+            "SB02-p16-c2",
+            "SB15-p6-c4"
+          ]
+        },
+        {
+          "id": "S-FINAL-17",
+          "set": "additional",
+          "page_rank": 4,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB05-p7-c5",
+            "SB10-p12-c3",
+            "SB10-p16-c5",
+            "SB05-p2-c2",
+            "SB05-p7-c1"
+          ]
+        },
+        {
+          "id": "S-FINAL-18",
+          "set": "additional",
+          "page_rank": 3,
+          "quote_rank": 3,
+          "group_recall": 0.25,
+          "retrieved": [
+            "SB11-p21-c2",
+            "SB13-p13-c2",
+            "SB11-p1-c3",
+            "SB11-p6-c2",
+            "SB15-p5-c2"
+          ]
+        },
+        {
+          "id": "S-FINAL-19",
+          "set": "additional",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 0.5,
+          "retrieved": [
+            "SB10-p1-c2",
+            "SB05-p8-c1",
+            "SB07-p7-c2",
+            "SB07-p23-c1",
+            "SB05-p8-c4"
+          ]
+        },
+        {
+          "id": "S-FINAL-20",
+          "set": "additional",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB09-p3-c1",
+            "SB09-p11-c1",
+            "SB09-p11-c3",
+            "SB09-p11-c2",
+            "SB09-p2-c1"
+          ]
+        },
+        {
+          "id": "S-FINAL-21",
+          "set": "additional",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB05-p13-c4",
+            "SB05-p22-c4",
+            "SB12-p11-c2",
+            "SB15-p16-c3",
+            "SB02-p18-c4"
+          ]
+        },
+        {
+          "id": "S-FINAL-22",
+          "set": "additional",
+          "page_rank": 4,
+          "quote_rank": 4,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB06-p12-c4",
+            "SB06-p12-c1",
+            "SB06-p12-c2",
+            "SB06-p1-c2",
+            "SB04-p19-c4"
+          ]
+        },
+        {
+          "id": "S-FINAL-23",
+          "set": "additional",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB05-p3-c4",
+            "SB05-p17-c1",
+            "SB06-p13-c1",
+            "SB05-p1-c1",
+            "SB10-p7-c4"
+          ]
+        },
+        {
+          "id": "S-FINAL-24",
+          "set": "additional",
+          "page_rank": 4,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB11-p17-c1",
+            "SB11-p14-c1",
+            "SB14-p10-c2",
+            "SB11-p3-c2",
+            "SB13-p11-c2"
+          ]
+        },
+        {
+          "id": "S-FINAL-25",
+          "set": "additional",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 0.6666666666666666,
+          "retrieved": [
+            "SB15-p1-c5",
+            "SB15-p20-c3",
+            "SB11-p7-c3",
+            "SB11-p1-c2",
+            "SB11-p21-c2"
+          ]
+        },
+        {
+          "id": "S-FINAL-26",
+          "set": "additional",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB08-p13-c4",
+            "SB11-p17-c1",
+            "SB08-p11-c1",
+            "SB14-p16-c2",
+            "SB12-p9-c2"
+          ]
+        },
+        {
+          "id": "S-FINAL-27",
+          "set": "additional",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB11-p20-c1",
+            "SB14-p21-c2",
+            "SB15-p2-c1",
+            "SB11-p5-c2",
+            "SB03-p20-c1"
+          ]
+        },
+        {
+          "id": "S-FINAL-28",
+          "set": "additional",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB12-p3-c1",
+            "SB04-p19-c3",
+            "SB02-p13-c3",
+            "SB12-p14-c3",
+            "SB12-p14-c1"
+          ]
+        },
+        {
+          "id": "S-FINAL-30",
+          "set": "additional",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB04-p3-c1",
+            "SB06-p22-c2",
+            "SB04-p3-c4",
+            "SB04-p22-c5",
+            "SB04-p22-c3"
+          ]
+        },
+        {
+          "id": "S-VAL-DEV-01",
+          "set": "expansion_validation",
+          "page_rank": 2,
+          "quote_rank": 2,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB14-p11-c3",
+            "SB01-p19-c2",
+            "SB01-p19-c3",
+            "SB01-p19-c4",
+            "SB15-p5-c4"
+          ]
+        },
+        {
+          "id": "S-VAL-DEV-02",
+          "set": "expansion_validation",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB02-p9-c4",
+            "SB15-p7-c1",
+            "SB02-p17-c2",
+            "SB02-p8-c1",
+            "SB02-p9-c1"
+          ]
+        },
+        {
+          "id": "S-VAL-DEV-03",
+          "set": "expansion_validation",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB03-p14-c2",
+            "SB02-p12-c3",
+            "SB02-p21-c3",
+            "SB07-p17-c2",
+            "SB07-p17-c1"
+          ]
+        },
+        {
+          "id": "S-VAL-DEV-04",
+          "set": "expansion_validation",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB04-p14-c2",
+            "SB04-p14-c3",
+            "SB04-p14-c4",
+            "SB04-p20-c4",
+            "SB04-p23-c4"
+          ]
+        },
+        {
+          "id": "S-VAL-DEV-05",
+          "set": "expansion_validation",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB05-p14-c1",
+            "SB05-p20-c4",
+            "SB10-p17-c5",
+            "SB05-p14-c4",
+            "SB05-p23-c1"
+          ]
+        },
+        {
+          "id": "S-VAL-DEV-06",
+          "set": "expansion_validation",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB06-p15-c2",
+            "SB06-p7-c2",
+            "SB06-p7-c1",
+            "SB06-p5-c3",
+            "SB06-p24-c2"
+          ]
+        },
+        {
+          "id": "S-VAL-FINAL-01",
+          "set": "expansion_validation",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB07-p20-c1",
+            "SB09-p11-c3",
+            "SB07-p11-c1",
+            "SB07-p20-c4",
+            "SB07-p11-c4"
+          ]
+        },
+        {
+          "id": "S-VAL-FINAL-02",
+          "set": "expansion_validation",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB08-p8-c4",
+            "SB08-p8-c2",
+            "SB08-p8-c5",
+            "SB02-p19-c4",
+            "SB08-p8-c3"
+          ]
+        },
+        {
+          "id": "S-VAL-FINAL-03",
+          "set": "expansion_validation",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB09-p10-c1",
+            "SB09-p10-c3",
+            "SB09-p20-c1",
+            "SB15-p10-c1",
+            "SB09-p9-c5"
+          ]
+        },
+        {
+          "id": "S-VAL-FINAL-04",
+          "set": "expansion_validation",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB10-p5-c2",
+            "SB10-p9-c2",
+            "SB10-p14-c1",
+            "SB10-p5-c3",
+            "SB10-p2-c2"
+          ]
+        },
+        {
+          "id": "S-VAL-FINAL-05",
+          "set": "expansion_validation",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB11-p19-c1",
+            "SB11-p2-c2",
+            "SB11-p20-c2",
+            "SB11-p23-c2",
+            "SB11-p20-c4"
+          ]
+        },
+        {
+          "id": "S-VAL-FINAL-06",
+          "set": "expansion_validation",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB11-p17-c3",
+            "SB11-p5-c4",
+            "SB15-p21-c1",
+            "SB03-p20-c4",
+            "SB15-p20-c4"
+          ]
+        }
+      ]
+    },
+    {
+      "profile": "basic",
+      "mode": "rerank",
+      "summary": {
+        "n": 68,
+        "page_hit@1": 0.4117647058823529,
+        "page_hit@k": 0.5882352941176471,
+        "page_mrr": 0.4727941176470588,
+        "quote_hit@1": 0.39705882352941174,
+        "quote_hit@k": 0.5588235294117647,
+        "quote_mrr": 0.45,
+        "group_recall": 0.4531862745098039,
+        "sec_per_q": 0.38297418636434216
+      },
+      "rows": [
+        {
+          "id": "S-DEV-01",
+          "set": "development",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB01-p1-c2",
+            "SB01-p1-c1",
+            "SB01-p7-c1",
+            "SB01-p18-c1",
+            "SB01-p7-c2"
+          ]
+        },
+        {
+          "id": "S-DEV-02",
+          "set": "development",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 0.4,
+          "retrieved": [
+            "SB11-p1-c1",
+            "SB01-p12-c3",
+            "SB03-p5-c4",
+            "SB14-p21-c2",
+            "SB14-p6-c3"
+          ]
+        },
+        {
+          "id": "S-DEV-03",
+          "set": "development",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB12-p1-c2",
+            "SB01-p23-c2",
+            "SB01-p3-c1",
+            "SB01-p5-c2",
+            "SB01-p14-c2"
+          ]
+        },
+        {
+          "id": "S-DEV-04",
+          "set": "development",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB08-p19-c1",
+            "SB08-p20-c3",
+            "SB05-p12-c1",
+            "SB08-p19-c4",
+            "SB07-p18-c1"
+          ]
+        },
+        {
+          "id": "S-DEV-05",
+          "set": "development",
+          "page_rank": 3,
+          "quote_rank": 3,
+          "group_recall": 0.6666666666666666,
+          "retrieved": [
+            "SB15-p20-c1",
+            "SB14-p6-c3",
+            "SB11-p1-c1",
+            "SB15-p1-c2",
+            "SB14-p21-c2"
+          ]
+        },
+        {
+          "id": "S-DEV-06",
+          "set": "development",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB11-p20-c1",
+            "SB03-p20-c1",
+            "SB11-p19-c1",
+            "SB01-p7-c3",
+            "SB08-p20-c3"
+          ]
+        },
+        {
+          "id": "S-DEV-07",
+          "set": "development",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB04-p1-c2",
+            "SB15-p3-c1",
+            "SB04-p1-c1",
+            "SB04-p16-c2",
+            "SB04-p5-c2"
+          ]
+        },
+        {
+          "id": "S-DEV-08",
+          "set": "development",
+          "page_rank": 2,
+          "quote_rank": 5,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB15-p4-c1",
+            "SB05-p3-c3",
+            "SB05-p1-c4",
+            "SB12-p3-c3",
+            "SB10-p3-c3"
+          ]
+        },
+        {
+          "id": "S-DEV-09",
+          "set": "development",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 0.25,
+          "retrieved": [
+            "SB07-p4-c2",
+            "SB12-p19-c5",
+            "SB15-p21-c1",
+            "SB09-p3-c3",
+            "SB15-p21-c4"
+          ]
+        },
+        {
+          "id": "S-DEV-10",
+          "set": "development",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB15-p3-c2",
+            "SB02-p11-c4",
+            "SB02-p17-c4",
+            "SB10-p13-c4",
+            "SB15-p18-c3"
+          ]
+        },
+        {
+          "id": "S-DEV-11",
+          "set": "development",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB10-p3-c2",
+            "SB12-p4-c1",
+            "SB15-p16-c1",
+            "SB10-p19-c2",
+            "SB05-p1-c2"
+          ]
+        },
+        {
+          "id": "S-DEV-13",
+          "set": "development",
+          "page_rank": 3,
+          "quote_rank": 3,
+          "group_recall": 0.3333333333333333,
+          "retrieved": [
+            "SB14-p21-c2",
+            "SB14-p6-c3",
+            "SB11-p1-c1",
+            "SB15-p1-c5",
+            "SB01-p10-c3"
+          ]
+        },
+        {
+          "id": "S-DEV-14",
+          "set": "development",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB03-p20-c1",
+            "SB11-p20-c1",
+            "SB15-p2-c1",
+            "SB11-p19-c1",
+            "SB15-p6-c2"
+          ]
+        },
+        {
+          "id": "S-DEV-15",
+          "set": "development",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB05-p7-c3",
+            "SB11-p14-c1",
+            "SB15-p6-c3",
+            "SB13-p11-c2",
+            "SB05-p7-c2"
+          ]
+        },
+        {
+          "id": "S-DEV-16",
+          "set": "development",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB15-p21-c1",
+            "SB03-p20-c4",
+            "SB15-p20-c4",
+            "SB11-p8-c2",
+            "SB11-p17-c3"
+          ]
+        },
+        {
+          "id": "S-DEV-17",
+          "set": "development",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB10-p9-c1",
+            "SB05-p6-c1",
+            "SB10-p7-c1",
+            "SB10-p7-c4",
+            "SB05-p17-c1"
+          ]
+        },
+        {
+          "id": "S-DEV-18",
+          "set": "development",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB05-p7-c1",
+            "SB05-p7-c3",
+            "SB05-p7-c4",
+            "SB07-p11-c1",
+            "SB05-p17-c2"
+          ]
+        },
+        {
+          "id": "S-DEV-19",
+          "set": "development",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 0.5,
+          "retrieved": [
+            "SB09-p3-c1",
+            "SB09-p12-c1",
+            "SB03-p9-c2",
+            "SB12-p19-c1",
+            "SB03-p22-c3"
+          ]
+        },
+        {
+          "id": "S-DEV-20",
+          "set": "development",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB05-p7-c2",
+            "SB05-p7-c3",
+            "SB05-p7-c1",
+            "SB10-p1-c3",
+            "SB10-p15-c1"
+          ]
+        },
+        {
+          "id": "S-DEV-21",
+          "set": "development",
+          "page_rank": 3,
+          "quote_rank": 3,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB04-p10-c4",
+            "SB04-p19-c3",
+            "SB04-p2-c1",
+            "SB04-p22-c1",
+            "SB04-p10-c3"
+          ]
+        },
+        {
+          "id": "S-DEV-22",
+          "set": "development",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB06-p21-c4",
+            "SB10-p20-c3",
+            "SB14-p22-c3",
+            "SB10-p9-c5",
+            "SB06-p2-c3"
+          ]
+        },
+        {
+          "id": "S-DEV-23",
+          "set": "development",
+          "page_rank": 2,
+          "quote_rank": 2,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB01-p7-c2",
+            "SB01-p1-c2",
+            "SB01-p18-c3",
+            "SB14-p3-c1",
+            "SB01-p18-c1"
+          ]
+        },
+        {
+          "id": "S-DEV-24",
+          "set": "development",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB15-p24-c1",
+            "SB07-p22-c5",
+            "SB10-p12-c5",
+            "SB11-p11-c5",
+            "SB12-p22-c5"
+          ]
+        },
+        {
+          "id": "S-DEV-25",
+          "set": "development",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB15-p2-c3",
+            "SB11-p19-c1",
+            "SB11-p20-c2",
+            "SB11-p11-c3",
+            "SB08-p24-c3"
+          ]
+        },
+        {
+          "id": "S-DEV-26",
+          "set": "development",
+          "page_rank": 1,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB15-p1-c2",
+            "SB15-p20-c1",
+            "SB13-p20-c2",
+            "SB15-p21-c1",
+            "SB13-p21-c2"
+          ]
+        },
+        {
+          "id": "S-DEV-28",
+          "set": "development",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB06-p6-c3",
+            "SB11-p9-c2",
+            "SB01-p10-c2",
+            "SB01-p10-c5",
+            "SB03-p20-c4"
+          ]
+        },
+        {
+          "id": "S-DEV-29",
+          "set": "development",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB15-p10-c3",
+            "SB15-p10-c1",
+            "SB09-p20-c1",
+            "SB07-p16-c2",
+            "SB09-p15-c4"
+          ]
+        },
+        {
+          "id": "S-DEV-30",
+          "set": "development",
+          "page_rank": 3,
+          "quote_rank": 3,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB15-p23-c1",
+            "SB15-p23-c3",
+            "SB14-p3-c2",
+            "SB15-p23-c2",
+            "SB14-p22-c1"
+          ]
+        },
+        {
+          "id": "S-FINAL-01",
+          "set": "additional",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 0.5,
+          "retrieved": [
+            "SB01-p1-c2",
+            "SB01-p16-c2",
+            "SB01-p5-c1",
+            "SB01-p2-c1",
+            "SB01-p7-c2"
+          ]
+        },
+        {
+          "id": "S-FINAL-02",
+          "set": "additional",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB13-p13-c2",
+            "SB15-p20-c1",
+            "SB14-p6-c3",
+            "SB11-p21-c1",
+            "SB11-p10-c1"
+          ]
+        },
+        {
+          "id": "S-FINAL-03",
+          "set": "additional",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB01-p20-c2",
+            "SB05-p16-c2",
+            "SB01-p5-c5",
+            "SB14-p12-c2",
+            "SB14-p24-c1"
+          ]
+        },
+        {
+          "id": "S-FINAL-04",
+          "set": "additional",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB07-p1-c2",
+            "SB10-p8-c4",
+            "SB10-p1-c2",
+            "SB07-p7-c1",
+            "SB05-p6-c4"
+          ]
+        },
+        {
+          "id": "S-FINAL-05",
+          "set": "additional",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 0.6666666666666666,
+          "retrieved": [
+            "SB11-p1-c1",
+            "SB11-p5-c2",
+            "SB14-p6-c3",
+            "SB03-p5-c4",
+            "SB01-p12-c3"
+          ]
+        },
+        {
+          "id": "S-FINAL-06",
+          "set": "additional",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB01-p7-c3",
+            "SB07-p20-c2",
+            "SB07-p18-c1",
+            "SB04-p7-c2",
+            "SB14-p6-c3"
+          ]
+        },
+        {
+          "id": "S-FINAL-07",
+          "set": "additional",
+          "page_rank": 3,
+          "quote_rank": 3,
+          "group_recall": 0.5,
+          "retrieved": [
+            "SB12-p15-c3",
+            "SB02-p16-c2",
+            "SB04-p1-c2",
+            "SB02-p17-c4",
+            "SB02-p15-c4"
+          ]
+        },
+        {
+          "id": "S-FINAL-08",
+          "set": "additional",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB06-p2-c2",
+            "SB06-p14-c2",
+            "SB12-p18-c3",
+            "SB12-p4-c3",
+            "SB15-p4-c2"
+          ]
+        },
+        {
+          "id": "S-FINAL-09",
+          "set": "additional",
+          "page_rank": 5,
+          "quote_rank": 5,
+          "group_recall": 0.3333333333333333,
+          "retrieved": [
+            "SB08-p11-c1",
+            "SB11-p20-c1",
+            "SB03-p20-c1",
+            "SB13-p6-c3",
+            "SB11-p2-c1"
+          ]
+        },
+        {
+          "id": "S-FINAL-10",
+          "set": "additional",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB15-p18-c1",
+            "SB13-p11-c2",
+            "SB11-p14-c1",
+            "SB15-p18-c2",
+            "SB15-p2-c2"
+          ]
+        },
+        {
+          "id": "S-FINAL-11",
+          "set": "additional",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB10-p3-c1",
+            "SB05-p20-c1",
+            "SB05-p4-c3",
+            "SB05-p15-c1",
+            "SB14-p7-c3"
+          ]
+        },
+        {
+          "id": "S-FINAL-13",
+          "set": "additional",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB03-p10-c1",
+            "SB14-p6-c3",
+            "SB09-p9-c1",
+            "SB15-p20-c1",
+            "SB14-p21-c2"
+          ]
+        },
+        {
+          "id": "S-FINAL-14",
+          "set": "additional",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB15-p21-c1",
+            "SB11-p8-c5",
+            "SB11-p17-c3",
+            "SB11-p7-c5",
+            "SB03-p11-c2"
+          ]
+        },
+        {
+          "id": "S-FINAL-15",
+          "set": "additional",
+          "page_rank": 5,
+          "quote_rank": 5,
+          "group_recall": 0.3333333333333333,
+          "retrieved": [
+            "SB08-p12-c4",
+            "SB03-p20-c1",
+            "SB11-p16-c1",
+            "SB11-p12-c1",
+            "SB11-p2-c1"
+          ]
+        },
+        {
+          "id": "S-FINAL-16",
+          "set": "additional",
+          "page_rank": 2,
+          "quote_rank": 2,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB15-p3-c2",
+            "SB14-p2-c2",
+            "SB11-p14-c5",
+            "SB02-p21-c5",
+            "SB02-p16-c3"
+          ]
+        },
+        {
+          "id": "S-FINAL-17",
+          "set": "additional",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB11-p15-c1",
+            "SB11-p15-c3",
+            "SB13-p11-c2",
+            "SB15-p6-c3",
+            "SB08-p13-c1"
+          ]
+        },
+        {
+          "id": "S-FINAL-18",
+          "set": "additional",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB13-p13-c2",
+            "SB03-p11-c2",
+            "SB03-p10-c2",
+            "SB15-p5-c2",
+            "SB03-p20-c2"
+          ]
+        },
+        {
+          "id": "S-FINAL-19",
+          "set": "additional",
+          "page_rank": 3,
+          "quote_rank": 3,
+          "group_recall": 0.5,
+          "retrieved": [
+            "SB05-p8-c4",
+            "SB07-p1-c3",
+            "SB10-p1-c2",
+            "SB07-p7-c4",
+            "SB07-p23-c1"
+          ]
+        },
+        {
+          "id": "S-FINAL-20",
+          "set": "additional",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 0.5,
+          "retrieved": [
+            "SB09-p3-c1",
+            "SB09-p11-c1",
+            "SB09-p11-c2",
+            "SB07-p11-c2",
+            "SB07-p11-c1"
+          ]
+        },
+        {
+          "id": "S-FINAL-21",
+          "set": "additional",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB15-p16-c3",
+            "SB05-p22-c4",
+            "SB05-p13-c4",
+            "SB02-p18-c4",
+            "SB10-p23-c1"
+          ]
+        },
+        {
+          "id": "S-FINAL-22",
+          "set": "additional",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB04-p10-c4",
+            "SB06-p12-c4",
+            "SB06-p12-c1",
+            "SB04-p19-c4",
+            "SB15-p4-c1"
+          ]
+        },
+        {
+          "id": "S-FINAL-23",
+          "set": "additional",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB05-p3-c4",
+            "SB14-p3-c3",
+            "SB05-p6-c4",
+            "SB05-p17-c1",
+            "SB10-p20-c1"
+          ]
+        },
+        {
+          "id": "S-FINAL-24",
+          "set": "additional",
+          "page_rank": 4,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB14-p10-c2",
+            "SB11-p17-c1",
+            "SB11-p14-c1",
+            "SB11-p3-c1",
+            "SB11-p20-c3"
+          ]
+        },
+        {
+          "id": "S-FINAL-25",
+          "set": "additional",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 0.3333333333333333,
+          "retrieved": [
+            "SB15-p1-c5",
+            "SB15-p20-c1",
+            "SB15-p5-c1",
+            "SB15-p20-c3",
+            "SB13-p13-c2"
+          ]
+        },
+        {
+          "id": "S-FINAL-26",
+          "set": "additional",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB11-p17-c1",
+            "SB14-p1-c2",
+            "SB08-p11-c1",
+            "SB14-p21-c2",
+            "SB07-p24-c3"
+          ]
+        },
+        {
+          "id": "S-FINAL-27",
+          "set": "additional",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB14-p6-c3",
+            "SB15-p21-c1",
+            "SB11-p1-c1",
+            "SB03-p20-c4",
+            "SB11-p5-c2"
+          ]
+        },
+        {
+          "id": "S-FINAL-28",
+          "set": "additional",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB04-p10-c4",
+            "SB12-p14-c3",
+            "SB12-p15-c3",
+            "SB13-p16-c1",
+            "SB06-p12-c1"
+          ]
+        },
+        {
+          "id": "S-FINAL-30",
+          "set": "additional",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB14-p22-c4",
+            "SB14-p22-c2",
+            "SB04-p3-c4",
+            "SB04-p22-c5",
+            "SB04-p3-c1"
+          ]
+        },
+        {
+          "id": "S-VAL-DEV-01",
+          "set": "expansion_validation",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB01-p19-c3",
+            "SB01-p19-c2",
+            "SB14-p11-c3",
+            "SB01-p19-c5",
+            "SB05-p22-c4"
+          ]
+        },
+        {
+          "id": "S-VAL-DEV-02",
+          "set": "expansion_validation",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB02-p9-c4",
+            "SB02-p9-c1",
+            "SB15-p7-c1",
+            "SB02-p9-c2",
+            "SB02-p14-c3"
+          ]
+        },
+        {
+          "id": "S-VAL-DEV-03",
+          "set": "expansion_validation",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB03-p14-c2",
+            "SB03-p14-c1",
+            "SB07-p17-c1",
+            "SB10-p14-c2",
+            "SB07-p17-c2"
+          ]
+        },
+        {
+          "id": "S-VAL-DEV-04",
+          "set": "expansion_validation",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB04-p14-c3",
+            "SB04-p14-c4",
+            "SB04-p14-c2",
+            "SB04-p8-c4",
+            "SB04-p14-c1"
+          ]
+        },
+        {
+          "id": "S-VAL-DEV-05",
+          "set": "expansion_validation",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB05-p14-c1",
+            "SB05-p20-c4",
+            "SB05-p14-c3",
+            "SB05-p19-c4",
+            "SB05-p5-c4"
+          ]
+        },
+        {
+          "id": "S-VAL-DEV-06",
+          "set": "expansion_validation",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB06-p15-c2",
+            "SB06-p15-c3",
+            "SB06-p1-c3",
+            "SB06-p7-c1",
+            "SB06-p11-c2"
+          ]
+        },
+        {
+          "id": "S-VAL-FINAL-01",
+          "set": "expansion_validation",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB07-p20-c1",
+            "SB07-p11-c1",
+            "SB07-p20-c4",
+            "SB07-p18-c2",
+            "SB09-p11-c1"
+          ]
+        },
+        {
+          "id": "S-VAL-FINAL-02",
+          "set": "expansion_validation",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB08-p8-c2",
+            "SB08-p8-c4",
+            "SB08-p8-c5",
+            "SB08-p8-c1",
+            "SB08-p8-c3"
+          ]
+        },
+        {
+          "id": "S-VAL-FINAL-03",
+          "set": "expansion_validation",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB09-p10-c1",
+            "SB09-p10-c3",
+            "SB09-p10-c2",
+            "SB09-p9-c2",
+            "SB05-p10-c1"
+          ]
+        },
+        {
+          "id": "S-VAL-FINAL-04",
+          "set": "expansion_validation",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB10-p5-c2",
+            "SB10-p14-c1",
+            "SB10-p9-c2",
+            "SB10-p10-c1",
+            "SB10-p11-c1"
+          ]
+        },
+        {
+          "id": "S-VAL-FINAL-05",
+          "set": "expansion_validation",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB11-p19-c1",
+            "SB11-p20-c1",
+            "SB08-p14-c3",
+            "SB11-p23-c2",
+            "SB08-p24-c3"
+          ]
+        },
+        {
+          "id": "S-VAL-FINAL-06",
+          "set": "expansion_validation",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB13-p20-c2",
+            "SB11-p8-c2",
+            "SB03-p20-c4",
+            "SB11-p9-c2",
+            "SB15-p21-c1"
+          ]
+        }
+      ]
+    },
+    {
+      "profile": "qwen3",
+      "mode": "naive",
+      "summary": {
+        "n": 68,
+        "page_hit@1": 0.3382352941176471,
+        "page_hit@k": 0.5882352941176471,
+        "page_mrr": 0.41740196078431374,
+        "quote_hit@1": 0.3088235294117647,
+        "quote_hit@k": 0.5147058823529411,
+        "quote_mrr": 0.37401960784313726,
+        "group_recall": 0.39975490196078434,
+        "sec_per_q": 0.05394508207545561
+      },
+      "rows": [
+        {
+          "id": "S-DEV-01",
+          "set": "development",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB01-p1-c2",
+            "SB01-p1-c1",
+            "SB01-p18-c3",
+            "SB01-p7-c2",
+            "SB01-p18-c1"
+          ]
+        },
+        {
+          "id": "S-DEV-02",
+          "set": "development",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 0.6,
+          "retrieved": [
+            "SB11-p1-c1",
+            "SB01-p12-c3",
+            "SB01-p18-c4",
+            "SB01-p5-c1",
+            "SB01-p2-c2"
+          ]
+        },
+        {
+          "id": "S-DEV-03",
+          "set": "development",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB01-p3-c1",
+            "SB12-p5-c1",
+            "SB12-p1-c2",
+            "SB01-p5-c2",
+            "SB12-p5-c4"
+          ]
+        },
+        {
+          "id": "S-DEV-04",
+          "set": "development",
+          "page_rank": 2,
+          "quote_rank": 2,
+          "group_recall": 0.5,
+          "retrieved": [
+            "SB08-p19-c1",
+            "SB07-p2-c3",
+            "SB07-p18-c1",
+            "SB08-p20-c3",
+            "SB08-p12-c4"
+          ]
+        },
+        {
+          "id": "S-DEV-05",
+          "set": "development",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 0.6666666666666666,
+          "retrieved": [
+            "SB11-p1-c1",
+            "SB01-p12-c3",
+            "SB01-p7-c4",
+            "SB01-p16-c2",
+            "SB01-p10-c3"
+          ]
+        },
+        {
+          "id": "S-DEV-06",
+          "set": "development",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB08-p12-c4",
+            "SB08-p6-c3",
+            "SB08-p19-c4",
+            "SB08-p20-c3",
+            "SB11-p13-c3"
+          ]
+        },
+        {
+          "id": "S-DEV-07",
+          "set": "development",
+          "page_rank": 2,
+          "quote_rank": 2,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB04-p20-c1",
+            "SB04-p1-c1",
+            "SB04-p1-c2",
+            "SB04-p5-c1",
+            "SB04-p10-c2"
+          ]
+        },
+        {
+          "id": "S-DEV-08",
+          "set": "development",
+          "page_rank": 2,
+          "quote_rank": 2,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB15-p4-c1",
+            "SB10-p3-c3",
+            "SB10-p20-c2",
+            "SB05-p1-c4",
+            "SB05-p3-c1"
+          ]
+        },
+        {
+          "id": "S-DEV-09",
+          "set": "development",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB12-p19-c5",
+            "SB15-p1-c3",
+            "SB11-p13-c3",
+            "SB08-p12-c4",
+            "SB14-p21-c2"
+          ]
+        },
+        {
+          "id": "S-DEV-10",
+          "set": "development",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB15-p3-c2",
+            "SB02-p11-c4",
+            "SB02-p17-c4",
+            "SB02-p18-c2",
+            "SB07-p17-c1"
+          ]
+        },
+        {
+          "id": "S-DEV-11",
+          "set": "development",
+          "page_rank": 3,
+          "quote_rank": 3,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB15-p14-c5",
+            "SB10-p20-c1",
+            "SB10-p3-c2",
+            "SB10-p19-c2",
+            "SB10-p20-c3"
+          ]
+        },
+        {
+          "id": "S-DEV-13",
+          "set": "development",
+          "page_rank": 4,
+          "quote_rank": 4,
+          "group_recall": 0.3333333333333333,
+          "retrieved": [
+            "SB13-p13-c2",
+            "SB15-p20-c1",
+            "SB13-p13-c3",
+            "SB11-p1-c1",
+            "SB14-p21-c2"
+          ]
+        },
+        {
+          "id": "S-DEV-14",
+          "set": "development",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB12-p10-c2",
+            "SB04-p7-c4",
+            "SB14-p21-c2",
+            "SB15-p21-c4",
+            "SB12-p22-c3"
+          ]
+        },
+        {
+          "id": "S-DEV-15",
+          "set": "development",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB08-p12-c1",
+            "SB11-p14-c1",
+            "SB05-p12-c3",
+            "SB11-p22-c2",
+            "SB11-p15-c1"
+          ]
+        },
+        {
+          "id": "S-DEV-16",
+          "set": "development",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB11-p11-c1",
+            "SB15-p21-c1",
+            "SB15-p1-c3",
+            "SB11-p17-c3",
+            "SB11-p11-c4"
+          ]
+        },
+        {
+          "id": "S-DEV-17",
+          "set": "development",
+          "page_rank": 5,
+          "quote_rank": 5,
+          "group_recall": 0.5,
+          "retrieved": [
+            "SB10-p9-c3",
+            "SB10-p9-c1",
+            "SB10-p9-c5",
+            "SB10-p9-c4",
+            "SB10-p2-c1"
+          ]
+        },
+        {
+          "id": "S-DEV-18",
+          "set": "development",
+          "page_rank": 1,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB05-p2-c2",
+            "SB05-p7-c4",
+            "SB05-p7-c2",
+            "SB05-p7-c3",
+            "SB10-p17-c2"
+          ]
+        },
+        {
+          "id": "S-DEV-19",
+          "set": "development",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 0.5,
+          "retrieved": [
+            "SB09-p3-c2",
+            "SB09-p12-c1",
+            "SB07-p2-c3",
+            "SB12-p19-c1",
+            "SB09-p12-c3"
+          ]
+        },
+        {
+          "id": "S-DEV-20",
+          "set": "development",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB05-p7-c2",
+            "SB05-p7-c4",
+            "SB10-p17-c2",
+            "SB05-p7-c3",
+            "SB05-p7-c1"
+          ]
+        },
+        {
+          "id": "S-DEV-21",
+          "set": "development",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB04-p2-c1",
+            "SB04-p4-c4",
+            "SB04-p19-c3",
+            "SB04-p2-c4",
+            "SB04-p10-c4"
+          ]
+        },
+        {
+          "id": "S-DEV-22",
+          "set": "development",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB06-p2-c3",
+            "SB10-p20-c3",
+            "SB12-p17-c3",
+            "SB12-p17-c2",
+            "SB06-p13-c1"
+          ]
+        },
+        {
+          "id": "S-DEV-23",
+          "set": "development",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB14-p3-c1",
+            "SB01-p1-c1",
+            "SB01-p18-c3",
+            "SB01-p1-c2",
+            "SB01-p7-c2"
+          ]
+        },
+        {
+          "id": "S-DEV-24",
+          "set": "development",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB11-p9-c5",
+            "SB03-p18-c4",
+            "SB03-p21-c5",
+            "SB03-p18-c2",
+            "SB11-p11-c5"
+          ]
+        },
+        {
+          "id": "S-DEV-25",
+          "set": "development",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB15-p2-c3",
+            "SB08-p13-c4",
+            "SB11-p11-c3",
+            "SB11-p17-c1",
+            "SB15-p21-c3"
+          ]
+        },
+        {
+          "id": "S-DEV-26",
+          "set": "development",
+          "page_rank": 1,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB15-p1-c5",
+            "SB15-p1-c2",
+            "SB11-p6-c4",
+            "SB15-p20-c1",
+            "SB15-p20-c4"
+          ]
+        },
+        {
+          "id": "S-DEV-28",
+          "set": "development",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB01-p16-c1",
+            "SB01-p12-c3",
+            "SB01-p22-c2",
+            "SB11-p1-c1",
+            "SB01-p1-c2"
+          ]
+        },
+        {
+          "id": "S-DEV-29",
+          "set": "development",
+          "page_rank": 2,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB07-p10-c1",
+            "SB09-p2-c1",
+            "SB09-p9-c1",
+            "SB15-p10-c1",
+            "SB10-p11-c2"
+          ]
+        },
+        {
+          "id": "S-DEV-30",
+          "set": "development",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB15-p23-c1",
+            "SB03-p24-c2",
+            "SB15-p20-c4",
+            "SB11-p6-c4",
+            "SB14-p6-c3"
+          ]
+        },
+        {
+          "id": "S-FINAL-01",
+          "set": "additional",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 0.5,
+          "retrieved": [
+            "SB01-p1-c2",
+            "SB10-p2-c1",
+            "SB01-p16-c2",
+            "SB01-p7-c2",
+            "SB06-p6-c2"
+          ]
+        },
+        {
+          "id": "S-FINAL-02",
+          "set": "additional",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB13-p13-c2",
+            "SB15-p1-c2",
+            "SB15-p20-c1",
+            "SB01-p17-c5",
+            "SB11-p10-c1"
+          ]
+        },
+        {
+          "id": "S-FINAL-03",
+          "set": "additional",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB01-p20-c2",
+            "SB01-p20-c4",
+            "SB01-p20-c5",
+            "SB12-p20-c4",
+            "SB14-p5-c3"
+          ]
+        },
+        {
+          "id": "S-FINAL-04",
+          "set": "additional",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB07-p1-c2",
+            "SB07-p7-c1",
+            "SB09-p21-c1",
+            "SB07-p7-c5",
+            "SB07-p7-c2"
+          ]
+        },
+        {
+          "id": "S-FINAL-05",
+          "set": "additional",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 0.6666666666666666,
+          "retrieved": [
+            "SB11-p1-c1",
+            "SB15-p20-c1",
+            "SB14-p6-c3",
+            "SB11-p5-c2",
+            "SB15-p1-c2"
+          ]
+        },
+        {
+          "id": "S-FINAL-06",
+          "set": "additional",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB08-p12-c4",
+            "SB11-p13-c3",
+            "SB08-p6-c3",
+            "SB01-p7-c3",
+            "SB01-p7-c4"
+          ]
+        },
+        {
+          "id": "S-FINAL-07",
+          "set": "additional",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB02-p13-c3",
+            "SB02-p16-c4",
+            "SB02-p3-c4",
+            "SB02-p15-c4",
+            "SB12-p6-c3"
+          ]
+        },
+        {
+          "id": "S-FINAL-08",
+          "set": "additional",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB06-p2-c2",
+            "SB12-p18-c3",
+            "SB06-p14-c2",
+            "SB12-p4-c3",
+            "SB15-p4-c2"
+          ]
+        },
+        {
+          "id": "S-FINAL-09",
+          "set": "additional",
+          "page_rank": 3,
+          "quote_rank": 3,
+          "group_recall": 0.3333333333333333,
+          "retrieved": [
+            "SB14-p21-c2",
+            "SB04-p13-c3",
+            "SB04-p4-c2",
+            "SB02-p18-c3",
+            "SB04-p7-c4"
+          ]
+        },
+        {
+          "id": "S-FINAL-10",
+          "set": "additional",
+          "page_rank": 5,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB11-p15-c1",
+            "SB11-p14-c1",
+            "SB08-p12-c1",
+            "SB13-p11-c5",
+            "SB11-p3-c2"
+          ]
+        },
+        {
+          "id": "S-FINAL-11",
+          "set": "additional",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB10-p3-c1",
+            "SB05-p20-c1",
+            "SB05-p20-c3",
+            "SB05-p4-c3",
+            "SB05-p15-c1"
+          ]
+        },
+        {
+          "id": "S-FINAL-13",
+          "set": "additional",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB03-p10-c1",
+            "SB14-p6-c3",
+            "SB03-p5-c4",
+            "SB07-p10-c1",
+            "SB15-p20-c1"
+          ]
+        },
+        {
+          "id": "S-FINAL-14",
+          "set": "additional",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB15-p1-c3",
+            "SB11-p11-c1",
+            "SB11-p17-c3",
+            "SB15-p21-c1",
+            "SB03-p10-c4"
+          ]
+        },
+        {
+          "id": "S-FINAL-15",
+          "set": "additional",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB08-p12-c4",
+            "SB08-p6-c3",
+            "SB11-p15-c2",
+            "SB08-p3-c3",
+            "SB08-p20-c3"
+          ]
+        },
+        {
+          "id": "S-FINAL-16",
+          "set": "additional",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB15-p3-c2",
+            "SB02-p18-c3",
+            "SB12-p6-c1",
+            "SB02-p21-c5",
+            "SB02-p16-c2"
+          ]
+        },
+        {
+          "id": "S-FINAL-17",
+          "set": "additional",
+          "page_rank": 4,
+          "quote_rank": 4,
+          "group_recall": 0.5,
+          "retrieved": [
+            "SB11-p15-c1",
+            "SB08-p12-c1",
+            "SB11-p14-c1",
+            "SB11-p3-c2",
+            "SB07-p24-c3"
+          ]
+        },
+        {
+          "id": "S-FINAL-18",
+          "set": "additional",
+          "page_rank": 5,
+          "quote_rank": 5,
+          "group_recall": 0.25,
+          "retrieved": [
+            "SB13-p13-c2",
+            "SB06-p16-c3",
+            "SB07-p13-c3",
+            "SB11-p9-c2",
+            "SB11-p1-c3"
+          ]
+        },
+        {
+          "id": "S-FINAL-19",
+          "set": "additional",
+          "page_rank": 3,
+          "quote_rank": 3,
+          "group_recall": 0.5,
+          "retrieved": [
+            "SB07-p23-c1",
+            "SB10-p8-c3",
+            "SB10-p1-c2",
+            "SB07-p7-c4",
+            "SB07-p1-c3"
+          ]
+        },
+        {
+          "id": "S-FINAL-20",
+          "set": "additional",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 0.5,
+          "retrieved": [
+            "SB09-p2-c1",
+            "SB09-p11-c3",
+            "SB09-p11-c1",
+            "SB09-p11-c2",
+            "SB09-p9-c1"
+          ]
+        },
+        {
+          "id": "S-FINAL-21",
+          "set": "additional",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB05-p22-c4",
+            "SB12-p8-c2",
+            "SB12-p11-c2",
+            "SB07-p19-c4",
+            "SB12-p13-c4"
+          ]
+        },
+        {
+          "id": "S-FINAL-22",
+          "set": "additional",
+          "page_rank": 4,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB06-p12-c2",
+            "SB06-p12-c1",
+            "SB06-p12-c4",
+            "SB12-p3-c1",
+            "SB14-p12-c4"
+          ]
+        },
+        {
+          "id": "S-FINAL-23",
+          "set": "additional",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB05-p3-c4",
+            "SB06-p13-c1",
+            "SB05-p17-c1",
+            "SB05-p23-c1",
+            "SB10-p20-c3"
+          ]
+        },
+        {
+          "id": "S-FINAL-24",
+          "set": "additional",
+          "page_rank": 4,
+          "quote_rank": 4,
+          "group_recall": 0.5,
+          "retrieved": [
+            "SB08-p12-c1",
+            "SB11-p14-c1",
+            "SB11-p13-c4",
+            "SB11-p2-c2",
+            "SB11-p23-c2"
+          ]
+        },
+        {
+          "id": "S-FINAL-25",
+          "set": "additional",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 0.3333333333333333,
+          "retrieved": [
+            "SB15-p1-c5",
+            "SB15-p20-c3",
+            "SB11-p7-c3",
+            "SB15-p20-c1",
+            "SB15-p20-c4"
+          ]
+        },
+        {
+          "id": "S-FINAL-26",
+          "set": "additional",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB08-p13-c4",
+            "SB15-p19-c2",
+            "SB11-p17-c1",
+            "SB15-p2-c3",
+            "SB08-p11-c1"
+          ]
+        },
+        {
+          "id": "S-FINAL-27",
+          "set": "additional",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB01-p12-c3",
+            "SB15-p20-c1",
+            "SB11-p20-c1",
+            "SB11-p5-c2",
+            "SB11-p10-c1"
+          ]
+        },
+        {
+          "id": "S-FINAL-28",
+          "set": "additional",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB12-p3-c1",
+            "SB12-p14-c1",
+            "SB12-p14-c3",
+            "SB04-p11-c4",
+            "SB12-p15-c3"
+          ]
+        },
+        {
+          "id": "S-FINAL-30",
+          "set": "additional",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB04-p3-c1",
+            "SB04-p22-c5",
+            "SB04-p3-c2",
+            "SB04-p22-c2",
+            "SB06-p22-c1"
+          ]
+        },
+        {
+          "id": "S-VAL-DEV-01",
+          "set": "expansion_validation",
+          "page_rank": 3,
+          "quote_rank": 3,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB14-p11-c3",
+            "SB07-p17-c5",
+            "SB01-p19-c3",
+            "SB01-p15-c4",
+            "SB07-p13-c1"
+          ]
+        },
+        {
+          "id": "S-VAL-DEV-02",
+          "set": "expansion_validation",
+          "page_rank": 4,
+          "quote_rank": 4,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB02-p15-c1",
+            "SB12-p7-c3",
+            "SB02-p8-c2",
+            "SB02-p9-c1",
+            "SB02-p14-c3"
+          ]
+        },
+        {
+          "id": "S-VAL-DEV-03",
+          "set": "expansion_validation",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB07-p17-c2",
+            "SB07-p4-c1",
+            "SB03-p9-c4",
+            "SB07-p23-c2",
+            "SB07-p3-c3"
+          ]
+        },
+        {
+          "id": "S-VAL-DEV-04",
+          "set": "expansion_validation",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB04-p14-c4",
+            "SB04-p14-c2",
+            "SB04-p12-c4",
+            "SB04-p10-c2",
+            "SB04-p11-c2"
+          ]
+        },
+        {
+          "id": "S-VAL-DEV-05",
+          "set": "expansion_validation",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB05-p14-c1",
+            "SB05-p20-c4",
+            "SB05-p20-c1",
+            "SB05-p23-c1",
+            "SB05-p15-c1"
+          ]
+        },
+        {
+          "id": "S-VAL-DEV-06",
+          "set": "expansion_validation",
+          "page_rank": 5,
+          "quote_rank": 5,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB06-p11-c2",
+            "SB06-p7-c2",
+            "SB14-p13-c4",
+            "SB06-p7-c3",
+            "SB06-p15-c2"
+          ]
+        },
+        {
+          "id": "S-VAL-FINAL-01",
+          "set": "expansion_validation",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB07-p11-c1",
+            "SB09-p11-c3",
+            "SB07-p11-c4",
+            "SB09-p11-c2",
+            "SB07-p2-c4"
+          ]
+        },
+        {
+          "id": "S-VAL-FINAL-02",
+          "set": "expansion_validation",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB08-p8-c4",
+            "SB08-p8-c5",
+            "SB08-p8-c2",
+            "SB08-p8-c3",
+            "SB02-p19-c4"
+          ]
+        },
+        {
+          "id": "S-VAL-FINAL-03",
+          "set": "expansion_validation",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB09-p10-c3",
+            "SB09-p10-c1",
+            "SB09-p9-c5",
+            "SB09-p9-c1",
+            "SB09-p20-c1"
+          ]
+        },
+        {
+          "id": "S-VAL-FINAL-04",
+          "set": "expansion_validation",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB10-p2-c4",
+            "SB10-p9-c5",
+            "SB05-p10-c2",
+            "SB10-p11-c3",
+            "SB07-p16-c5"
+          ]
+        },
+        {
+          "id": "S-VAL-FINAL-05",
+          "set": "expansion_validation",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB11-p19-c1",
+            "SB11-p13-c2",
+            "SB08-p14-c3",
+            "SB11-p2-c2",
+            "SB11-p20-c4"
+          ]
+        },
+        {
+          "id": "S-VAL-FINAL-06",
+          "set": "expansion_validation",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB11-p5-c4",
+            "SB15-p21-c1",
+            "SB13-p5-c4",
+            "SB11-p11-c1",
+            "SB13-p9-c1"
+          ]
+        }
+      ]
+    },
+    {
+      "profile": "qwen3",
+      "mode": "hybrid",
+      "summary": {
+        "n": 68,
+        "page_hit@1": 0.38235294117647056,
+        "page_hit@k": 0.6176470588235294,
+        "page_mrr": 0.4727941176470588,
+        "quote_hit@1": 0.3382352941176471,
+        "quote_hit@k": 0.5735294117647058,
+        "quote_mrr": 0.42622549019607847,
+        "group_recall": 0.4740196078431373,
+        "sec_per_q": 0.038482150610755474
+      },
+      "rows": [
+        {
+          "id": "S-DEV-01",
+          "set": "development",
+          "page_rank": 1,
+          "quote_rank": 3,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB01-p1-c1",
+            "SB01-p7-c2",
+            "SB01-p1-c2",
+            "SB01-p18-c3",
+            "SB01-p18-c1"
+          ]
+        },
+        {
+          "id": "S-DEV-02",
+          "set": "development",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 0.4,
+          "retrieved": [
+            "SB11-p1-c1",
+            "SB01-p12-c3",
+            "SB15-p1-c2",
+            "SB01-p7-c2",
+            "SB01-p5-c1"
+          ]
+        },
+        {
+          "id": "S-DEV-03",
+          "set": "development",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB01-p3-c1",
+            "SB12-p1-c1",
+            "SB12-p1-c2",
+            "SB01-p5-c2",
+            "SB01-p23-c2"
+          ]
+        },
+        {
+          "id": "S-DEV-04",
+          "set": "development",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB08-p19-c1",
+            "SB08-p19-c4",
+            "SB05-p12-c1",
+            "SB07-p20-c2",
+            "SB10-p2-c2"
+          ]
+        },
+        {
+          "id": "S-DEV-05",
+          "set": "development",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 0.6666666666666666,
+          "retrieved": [
+            "SB11-p1-c1",
+            "SB15-p20-c1",
+            "SB01-p12-c3",
+            "SB01-p7-c4",
+            "SB15-p1-c2"
+          ]
+        },
+        {
+          "id": "S-DEV-06",
+          "set": "development",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB12-p10-c2",
+            "SB14-p21-c2",
+            "SB08-p12-c4",
+            "SB03-p20-c1",
+            "SB03-p9-c3"
+          ]
+        },
+        {
+          "id": "S-DEV-07",
+          "set": "development",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB04-p1-c1",
+            "SB04-p1-c3",
+            "SB04-p1-c2",
+            "SB04-p5-c2",
+            "SB04-p20-c1"
+          ]
+        },
+        {
+          "id": "S-DEV-08",
+          "set": "development",
+          "page_rank": 2,
+          "quote_rank": 2,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB15-p4-c1",
+            "SB10-p3-c3",
+            "SB10-p20-c2",
+            "SB05-p3-c1",
+            "SB05-p1-c4"
+          ]
+        },
+        {
+          "id": "S-DEV-09",
+          "set": "development",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB15-p1-c2",
+            "SB11-p10-c1",
+            "SB13-p13-c2",
+            "SB14-p21-c2",
+            "SB15-p1-c3"
+          ]
+        },
+        {
+          "id": "S-DEV-10",
+          "set": "development",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB15-p3-c2",
+            "SB02-p11-c4",
+            "SB02-p17-c4",
+            "SB02-p17-c1",
+            "SB07-p17-c1"
+          ]
+        },
+        {
+          "id": "S-DEV-11",
+          "set": "development",
+          "page_rank": 5,
+          "quote_rank": 5,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB10-p19-c2",
+            "SB15-p16-c1",
+            "SB15-p14-c1",
+            "SB10-p19-c1",
+            "SB10-p3-c2"
+          ]
+        },
+        {
+          "id": "S-DEV-13",
+          "set": "development",
+          "page_rank": 3,
+          "quote_rank": 3,
+          "group_recall": 0.3333333333333333,
+          "retrieved": [
+            "SB15-p20-c1",
+            "SB14-p6-c3",
+            "SB11-p1-c1",
+            "SB13-p13-c2",
+            "SB14-p21-c2"
+          ]
+        },
+        {
+          "id": "S-DEV-14",
+          "set": "development",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB03-p20-c1",
+            "SB14-p21-c2",
+            "SB12-p10-c2",
+            "SB15-p21-c4",
+            "SB12-p9-c2"
+          ]
+        },
+        {
+          "id": "S-DEV-15",
+          "set": "development",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB11-p14-c1",
+            "SB08-p12-c1",
+            "SB15-p2-c2",
+            "SB15-p18-c1",
+            "SB15-p21-c3"
+          ]
+        },
+        {
+          "id": "S-DEV-16",
+          "set": "development",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB11-p11-c1",
+            "SB15-p21-c1",
+            "SB11-p17-c3",
+            "SB11-p21-c2",
+            "SB03-p20-c4"
+          ]
+        },
+        {
+          "id": "S-DEV-17",
+          "set": "development",
+          "page_rank": 4,
+          "quote_rank": 4,
+          "group_recall": 0.5,
+          "retrieved": [
+            "SB10-p9-c1",
+            "SB10-p9-c3",
+            "SB10-p9-c4",
+            "SB10-p2-c1",
+            "SB10-p9-c5"
+          ]
+        },
+        {
+          "id": "S-DEV-18",
+          "set": "development",
+          "page_rank": 1,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB05-p2-c2",
+            "SB07-p11-c4",
+            "SB07-p20-c4",
+            "SB10-p5-c3",
+            "SB05-p7-c1"
+          ]
+        },
+        {
+          "id": "S-DEV-19",
+          "set": "development",
+          "page_rank": 2,
+          "quote_rank": 2,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB09-p12-c1",
+            "SB09-p3-c2",
+            "SB09-p3-c1",
+            "SB12-p19-c1",
+            "SB07-p2-c3"
+          ]
+        },
+        {
+          "id": "S-DEV-20",
+          "set": "development",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB05-p7-c2",
+            "SB05-p7-c4",
+            "SB10-p7-c2",
+            "SB10-p1-c3",
+            "SB05-p7-c3"
+          ]
+        },
+        {
+          "id": "S-DEV-21",
+          "set": "development",
+          "page_rank": 2,
+          "quote_rank": 2,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB04-p19-c3",
+            "SB04-p2-c1",
+            "SB04-p10-c4",
+            "SB04-p4-c4",
+            "SB04-p9-c4"
+          ]
+        },
+        {
+          "id": "S-DEV-22",
+          "set": "development",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB06-p2-c3",
+            "SB12-p17-c3",
+            "SB10-p20-c3",
+            "SB06-p21-c4",
+            "SB06-p13-c1"
+          ]
+        },
+        {
+          "id": "S-DEV-23",
+          "set": "development",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB14-p3-c1",
+            "SB01-p18-c3",
+            "SB01-p1-c1",
+            "SB01-p7-c2",
+            "SB01-p1-c2"
+          ]
+        },
+        {
+          "id": "S-DEV-24",
+          "set": "development",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB03-p18-c4",
+            "SB02-p13-c5",
+            "SB07-p22-c5",
+            "SB11-p11-c5",
+            "SB11-p9-c5"
+          ]
+        },
+        {
+          "id": "S-DEV-25",
+          "set": "development",
+          "page_rank": 4,
+          "quote_rank": 4,
+          "group_recall": 0.6666666666666666,
+          "retrieved": [
+            "SB15-p2-c3",
+            "SB11-p19-c1",
+            "SB11-p20-c2",
+            "SB11-p2-c2",
+            "SB11-p11-c3"
+          ]
+        },
+        {
+          "id": "S-DEV-26",
+          "set": "development",
+          "page_rank": 1,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB15-p1-c2",
+            "SB15-p20-c1",
+            "SB13-p20-c2",
+            "SB11-p7-c3",
+            "SB13-p8-c1"
+          ]
+        },
+        {
+          "id": "S-DEV-28",
+          "set": "development",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB01-p10-c2",
+            "SB06-p6-c2",
+            "SB01-p10-c5",
+            "SB01-p12-c3",
+            "SB11-p1-c1"
+          ]
+        },
+        {
+          "id": "S-DEV-29",
+          "set": "development",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB07-p10-c1",
+            "SB15-p10-c1",
+            "SB09-p20-c1",
+            "SB09-p9-c1",
+            "SB15-p10-c3"
+          ]
+        },
+        {
+          "id": "S-DEV-30",
+          "set": "development",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB15-p23-c1",
+            "SB15-p23-c3",
+            "SB15-p23-c2",
+            "SB13-p1-c2",
+            "SB13-p7-c2"
+          ]
+        },
+        {
+          "id": "S-FINAL-01",
+          "set": "additional",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 0.5,
+          "retrieved": [
+            "SB01-p1-c2",
+            "SB01-p16-c2",
+            "SB01-p7-c2",
+            "SB01-p5-c1",
+            "SB10-p2-c1"
+          ]
+        },
+        {
+          "id": "S-FINAL-02",
+          "set": "additional",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB13-p13-c2",
+            "SB15-p1-c2",
+            "SB15-p20-c1",
+            "SB11-p10-c1",
+            "SB01-p10-c2"
+          ]
+        },
+        {
+          "id": "S-FINAL-03",
+          "set": "additional",
+          "page_rank": 3,
+          "quote_rank": 3,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB01-p20-c2",
+            "SB01-p20-c4",
+            "SB01-p4-c3",
+            "SB01-p20-c5",
+            "SB01-p20-c3"
+          ]
+        },
+        {
+          "id": "S-FINAL-04",
+          "set": "additional",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB07-p1-c2",
+            "SB07-p7-c1",
+            "SB10-p8-c4",
+            "SB09-p21-c1",
+            "SB07-p7-c5"
+          ]
+        },
+        {
+          "id": "S-FINAL-05",
+          "set": "additional",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 0.6666666666666666,
+          "retrieved": [
+            "SB11-p1-c1",
+            "SB15-p20-c1",
+            "SB11-p5-c2",
+            "SB14-p6-c3",
+            "SB01-p12-c3"
+          ]
+        },
+        {
+          "id": "S-FINAL-06",
+          "set": "additional",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB01-p7-c3",
+            "SB08-p12-c4",
+            "SB01-p7-c4",
+            "SB11-p13-c3",
+            "SB15-p17-c3"
+          ]
+        },
+        {
+          "id": "S-FINAL-07",
+          "set": "additional",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB02-p3-c4",
+            "SB02-p13-c3",
+            "SB02-p15-c4",
+            "SB02-p3-c2",
+            "SB15-p3-c1"
+          ]
+        },
+        {
+          "id": "S-FINAL-08",
+          "set": "additional",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB06-p2-c2",
+            "SB12-p18-c3",
+            "SB12-p4-c3",
+            "SB06-p14-c2",
+            "SB15-p4-c2"
+          ]
+        },
+        {
+          "id": "S-FINAL-09",
+          "set": "additional",
+          "page_rank": 2,
+          "quote_rank": 2,
+          "group_recall": 0.3333333333333333,
+          "retrieved": [
+            "SB14-p21-c2",
+            "SB04-p4-c2",
+            "SB04-p13-c3",
+            "SB15-p11-c1",
+            "SB02-p12-c3"
+          ]
+        },
+        {
+          "id": "S-FINAL-10",
+          "set": "additional",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB11-p15-c1",
+            "SB11-p14-c1",
+            "SB08-p12-c1",
+            "SB15-p18-c1",
+            "SB08-p23-c2"
+          ]
+        },
+        {
+          "id": "S-FINAL-11",
+          "set": "additional",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB10-p3-c1",
+            "SB05-p20-c1",
+            "SB05-p15-c1",
+            "SB05-p4-c3",
+            "SB14-p7-c3"
+          ]
+        },
+        {
+          "id": "S-FINAL-13",
+          "set": "additional",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 0.3333333333333333,
+          "retrieved": [
+            "SB09-p2-c1",
+            "SB03-p10-c1",
+            "SB09-p9-c1",
+            "SB07-p10-c1",
+            "SB14-p6-c3"
+          ]
+        },
+        {
+          "id": "S-FINAL-14",
+          "set": "additional",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB11-p17-c3",
+            "SB11-p11-c1",
+            "SB15-p21-c1",
+            "SB11-p8-c2",
+            "SB11-p21-c2"
+          ]
+        },
+        {
+          "id": "S-FINAL-15",
+          "set": "additional",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB08-p12-c4",
+            "SB11-p13-c3",
+            "SB12-p19-c4",
+            "SB15-p21-c4",
+            "SB11-p15-c2"
+          ]
+        },
+        {
+          "id": "S-FINAL-16",
+          "set": "additional",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB15-p3-c2",
+            "SB02-p16-c2",
+            "SB12-p6-c1",
+            "SB02-p3-c3",
+            "SB02-p17-c1"
+          ]
+        },
+        {
+          "id": "S-FINAL-17",
+          "set": "additional",
+          "page_rank": 5,
+          "quote_rank": 5,
+          "group_recall": 0.5,
+          "retrieved": [
+            "SB11-p15-c1",
+            "SB08-p12-c1",
+            "SB08-p13-c1",
+            "SB11-p14-c1",
+            "SB11-p3-c2"
+          ]
+        },
+        {
+          "id": "S-FINAL-18",
+          "set": "additional",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB13-p13-c2",
+            "SB11-p9-c2",
+            "SB13-p6-c2",
+            "SB11-p10-c3",
+            "SB11-p6-c2"
+          ]
+        },
+        {
+          "id": "S-FINAL-19",
+          "set": "additional",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 0.5,
+          "retrieved": [
+            "SB10-p1-c2",
+            "SB07-p23-c1",
+            "SB05-p8-c1",
+            "SB10-p8-c3",
+            "SB07-p7-c2"
+          ]
+        },
+        {
+          "id": "S-FINAL-20",
+          "set": "additional",
+          "page_rank": 2,
+          "quote_rank": 2,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB07-p10-c1",
+            "SB09-p2-c1",
+            "SB09-p3-c1",
+            "SB09-p11-c3",
+            "SB09-p11-c1"
+          ]
+        },
+        {
+          "id": "S-FINAL-21",
+          "set": "additional",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB05-p22-c4",
+            "SB12-p11-c2",
+            "SB07-p19-c5",
+            "SB05-p13-c4",
+            "SB12-p4-c2"
+          ]
+        },
+        {
+          "id": "S-FINAL-22",
+          "set": "additional",
+          "page_rank": 4,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB06-p12-c2",
+            "SB06-p12-c4",
+            "SB06-p12-c1",
+            "SB12-p3-c1",
+            "SB04-p19-c4"
+          ]
+        },
+        {
+          "id": "S-FINAL-23",
+          "set": "additional",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB05-p3-c4",
+            "SB05-p17-c1",
+            "SB06-p13-c1",
+            "SB05-p6-c4",
+            "SB10-p7-c4"
+          ]
+        },
+        {
+          "id": "S-FINAL-24",
+          "set": "additional",
+          "page_rank": 3,
+          "quote_rank": 3,
+          "group_recall": 0.5,
+          "retrieved": [
+            "SB11-p14-c1",
+            "SB08-p12-c1",
+            "SB11-p2-c2",
+            "SB11-p20-c2",
+            "SB15-p18-c1"
+          ]
+        },
+        {
+          "id": "S-FINAL-25",
+          "set": "additional",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 0.3333333333333333,
+          "retrieved": [
+            "SB15-p1-c5",
+            "SB15-p20-c3",
+            "SB11-p7-c3",
+            "SB15-p20-c1",
+            "SB15-p20-c4"
+          ]
+        },
+        {
+          "id": "S-FINAL-26",
+          "set": "additional",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB11-p17-c1",
+            "SB08-p13-c4",
+            "SB15-p19-c2",
+            "SB08-p11-c1",
+            "SB08-p23-c2"
+          ]
+        },
+        {
+          "id": "S-FINAL-27",
+          "set": "additional",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB15-p20-c1",
+            "SB01-p12-c3",
+            "SB11-p20-c1",
+            "SB15-p1-c2",
+            "SB11-p5-c2"
+          ]
+        },
+        {
+          "id": "S-FINAL-28",
+          "set": "additional",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB12-p3-c1",
+            "SB04-p10-c1",
+            "SB04-p19-c3",
+            "SB12-p14-c3",
+            "SB12-p14-c1"
+          ]
+        },
+        {
+          "id": "S-FINAL-30",
+          "set": "additional",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB04-p3-c1",
+            "SB04-p22-c5",
+            "SB04-p3-c4",
+            "SB04-p3-c2",
+            "SB04-p22-c2"
+          ]
+        },
+        {
+          "id": "S-VAL-DEV-01",
+          "set": "expansion_validation",
+          "page_rank": 2,
+          "quote_rank": 2,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB14-p11-c3",
+            "SB01-p19-c3",
+            "SB01-p19-c2",
+            "SB01-p21-c5",
+            "SB07-p13-c1"
+          ]
+        },
+        {
+          "id": "S-VAL-DEV-02",
+          "set": "expansion_validation",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB02-p9-c4",
+            "SB15-p7-c1",
+            "SB02-p15-c1",
+            "SB02-p9-c1",
+            "SB02-p5-c4"
+          ]
+        },
+        {
+          "id": "S-VAL-DEV-03",
+          "set": "expansion_validation",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB03-p14-c2",
+            "SB03-p14-c1",
+            "SB07-p17-c2",
+            "SB07-p4-c1",
+            "SB03-p15-c1"
+          ]
+        },
+        {
+          "id": "S-VAL-DEV-04",
+          "set": "expansion_validation",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB04-p14-c2",
+            "SB04-p14-c4",
+            "SB04-p14-c3",
+            "SB04-p10-c2",
+            "SB04-p12-c4"
+          ]
+        },
+        {
+          "id": "S-VAL-DEV-05",
+          "set": "expansion_validation",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB05-p14-c1",
+            "SB05-p5-c4",
+            "SB05-p20-c4",
+            "SB05-p20-c1",
+            "SB05-p23-c1"
+          ]
+        },
+        {
+          "id": "S-VAL-DEV-06",
+          "set": "expansion_validation",
+          "page_rank": 2,
+          "quote_rank": 2,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB06-p11-c2",
+            "SB06-p15-c2",
+            "SB06-p7-c2",
+            "SB06-p5-c3",
+            "SB14-p13-c4"
+          ]
+        },
+        {
+          "id": "S-VAL-FINAL-01",
+          "set": "expansion_validation",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB07-p20-c1",
+            "SB07-p11-c1",
+            "SB09-p11-c3",
+            "SB07-p11-c4",
+            "SB07-p18-c2"
+          ]
+        },
+        {
+          "id": "S-VAL-FINAL-02",
+          "set": "expansion_validation",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB08-p8-c2",
+            "SB08-p8-c4",
+            "SB08-p8-c5",
+            "SB08-p8-c1",
+            "SB08-p8-c3"
+          ]
+        },
+        {
+          "id": "S-VAL-FINAL-03",
+          "set": "expansion_validation",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB09-p10-c3",
+            "SB09-p10-c1",
+            "SB09-p9-c1",
+            "SB09-p20-c1",
+            "SB15-p10-c1"
+          ]
+        },
+        {
+          "id": "S-VAL-FINAL-04",
+          "set": "expansion_validation",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB10-p2-c2",
+            "SB07-p16-c5",
+            "SB10-p9-c5",
+            "SB10-p2-c4",
+            "SB10-p9-c3"
+          ]
+        },
+        {
+          "id": "S-VAL-FINAL-05",
+          "set": "expansion_validation",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB11-p19-c1",
+            "SB08-p14-c3",
+            "SB11-p20-c2",
+            "SB11-p2-c2",
+            "SB11-p13-c1"
+          ]
+        },
+        {
+          "id": "S-VAL-FINAL-06",
+          "set": "expansion_validation",
+          "page_rank": 2,
+          "quote_rank": 4,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB15-p21-c1",
+            "SB13-p20-c1",
+            "SB11-p11-c1",
+            "SB13-p20-c2",
+            "SB13-p20-c3"
+          ]
+        }
+      ]
+    },
+    {
+      "profile": "qwen3",
+      "mode": "rerank",
+      "summary": {
+        "n": 68,
+        "page_hit@1": 0.4117647058823529,
+        "page_hit@k": 0.6176470588235294,
+        "page_mrr": 0.48504901960784313,
+        "quote_hit@1": 0.39705882352941174,
+        "quote_hit@k": 0.5735294117647058,
+        "quote_mrr": 0.4600490196078431,
+        "group_recall": 0.4605392156862745,
+        "sec_per_q": 0.314241721349604
+      },
+      "rows": [
+        {
+          "id": "S-DEV-01",
+          "set": "development",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB01-p1-c2",
+            "SB01-p1-c1",
+            "SB01-p7-c1",
+            "SB01-p18-c1",
+            "SB01-p7-c2"
+          ]
+        },
+        {
+          "id": "S-DEV-02",
+          "set": "development",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 0.4,
+          "retrieved": [
+            "SB11-p1-c1",
+            "SB01-p12-c3",
+            "SB03-p5-c4",
+            "SB14-p21-c2",
+            "SB14-p6-c3"
+          ]
+        },
+        {
+          "id": "S-DEV-03",
+          "set": "development",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB12-p1-c2",
+            "SB01-p23-c2",
+            "SB01-p3-c1",
+            "SB01-p5-c2",
+            "SB01-p14-c2"
+          ]
+        },
+        {
+          "id": "S-DEV-04",
+          "set": "development",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB08-p19-c1",
+            "SB08-p20-c3",
+            "SB05-p12-c1",
+            "SB08-p19-c4",
+            "SB07-p18-c1"
+          ]
+        },
+        {
+          "id": "S-DEV-05",
+          "set": "development",
+          "page_rank": 3,
+          "quote_rank": 3,
+          "group_recall": 0.6666666666666666,
+          "retrieved": [
+            "SB15-p20-c1",
+            "SB14-p6-c3",
+            "SB11-p1-c1",
+            "SB15-p1-c2",
+            "SB14-p21-c2"
+          ]
+        },
+        {
+          "id": "S-DEV-06",
+          "set": "development",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB11-p20-c1",
+            "SB03-p20-c1",
+            "SB11-p19-c1",
+            "SB01-p7-c3",
+            "SB08-p11-c1"
+          ]
+        },
+        {
+          "id": "S-DEV-07",
+          "set": "development",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB04-p1-c2",
+            "SB15-p3-c1",
+            "SB04-p1-c1",
+            "SB04-p16-c2",
+            "SB04-p5-c2"
+          ]
+        },
+        {
+          "id": "S-DEV-08",
+          "set": "development",
+          "page_rank": 2,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB15-p4-c1",
+            "SB05-p3-c3",
+            "SB05-p23-c4",
+            "SB05-p1-c4",
+            "SB12-p3-c3"
+          ]
+        },
+        {
+          "id": "S-DEV-09",
+          "set": "development",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 0.25,
+          "retrieved": [
+            "SB07-p4-c2",
+            "SB12-p19-c5",
+            "SB15-p21-c1",
+            "SB09-p3-c3",
+            "SB15-p21-c4"
+          ]
+        },
+        {
+          "id": "S-DEV-10",
+          "set": "development",
+          "page_rank": 2,
+          "quote_rank": 2,
+          "group_recall": 0.5,
+          "retrieved": [
+            "SB15-p3-c2",
+            "SB07-p3-c4",
+            "SB02-p11-c4",
+            "SB02-p17-c4",
+            "SB07-p12-c4"
+          ]
+        },
+        {
+          "id": "S-DEV-11",
+          "set": "development",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB10-p3-c2",
+            "SB12-p4-c1",
+            "SB15-p16-c1",
+            "SB10-p19-c2",
+            "SB05-p1-c2"
+          ]
+        },
+        {
+          "id": "S-DEV-13",
+          "set": "development",
+          "page_rank": 3,
+          "quote_rank": 3,
+          "group_recall": 0.3333333333333333,
+          "retrieved": [
+            "SB14-p21-c2",
+            "SB14-p6-c3",
+            "SB11-p1-c1",
+            "SB15-p1-c5",
+            "SB01-p10-c3"
+          ]
+        },
+        {
+          "id": "S-DEV-14",
+          "set": "development",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB03-p20-c1",
+            "SB08-p11-c1",
+            "SB11-p20-c1",
+            "SB15-p2-c1",
+            "SB11-p19-c1"
+          ]
+        },
+        {
+          "id": "S-DEV-15",
+          "set": "development",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB11-p14-c1",
+            "SB15-p6-c3",
+            "SB13-p11-c2",
+            "SB13-p11-c5",
+            "SB15-p18-c1"
+          ]
+        },
+        {
+          "id": "S-DEV-16",
+          "set": "development",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB15-p21-c1",
+            "SB03-p20-c4",
+            "SB15-p20-c4",
+            "SB11-p8-c2",
+            "SB11-p6-c4"
+          ]
+        },
+        {
+          "id": "S-DEV-17",
+          "set": "development",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB10-p9-c1",
+            "SB05-p6-c1",
+            "SB10-p7-c1",
+            "SB10-p7-c4",
+            "SB05-p17-c1"
+          ]
+        },
+        {
+          "id": "S-DEV-18",
+          "set": "development",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB05-p7-c1",
+            "SB05-p7-c3",
+            "SB05-p7-c4",
+            "SB07-p11-c1",
+            "SB05-p17-c2"
+          ]
+        },
+        {
+          "id": "S-DEV-19",
+          "set": "development",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 0.5,
+          "retrieved": [
+            "SB09-p3-c1",
+            "SB09-p12-c1",
+            "SB03-p9-c2",
+            "SB12-p19-c1",
+            "SB03-p22-c3"
+          ]
+        },
+        {
+          "id": "S-DEV-20",
+          "set": "development",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB05-p7-c2",
+            "SB05-p7-c3",
+            "SB05-p7-c1",
+            "SB10-p1-c3",
+            "SB10-p15-c1"
+          ]
+        },
+        {
+          "id": "S-DEV-21",
+          "set": "development",
+          "page_rank": 3,
+          "quote_rank": 3,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB04-p10-c4",
+            "SB04-p19-c3",
+            "SB04-p2-c1",
+            "SB04-p22-c1",
+            "SB04-p10-c3"
+          ]
+        },
+        {
+          "id": "S-DEV-22",
+          "set": "development",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB06-p21-c4",
+            "SB10-p20-c3",
+            "SB06-p17-c3",
+            "SB10-p9-c5",
+            "SB06-p2-c3"
+          ]
+        },
+        {
+          "id": "S-DEV-23",
+          "set": "development",
+          "page_rank": 2,
+          "quote_rank": 2,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB01-p7-c2",
+            "SB01-p1-c2",
+            "SB01-p18-c3",
+            "SB14-p3-c1",
+            "SB01-p18-c1"
+          ]
+        },
+        {
+          "id": "S-DEV-24",
+          "set": "development",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB15-p24-c1",
+            "SB07-p22-c5",
+            "SB10-p12-c5",
+            "SB11-p11-c5",
+            "SB12-p22-c5"
+          ]
+        },
+        {
+          "id": "S-DEV-25",
+          "set": "development",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB15-p2-c3",
+            "SB11-p19-c1",
+            "SB11-p20-c2",
+            "SB11-p11-c3",
+            "SB08-p24-c3"
+          ]
+        },
+        {
+          "id": "S-DEV-26",
+          "set": "development",
+          "page_rank": 1,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB15-p1-c2",
+            "SB15-p20-c1",
+            "SB13-p20-c2",
+            "SB15-p21-c1",
+            "SB13-p21-c2"
+          ]
+        },
+        {
+          "id": "S-DEV-28",
+          "set": "development",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB06-p6-c3",
+            "SB11-p9-c2",
+            "SB01-p10-c2",
+            "SB01-p10-c5",
+            "SB03-p20-c4"
+          ]
+        },
+        {
+          "id": "S-DEV-29",
+          "set": "development",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB15-p10-c3",
+            "SB15-p10-c1",
+            "SB09-p20-c1",
+            "SB07-p16-c2",
+            "SB09-p15-c4"
+          ]
+        },
+        {
+          "id": "S-DEV-30",
+          "set": "development",
+          "page_rank": 3,
+          "quote_rank": 3,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB15-p23-c1",
+            "SB15-p23-c3",
+            "SB14-p3-c2",
+            "SB15-p23-c2",
+            "SB15-p23-c4"
+          ]
+        },
+        {
+          "id": "S-FINAL-01",
+          "set": "additional",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 0.5,
+          "retrieved": [
+            "SB01-p1-c2",
+            "SB01-p16-c2",
+            "SB01-p5-c1",
+            "SB01-p2-c1",
+            "SB01-p7-c2"
+          ]
+        },
+        {
+          "id": "S-FINAL-02",
+          "set": "additional",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB13-p13-c2",
+            "SB15-p20-c1",
+            "SB14-p6-c3",
+            "SB11-p21-c1",
+            "SB11-p10-c1"
+          ]
+        },
+        {
+          "id": "S-FINAL-03",
+          "set": "additional",
+          "page_rank": 3,
+          "quote_rank": 3,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB01-p20-c2",
+            "SB05-p16-c2",
+            "SB01-p4-c3",
+            "SB01-p5-c5",
+            "SB01-p13-c5"
+          ]
+        },
+        {
+          "id": "S-FINAL-04",
+          "set": "additional",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB07-p1-c2",
+            "SB10-p8-c4",
+            "SB10-p1-c2",
+            "SB07-p7-c1",
+            "SB05-p6-c4"
+          ]
+        },
+        {
+          "id": "S-FINAL-05",
+          "set": "additional",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 0.6666666666666666,
+          "retrieved": [
+            "SB11-p1-c1",
+            "SB11-p5-c2",
+            "SB14-p6-c3",
+            "SB03-p5-c4",
+            "SB01-p12-c3"
+          ]
+        },
+        {
+          "id": "S-FINAL-06",
+          "set": "additional",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB15-p2-c3",
+            "SB01-p7-c3",
+            "SB07-p20-c2",
+            "SB07-p18-c1",
+            "SB04-p7-c2"
+          ]
+        },
+        {
+          "id": "S-FINAL-07",
+          "set": "additional",
+          "page_rank": 3,
+          "quote_rank": 3,
+          "group_recall": 0.5,
+          "retrieved": [
+            "SB12-p15-c3",
+            "SB02-p16-c2",
+            "SB04-p1-c2",
+            "SB02-p17-c4",
+            "SB02-p15-c4"
+          ]
+        },
+        {
+          "id": "S-FINAL-08",
+          "set": "additional",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB06-p2-c2",
+            "SB06-p14-c2",
+            "SB12-p18-c3",
+            "SB12-p4-c3",
+            "SB15-p4-c2"
+          ]
+        },
+        {
+          "id": "S-FINAL-09",
+          "set": "additional",
+          "page_rank": 5,
+          "quote_rank": 5,
+          "group_recall": 0.3333333333333333,
+          "retrieved": [
+            "SB08-p11-c1",
+            "SB11-p20-c1",
+            "SB13-p6-c3",
+            "SB11-p22-c1",
+            "SB11-p2-c1"
+          ]
+        },
+        {
+          "id": "S-FINAL-10",
+          "set": "additional",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB15-p18-c1",
+            "SB13-p11-c2",
+            "SB11-p14-c1",
+            "SB15-p18-c2",
+            "SB15-p2-c2"
+          ]
+        },
+        {
+          "id": "S-FINAL-11",
+          "set": "additional",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB10-p3-c1",
+            "SB05-p20-c1",
+            "SB05-p4-c3",
+            "SB05-p15-c1",
+            "SB14-p7-c3"
+          ]
+        },
+        {
+          "id": "S-FINAL-13",
+          "set": "additional",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB03-p10-c1",
+            "SB14-p6-c3",
+            "SB09-p9-c1",
+            "SB15-p20-c1",
+            "SB14-p21-c2"
+          ]
+        },
+        {
+          "id": "S-FINAL-14",
+          "set": "additional",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB15-p21-c1",
+            "SB11-p8-c5",
+            "SB11-p17-c3",
+            "SB11-p7-c5",
+            "SB11-p21-c2"
+          ]
+        },
+        {
+          "id": "S-FINAL-15",
+          "set": "additional",
+          "page_rank": 4,
+          "quote_rank": 4,
+          "group_recall": 0.3333333333333333,
+          "retrieved": [
+            "SB08-p11-c1",
+            "SB08-p12-c4",
+            "SB11-p16-c1",
+            "SB11-p2-c1",
+            "SB15-p21-c3"
+          ]
+        },
+        {
+          "id": "S-FINAL-16",
+          "set": "additional",
+          "page_rank": 2,
+          "quote_rank": 2,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB15-p3-c2",
+            "SB14-p2-c2",
+            "SB02-p21-c5",
+            "SB02-p16-c3",
+            "SB08-p11-c5"
+          ]
+        },
+        {
+          "id": "S-FINAL-17",
+          "set": "additional",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB11-p15-c1",
+            "SB08-p18-c3",
+            "SB08-p17-c5",
+            "SB11-p15-c3",
+            "SB13-p11-c2"
+          ]
+        },
+        {
+          "id": "S-FINAL-18",
+          "set": "additional",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB13-p13-c2",
+            "SB03-p11-c2",
+            "SB03-p10-c2",
+            "SB15-p5-c2",
+            "SB03-p20-c2"
+          ]
+        },
+        {
+          "id": "S-FINAL-19",
+          "set": "additional",
+          "page_rank": 3,
+          "quote_rank": 3,
+          "group_recall": 0.5,
+          "retrieved": [
+            "SB05-p8-c4",
+            "SB07-p1-c3",
+            "SB10-p1-c2",
+            "SB07-p7-c4",
+            "SB07-p23-c1"
+          ]
+        },
+        {
+          "id": "S-FINAL-20",
+          "set": "additional",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 0.5,
+          "retrieved": [
+            "SB09-p3-c1",
+            "SB09-p11-c1",
+            "SB09-p11-c2",
+            "SB07-p11-c2",
+            "SB07-p11-c1"
+          ]
+        },
+        {
+          "id": "S-FINAL-21",
+          "set": "additional",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB15-p16-c3",
+            "SB05-p22-c4",
+            "SB05-p13-c4",
+            "SB02-p18-c4",
+            "SB10-p23-c1"
+          ]
+        },
+        {
+          "id": "S-FINAL-22",
+          "set": "additional",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB04-p10-c4",
+            "SB06-p12-c4",
+            "SB06-p12-c1",
+            "SB04-p14-c4",
+            "SB04-p19-c4"
+          ]
+        },
+        {
+          "id": "S-FINAL-23",
+          "set": "additional",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB05-p3-c4",
+            "SB14-p3-c3",
+            "SB05-p6-c4",
+            "SB05-p17-c1",
+            "SB10-p20-c1"
+          ]
+        },
+        {
+          "id": "S-FINAL-24",
+          "set": "additional",
+          "page_rank": 5,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB14-p10-c2",
+            "SB11-p17-c1",
+            "SB11-p14-c1",
+            "SB11-p20-c4",
+            "SB11-p3-c1"
+          ]
+        },
+        {
+          "id": "S-FINAL-25",
+          "set": "additional",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 0.3333333333333333,
+          "retrieved": [
+            "SB15-p1-c5",
+            "SB15-p20-c1",
+            "SB15-p5-c1",
+            "SB15-p20-c3",
+            "SB13-p13-c2"
+          ]
+        },
+        {
+          "id": "S-FINAL-26",
+          "set": "additional",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB11-p17-c1",
+            "SB08-p11-c1",
+            "SB14-p21-c2",
+            "SB07-p24-c3",
+            "SB11-p11-c3"
+          ]
+        },
+        {
+          "id": "S-FINAL-27",
+          "set": "additional",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB14-p6-c3",
+            "SB15-p21-c1",
+            "SB11-p1-c1",
+            "SB03-p20-c4",
+            "SB11-p5-c2"
+          ]
+        },
+        {
+          "id": "S-FINAL-28",
+          "set": "additional",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB04-p10-c4",
+            "SB12-p14-c3",
+            "SB12-p15-c3",
+            "SB13-p10-c4",
+            "SB13-p16-c1"
+          ]
+        },
+        {
+          "id": "S-FINAL-30",
+          "set": "additional",
+          "page_rank": null,
+          "quote_rank": null,
+          "group_recall": 0.0,
+          "retrieved": [
+            "SB14-p22-c2",
+            "SB04-p3-c4",
+            "SB04-p22-c5",
+            "SB04-p3-c1",
+            "SB04-p22-c4"
+          ]
+        },
+        {
+          "id": "S-VAL-DEV-01",
+          "set": "expansion_validation",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB01-p19-c3",
+            "SB01-p19-c2",
+            "SB14-p11-c3",
+            "SB01-p19-c5",
+            "SB01-p21-c5"
+          ]
+        },
+        {
+          "id": "S-VAL-DEV-02",
+          "set": "expansion_validation",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB02-p9-c4",
+            "SB02-p9-c1",
+            "SB15-p7-c1",
+            "SB02-p9-c2",
+            "SB02-p14-c3"
+          ]
+        },
+        {
+          "id": "S-VAL-DEV-03",
+          "set": "expansion_validation",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB03-p14-c2",
+            "SB03-p14-c1",
+            "SB07-p17-c1",
+            "SB07-p17-c2",
+            "SB07-p17-c3"
+          ]
+        },
+        {
+          "id": "S-VAL-DEV-04",
+          "set": "expansion_validation",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB04-p14-c3",
+            "SB04-p14-c4",
+            "SB04-p14-c2",
+            "SB04-p8-c4",
+            "SB04-p14-c1"
+          ]
+        },
+        {
+          "id": "S-VAL-DEV-05",
+          "set": "expansion_validation",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB05-p14-c1",
+            "SB05-p20-c4",
+            "SB05-p14-c3",
+            "SB05-p19-c4",
+            "SB05-p5-c4"
+          ]
+        },
+        {
+          "id": "S-VAL-DEV-06",
+          "set": "expansion_validation",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB06-p15-c2",
+            "SB06-p15-c3",
+            "SB06-p1-c3",
+            "SB06-p7-c1",
+            "SB06-p11-c2"
+          ]
+        },
+        {
+          "id": "S-VAL-FINAL-01",
+          "set": "expansion_validation",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB07-p20-c1",
+            "SB07-p11-c1",
+            "SB07-p20-c4",
+            "SB07-p18-c2",
+            "SB09-p11-c1"
+          ]
+        },
+        {
+          "id": "S-VAL-FINAL-02",
+          "set": "expansion_validation",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB08-p8-c2",
+            "SB08-p8-c4",
+            "SB08-p8-c5",
+            "SB08-p8-c1",
+            "SB08-p8-c3"
+          ]
+        },
+        {
+          "id": "S-VAL-FINAL-03",
+          "set": "expansion_validation",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB09-p10-c1",
+            "SB09-p10-c3",
+            "SB09-p10-c2",
+            "SB09-p9-c2",
+            "SB05-p10-c1"
+          ]
+        },
+        {
+          "id": "S-VAL-FINAL-04",
+          "set": "expansion_validation",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB10-p5-c2",
+            "SB10-p14-c1",
+            "SB10-p9-c2",
+            "SB10-p10-c1",
+            "SB10-p11-c1"
+          ]
+        },
+        {
+          "id": "S-VAL-FINAL-05",
+          "set": "expansion_validation",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB11-p19-c1",
+            "SB11-p20-c1",
+            "SB08-p14-c3",
+            "SB11-p23-c2",
+            "SB08-p24-c3"
+          ]
+        },
+        {
+          "id": "S-VAL-FINAL-06",
+          "set": "expansion_validation",
+          "page_rank": 1,
+          "quote_rank": 1,
+          "group_recall": 1.0,
+          "retrieved": [
+            "SB13-p20-c2",
+            "SB11-p8-c2",
+            "SB03-p20-c4",
+            "SB11-p9-c2",
+            "SB15-p21-c1"
+          ]
+        }
+      ]
+    }
+  ]
+}

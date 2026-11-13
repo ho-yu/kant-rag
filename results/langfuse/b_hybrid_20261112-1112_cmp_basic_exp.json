@@ -1,0 +1,74 @@
+{
+  "run_name": "b_hybrid_20261112-1112_cmp_basic_exp",
+  "dataset": "shipping-basic-expansion-validation-v1",
+  "impl": "retrieval_b",
+  "mode": "hybrid",
+  "page_context": false,
+  "code_answer_scores": false,
+  "judge_model": null,
+  "n_items": 12,
+  "summary": {
+    "hit_at_5": {
+      "mean": 1.0,
+      "n_scored": 12,
+      "n_zero": 0,
+      "n_na": 0,
+      "n_unavailable": 0,
+      "causes": {},
+      "by_status": {
+        "answered": {
+          "mean": 1.0,
+          "n_scored": 10,
+          "n": 10
+        },
+        "abstained": {
+          "mean": 1.0,
+          "n_scored": 2,
+          "n": 2
+        }
+      }
+    },
+    "recall_at_5": {
+      "mean": 1.0,
+      "n_scored": 12,
+      "n_zero": 0,
+      "n_na": 0,
+      "n_unavailable": 0,
+      "causes": {},
+      "by_status": {
+        "answered": {
+          "mean": 1.0,
+          "n_scored": 10,
+          "n": 10
+        },
+        "abstained": {
+          "mean": 1.0,
+          "n_scored": 2,
+          "n": 2
+        }
+      }
+    },
+    "mrr_at_5": {
+      "mean": 0.8542,
+      "n_scored": 12,
+      "n_zero": 0,
+      "n_na": 0,
+      "n_unavailable": 0,
+      "causes": {},
+      "by_status": {
+        "answered": {
+          "mean": 0.825,
+          "n_scored": 10,
+          "n": 10
+        },
+        "abstained": {
+          "mean": 1.0,
+          "n_scored": 2,
+          "n": 2
+        }
+      }
+    }
+  },
+  "grading_usage": null,
+  "url": "http://10.2.17.122:3000/project/cmw4irryu0007pc6a7n3sy3al/experiments/results?baseline=2f28bc85b9561b61"
+}

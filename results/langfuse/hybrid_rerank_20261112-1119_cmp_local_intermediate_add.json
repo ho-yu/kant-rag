@@ -1,0 +1,95 @@
+{
+  "run_name": "hybrid_rerank_20261112-1119_cmp_local_intermediate_add",
+  "dataset": "shipping-intermediate-additional-v1",
+  "impl": "retrieval_a",
+  "mode": "hybrid_rerank",
+  "page_context": false,
+  "code_answer_scores": false,
+  "judge_model": null,
+  "n_items": 30,
+  "summary": {
+    "hit_at_5": {
+      "mean": 0.9643,
+      "n_scored": 28,
+      "n_zero": 1,
+      "n_na": 2,
+      "n_unavailable": 0,
+      "causes": {
+        "no_evidence": 2
+      },
+      "by_status": {
+        "answered": {
+          "mean": 1.0,
+          "n_scored": 16,
+          "n": 16
+        },
+        "needs_clarification": {
+          "mean": 0.875,
+          "n_scored": 8,
+          "n": 10
+        },
+        "abstained": {
+          "mean": 1.0,
+          "n_scored": 4,
+          "n": 4
+        }
+      }
+    },
+    "recall_at_5": {
+      "mean": 0.6447,
+      "n_scored": 28,
+      "n_zero": 1,
+      "n_na": 2,
+      "n_unavailable": 0,
+      "causes": {
+        "no_evidence": 2
+      },
+      "by_status": {
+        "answered": {
+          "mean": 0.7865,
+          "n_scored": 16,
+          "n": 16
+        },
+        "needs_clarification": {
+          "mean": 0.4232,
+          "n_scored": 8,
+          "n": 10
+        },
+        "abstained": {
+          "mean": 0.5208,
+          "n_scored": 4,
+          "n": 4
+        }
+      }
+    },
+    "mrr_at_5": {
+      "mean": 0.9643,
+      "n_scored": 28,
+      "n_zero": 1,
+      "n_na": 2,
+      "n_unavailable": 0,
+      "causes": {
+        "no_evidence": 2
+      },
+      "by_status": {
+        "answered": {
+          "mean": 1.0,
+          "n_scored": 16,
+          "n": 16
+        },
+        "needs_clarification": {
+          "mean": 0.875,
+          "n_scored": 8,
+          "n": 10
+        },
+        "abstained": {
+          "mean": 1.0,
+          "n_scored": 4,
+          "n": 4
+        }
+      }
+    }
+  },
+  "grading_usage": null,
+  "url": "http://10.2.17.122:3000/project/cmw4irryu0007pc6a7n3sy3al/experiments/results?baseline=b8b545ed966d29a7"
+}

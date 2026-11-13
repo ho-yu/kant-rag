@@ -1,0 +1,1187 @@
+{
+ "collected_at": "2026-11-12T20:50:44",
+ "runs": [
+  {
+   "difficulty": "advanced",
+   "split": "development",
+   "config": "B-k7",
+   "mode": "hybrid_rerank",
+   "experiment": "b_hybrid_rerank_20261112-2038_advanced-dev-k7-gpt6luna",
+   "experiment_id": "83f5dd625ecb79ac",
+   "n_items": 30,
+   "items": [
+    {
+     "question_id": "AS-DEV01",
+     "question": "가온루트해운 부산–LA 안내에서 일반 건화물로 예약할 수 있는 컨테이너 종류는 무엇인가요?",
+     "status": "answered",
+     "error": null,
+     "latency_ms": 3810.6,
+     "n_contexts": 7,
+     "context_books": [
+      "AS007",
+      "AS008",
+      "AS007",
+      "AS007",
+      "AS046",
+      "AS007",
+      "AS007"
+     ],
+     "scores": {
+      "recall_at_7": 1.0,
+      "mrr_at_7": 1.0,
+      "hit_at_7": 1.0,
+      "faithfulness": 1.0,
+      "context_recall": 1.0,
+      "answer_relevancy": 0.8866809353802255,
+      "context_precision": 0.759523809508619,
+      "judge_facts": 1.0,
+      "judge_conditions": 1.0,
+      "judge_evidence": 1.0,
+      "judge_decision": 1.0
+     },
+     "states": {},
+     "tokens": {
+      "input": 2829,
+      "output": 161,
+      "cost": 0.00020014,
+      "generations": 1,
+      "with_usage": 1
+     },
+     "trace_id": "a81143251af6d24612efd02b03bdc521"
+    },
+    {
+     "question_id": "AS-DEV02",
+     "question": "가온루트 부산–LA 일반 건화물 40GP로 2026년 11월 6일 출항을 처음 신청하려고 합니다. 예약 메일에 넣을 정보와 창구, 그 일정으로 예약이 확정됐을 때 준비할 SI 마감과 제출처를 한 번에 정리해 주세요.",
+     "status": "answered",
+     "error": null,
+     "latency_ms": 8105.0,
+     "n_contexts": 7,
+     "context_books": [
+      "AS014",
+      "AS008",
+      "AS014",
+      "AS014",
+      "AS014",
+      "AS014",
+      "AS014"
+     ],
+     "scores": {
+      "hit_at_7": 1.0,
+      "recall_at_7": 0.6666666666666666,
+      "mrr_at_7": 1.0,
+      "context_recall": 0.75,
+      "answer_relevancy": 0.7237030681723677,
+      "faithfulness": 0.8421052631578947,
+      "context_precision": 0.9999999999857143,
+      "judge_facts": 0.0,
+      "judge_conditions": 0.0,
+      "judge_evidence": 1.0,
+      "judge_decision": 0.0
+     },
+     "states": {},
+     "tokens": {
+      "input": 4890,
+      "output": 397,
+      "cost": 0.000564265,
+      "generations": 1,
+      "with_usage": 1
+     },
+     "trace_id": "1a2738d114f032fbb87400063e69e0c9"
+    },
+    {
+     "question_id": "AS-DEV03",
+     "question": "예약 접수번호를 받았는데 회신에는 검토 중이라고 적혀 있습니다. 이것을 예약 확정으로 보고 준비하면 되나요?",
+     "status": "answered",
+     "error": null,
+     "latency_ms": 3228.6,
+     "n_contexts": 7,
+     "context_books": [
+      "AS008",
+      "AS008",
+      "AS011",
+      "AS011",
+      "AS028",
+      "AS008",
+      "AS008"
+     ],
+     "scores": {
+      "recall_at_7": 1.0,
+      "answer_relevancy": 0.9149629208840588,
+      "hit_at_7": 1.0,
+      "context_precision": 0.9999999999857143,
+      "mrr_at_7": 1.0,
+      "context_recall": 1.0,
+      "faithfulness": 1.0,
+      "judge_facts": 1.0,
+      "judge_conditions": 1.0,
+      "judge_evidence": 1.0,
+      "judge_decision": 0.0
+     },
+     "states": {},
+     "tokens": {
+      "input": 2853,
+      "output": 125,
+      "cost": 0.000173639999,
+      "generations": 1,
+      "with_usage": 1
+     },
+     "trace_id": "bf3c28fc9894b7c6c5b5f4d6c39f2159"
+    },
+    {
+     "question_id": "AS-DEV04",
+     "question": "SI의 화물 총중량과 VGM이 다르게 적혀 있으면 어느 하나가 잘못된 건가요? 두 항목의 차이만 설명해 주세요.",
+     "status": "answered",
+     "error": null,
+     "latency_ms": 4202.8,
+     "n_contexts": 7,
+     "context_books": [
+      "AS009",
+      "AS016",
+      "AS009",
+      "AS009",
+      "AS009",
+      "AS009",
+      "AS009"
+     ],
+     "scores": {
+      "hit_at_7": 1.0,
+      "recall_at_7": 1.0,
+      "mrr_at_7": 1.0,
+      "context_precision": 0.9150793650641138,
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.9287856559243041,
+      "context_recall": 1.0,
+      "judge_facts": 1.0,
+      "judge_conditions": 1.0,
+      "judge_evidence": 1.0,
+      "judge_decision": 1.0
+     },
+     "states": {},
+     "tokens": {
+      "input": 2968,
+      "output": 193,
+      "cost": 0.000222015,
+      "generations": 1,
+      "with_usage": 1
+     },
+     "trace_id": "190c84fa4243bd3daccf4bb0bf75c44a"
+    },
+    {
+     "question_id": "AS-DEV05",
+     "question": "가온루트 부산–LA 40GP의 2026년 11월 6일 출항용 SI를 작성 중입니다. 예전 오후 3시 안내 대신 언제까지 내야 하나요? 포장명세서의 순중량을 SI 화물 총중량 칸에 옮겨도 되는지도 확인해 주세요.",
+     "status": "answered",
+     "error": null,
+     "latency_ms": 5586.2,
+     "n_contexts": 7,
+     "context_books": [
+      "AS014",
+      "AS014",
+      "AS014",
+      "AS014",
+      "AS014",
+      "AS009",
+      "AS014"
+     ],
+     "scores": {
+      "hit_at_7": 1.0,
+      "recall_at_7": 1.0,
+      "mrr_at_7": 1.0,
+      "context_recall": 1.0,
+      "faithfulness": 1.0,
+      "context_precision": 0.9999999999857143,
+      "answer_relevancy": 0.7692605699492128,
+      "judge_facts": 1.0,
+      "judge_conditions": 1.0,
+      "judge_evidence": 1.0,
+      "judge_decision": 1.0
+     },
+     "states": {},
+     "tokens": {
+      "input": 4879,
+      "output": 274,
+      "cost": 0.00050139,
+      "generations": 1,
+      "with_usage": 1
+     },
+     "trace_id": "0a7c898b1821ac528d19ee7601819cfb"
+    },
+    {
+     "question_id": "AS-DEV06",
+     "question": "부산–LA 40GP VGM을 2026년 11월 4일 처음 접수하면서 SI도 제출하려고 합니다. 두 자료의 제출 창구를 구분해 주고, SI 화물 총중량을 VGM에 그대로 복사해도 되는지 설명해 주세요.",
+     "status": "answered",
+     "error": null,
+     "latency_ms": 6578.7,
+     "n_contexts": 7,
+     "context_books": [
+      "AS009",
+      "AS009",
+      "AS009",
+      "AS014",
+      "AS014",
+      "AS009",
+      "AS009"
+     ],
+     "scores": {
+      "mrr_at_7": 1.0,
+      "recall_at_7": 1.0,
+      "hit_at_7": 1.0,
+      "context_recall": 0.8,
+      "context_precision": 0.9666666666473333,
+      "faithfulness": 0.875,
+      "answer_relevancy": 0.8421938859406143,
+      "judge_facts": 0.0,
+      "judge_conditions": 0.0,
+      "judge_evidence": 0.0,
+      "judge_decision": 0.0
+     },
+     "states": {},
+     "tokens": {
+      "input": 2960,
+      "output": 247,
+      "cost": 0.000248015,
+      "generations": 1,
+      "with_usage": 1
+     },
+     "trace_id": "e863935e9fb6c61202208832fdf12253"
+    },
+    {
+     "question_id": "AS-DEV07",
+     "question": "가온루트 예약 확정 확인서만 받았습니다. 그것만 들고 부산 반입센터에 장비를 바로 보내도 되는지, 반입 전에 무엇을 확인해야 하는지 알려 주세요.",
+     "status": "answered",
+     "error": null,
+     "latency_ms": 5377.0,
+     "n_contexts": 7,
+     "context_books": [
+      "AS011",
+      "AS011",
+      "AS011",
+      "AS011",
+      "AS013",
+      "AS011",
+      "AS011"
+     ],
+     "scores": {
+      "recall_at_7": 1.0,
+      "mrr_at_7": 1.0,
+      "hit_at_7": 1.0,
+      "answer_relevancy": 0.769063504124676,
+      "faithfulness": 1.0,
+      "context_recall": 0.8333333333333334,
+      "context_precision": 0.9484126983968916,
+      "judge_facts": 1.0,
+      "judge_conditions": 1.0,
+      "judge_evidence": 1.0,
+      "judge_decision": 1.0
+     },
+     "states": {},
+     "tokens": {
+      "input": 3189,
+      "output": 289,
+      "cost": 0.00029764,
+      "generations": 1,
+      "with_usage": 1
+     },
+     "trace_id": "5388773a4c789ecf03bad10ecf727905"
+    },
+    {
+     "question_id": "AS-DEV08",
+     "question": "선하증권 초안을 승인했습니다. 고객에게 장비 적재도 완료됐다고 말해도 되나요? 실제 적재는 무엇으로 확인해야 하나요?",
+     "status": "answered",
+     "error": null,
+     "latency_ms": 3878.5,
+     "n_contexts": 7,
+     "context_books": [
+      "AS047",
+      "AS022",
+      "AS087",
+      "AS022",
+      "AS112",
+      "AS067",
+      "AS042"
+     ],
+     "scores": {
+      "hit_at_7": 0.0,
+      "context_recall": 0.5,
+      "context_precision": 0.9999999999857143,
+      "recall_at_7": 0.0,
+      "faithfulness": 0.5,
+      "mrr_at_7": 0.0,
+      "answer_relevancy": 0.854304261527203,
+      "judge_facts": 0.0,
+      "judge_conditions": 0.0,
+      "judge_evidence": 0.0,
+      "judge_decision": 0.0
+     },
+     "states": {},
+     "tokens": {
+      "input": 2554,
+      "output": 171,
+      "cost": 0.000159265,
+      "generations": 1,
+      "with_usage": 1
+     },
+     "trace_id": "2deae88c0020bff7183d98b3a031d17a"
+    },
+    {
+     "question_id": "AS-DEV09",
+     "question": "11월 6일 부산–LA 출항용 SI의 화물 총중량 오기를 발견했습니다. 적용되는 SI 마감과 정정 메일에 넣을 내용을 알려 주세요. SI를 고치면 VGM도 자동 정정되는 건가요?",
+     "status": "answered",
+     "error": null,
+     "latency_ms": 7865.5,
+     "n_contexts": 7,
+     "context_books": [
+      "AS009",
+      "AS014",
+      "AS009",
+      "AS009",
+      "AS007",
+      "AS009",
+      "AS009"
+     ],
+     "scores": {
+      "mrr_at_7": 1.0,
+      "faithfulness": 0.9,
+      "context_recall": 0.5714285714285714,
+      "hit_at_7": 1.0,
+      "context_precision": 0.9999999999857143,
+      "answer_relevancy": 0.8115700044097786,
+      "recall_at_7": 1.0,
+      "judge_facts": 0.0,
+      "judge_conditions": 0.0,
+      "judge_evidence": 0.0,
+      "judge_decision": 0.0
+     },
+     "states": {},
+     "tokens": {
+      "input": 2954,
+      "output": 345,
+      "cost": 0.000370765,
+      "generations": 1,
+      "with_usage": 1
+     },
+     "trace_id": "ae4aebbe653a27a6198c51bdbcb0bf7b"
+    },
+    {
+     "question_id": "AS-DEV10",
+     "question": "같은 40GP 한 대를 쓰되 실제 컨테이너가 교체됐습니다. SI와 반입 예약에는 이전 장비번호를 알렸습니다. 새 번호를 어느 업무에 알려야 하고, 정정 요청에는 무엇을 함께 적나요?",
+     "status": "answered",
+     "error": null,
+     "latency_ms": 5292.1,
+     "n_contexts": 7,
+     "context_books": [
+      "AS009",
+      "AS038",
+      "AS019",
+      "AS029",
+      "AS036",
+      "AS009",
+      "AS018"
+     ],
+     "scores": {
+      "recall_at_7": 1.0,
+      "hit_at_7": 1.0,
+      "mrr_at_7": 1.0,
+      "context_precision": 0.6666666666333333,
+      "context_recall": 1.0,
+      "answer_relevancy": 0.7499137014358025,
+      "faithfulness": 0.875,
+      "judge_facts": 1.0,
+      "judge_conditions": 1.0,
+      "judge_evidence": 1.0,
+      "judge_decision": 1.0
+     },
+     "states": {},
+     "tokens": {
+      "input": 3809,
+      "output": 317,
+      "cost": 0.00038914,
+      "generations": 1,
+      "with_usage": 1
+     },
+     "trace_id": "1ff8eb2b0733c4c00a957dc704f90399"
+    },
+    {
+     "question_id": "AS-DEV11",
+     "question": "받은 선하증권 파일 이름에 최종이라고 되어 있습니다. 발행 안내는 없고 초안 승인 회신만 있는데 발행 완료로 기록해도 되나요?",
+     "status": "answered",
+     "error": null,
+     "latency_ms": 3679.9,
+     "n_contexts": 7,
+     "context_books": [
+      "AS012",
+      "AS012",
+      "AS012",
+      "AS012",
+      "AS012",
+      "AS012",
+      "AS012"
+     ],
+     "scores": {
+      "context_precision": 0.9999999999857143,
+      "mrr_at_7": 1.0,
+      "answer_relevancy": 0.7697027933711782,
+      "context_recall": 1.0,
+      "recall_at_7": 1.0,
+      "faithfulness": 1.0,
+      "hit_at_7": 1.0,
+      "judge_facts": 1.0,
+      "judge_conditions": 1.0,
+      "judge_evidence": 1.0,
+      "judge_decision": 1.0
+     },
+     "states": {},
+     "tokens": {
+      "input": 2829,
+      "output": 152,
+      "cost": 0.00018414,
+      "generations": 1,
+      "with_usage": 1
+     },
+     "trace_id": "2244b5052f24333fac2f2451ade578d1"
+    },
+    {
+     "question_id": "AS-DEV12",
+     "question": "가온루트 이번 건 마감이 몇 시죠?",
+     "status": "needs_clarification",
+     "error": null,
+     "latency_ms": 4922.3,
+     "n_contexts": 7,
+     "context_books": [
+      "AS014",
+      "AS014",
+      "AS014",
+      "AS014",
+      "AS014",
+      "AS040",
+      "AS024"
+     ],
+     "scores": {
+      "context_recall": 0.6666666666666666,
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.5262752642130315,
+      "context_precision": 0.9761904761742063,
+      "judge_facts": 0.0,
+      "judge_conditions": 1.0,
+      "judge_evidence": 1.0,
+      "judge_decision": 0.0
+     },
+     "states": {
+      "recall_at_7": "na",
+      "mrr_at_7": "na",
+      "hit_at_7": "na"
+     },
+     "tokens": {
+      "input": 3446,
+      "output": 141,
+      "cost": 0.000255765,
+      "generations": 1,
+      "with_usage": 1
+     },
+     "trace_id": "5b3ac982e34001a2d33d30fc4e264a24"
+    },
+    {
+     "question_id": "AS-DEV13",
+     "question": "2028-04-23 기준 선우기공의 절연 부품 120상자 건은 보관료와 장비반납지연료가 각각 얼마인가요? 각 비용의 무료기간, 유료기간, 적용한 요율 구간을 함께 설명해 주세요.",
+     "status": "needs_clarification",
+     "error": null,
+     "latency_ms": 7972.0,
+     "n_contexts": 7,
+     "context_books": [
+      "AS021",
+      "AS120",
+      "AS001",
+      "AS111",
+      "AS081",
+      "AS120",
+      "AS116"
+     ],
+     "scores": {
+      "answer_relevancy": 0.0,
+      "faithfulness": 0.7142857142857143,
+      "hit_at_7": 1.0,
+      "context_recall": 0.0,
+      "recall_at_7": 0.3333333333333333,
+      "mrr_at_7": 0.3333333333333333,
+      "context_precision": 0.49999999995,
+      "judge_facts": 0.0,
+      "judge_conditions": 0.0,
+      "judge_evidence": 1.0,
+      "judge_decision": 0.0
+     },
+     "states": {},
+     "tokens": {
+      "input": 3215,
+      "output": 385,
+      "cost": 0.00039739,
+      "generations": 1,
+      "with_usage": 1
+     },
+     "trace_id": "c05e13098cede9a366a879ed8bd34cd5"
+    },
+    {
+     "question_id": "AS-DEV14",
+     "question": "2028-04-23 기준 선우기공의 절연 부품 120상자 건에서 보관료 정정 승인 후 고객에게 안내할 두 비용의 합계는 얼마인가요? 어느 항목이 얼마만큼 정정됐고 어느 항목은 유지됐는지 함께 알려 주세요.",
+     "status": "abstained",
+     "error": null,
+     "latency_ms": 6532.4,
+     "n_contexts": 7,
+     "context_books": [
+      "AS119",
+      "AS119",
+      "AS070",
+      "AS084",
+      "AS077",
+      "AS014",
+      "AS054"
+     ],
+     "scores": {
+      "mrr_at_7": 0.0,
+      "hit_at_7": 0.0,
+      "recall_at_7": 0.0,
+      "faithfulness": 0.75,
+      "answer_relevancy": 0.0,
+      "context_recall": 0.0,
+      "context_precision": 0.0,
+      "judge_facts": 0.0,
+      "judge_conditions": 0.0,
+      "judge_evidence": 0.0,
+      "judge_decision": 0.0
+     },
+     "states": {},
+     "tokens": {
+      "input": 2598,
+      "output": 227,
+      "cost": 0.000225765,
+      "generations": 1,
+      "with_usage": 1
+     },
+     "trace_id": "0ecbe44f7577caae9e7d7e787918d55d"
+    },
+    {
+     "question_id": "AS-DEV15",
+     "question": "2028-04-23 기준 선우기공의 절연 부품 120상자 건을 확인해 주세요. 실제 반출일인 2028-04-11은 보관료와 장비반납지연료에서 각각 유료일에 포함되나요? 보관료에서는 그날의 유료일 순번과 일요율을, 장비반납지연료에서는 계산 시작일과 무료기간을 함께 알려 주세요.",
+     "status": "needs_clarification",
+     "error": null,
+     "latency_ms": 7962.1,
+     "n_contexts": 7,
+     "context_books": [
+      "AS021",
+      "AS086",
+      "AS091",
+      "AS051",
+      "AS011",
+      "AS078",
+      "AS066"
+     ],
+     "scores": {
+      "context_precision": 0.9999999999857143,
+      "answer_relevancy": 0.0,
+      "hit_at_7": 0.0,
+      "context_recall": 0.42857142857142855,
+      "mrr_at_7": 0.0,
+      "recall_at_7": 0.0,
+      "faithfulness": 0.9285714285714286,
+      "judge_facts": 0.0,
+      "judge_conditions": 0.0,
+      "judge_evidence": 1.0,
+      "judge_decision": 0.0
+     },
+     "states": {},
+     "tokens": {
+      "input": 2951,
+      "output": 373,
+      "cost": 0.00036839,
+      "generations": 1,
+      "with_usage": 1
+     },
+     "trace_id": "c11e15316d191c190db17ee033d66dc3"
+    },
+    {
+     "question_id": "AS-DEV16",
+     "question": "2029-10-05 16:00 KST 기준 청해상공의 2029-09-11 양하 산업용 고정구 250상자 건에서 반출일 정정으로 어느 비용이 얼마만큼 바뀌고 어느 비용이 유지되나요? 최종 두 비용 합계도 알려 주세요.",
+     "status": "abstained",
+     "error": null,
+     "latency_ms": 7234.8,
+     "n_contexts": 7,
+     "context_books": [
+      "AS034",
+      "AS107",
+      "AS029",
+      "AS107",
+      "AS069",
+      "AS065",
+      "AS109"
+     ],
+     "scores": {
+      "recall_at_7": 0.25,
+      "mrr_at_7": 1.0,
+      "hit_at_7": 1.0,
+      "context_precision": 0.0,
+      "answer_relevancy": 0.0,
+      "context_recall": 0.0,
+      "faithfulness": 0.8333333333333334,
+      "judge_facts": 0.0,
+      "judge_conditions": 0.0,
+      "judge_evidence": 0.0,
+      "judge_decision": 0.0
+     },
+     "states": {},
+     "tokens": {
+      "input": 2668,
+      "output": 290,
+      "cost": 0.000288015,
+      "generations": 1,
+      "with_usage": 1
+     },
+     "trace_id": "ff697d8232d95bc6ede306ea9b3202c0"
+    },
+    {
+     "question_id": "AS-DEV17",
+     "question": "2030-05-11 16:00 KST 기준 예약 HG2030-00362·장비 HL-40GP-00362 건에서 새 보관 요율의 적용 여부를 계약일 기준으로 판단하고 두 비용을 계산해 주세요.",
+     "status": "needs_clarification",
+     "error": null,
+     "latency_ms": 5404.3,
+     "n_contexts": 7,
+     "context_books": [
+      "AS008",
+      "AS068",
+      "AS068",
+      "AS078",
+      "AS008",
+      "AS073",
+      "AS038"
+     ],
+     "scores": {
+      "context_recall": 0.5,
+      "recall_at_7": 0.25,
+      "hit_at_7": 1.0,
+      "context_precision": 0.5666666666525,
+      "mrr_at_7": 1.0,
+      "answer_relevancy": 0.7596810505511519,
+      "faithfulness": 0.42857142857142855,
+      "judge_facts": 0.0,
+      "judge_conditions": 0.0,
+      "judge_evidence": 0.0,
+      "judge_decision": 0.0
+     },
+     "states": {},
+     "tokens": {
+      "input": 2825,
+      "output": 210,
+      "cost": 0.00024414,
+      "generations": 1,
+      "with_usage": 1
+     },
+     "trace_id": "cf92cd281fc2d0904eeda2ea00d92159"
+    },
+    {
+     "question_id": "AS-DEV18",
+     "question": "2030-12-21 16:00 KST 기준 가람자재의 2030-11-27 양하 압력계 외함 226상자 건에서 양하일과 개정 효력일을 대조해 보관 요율과 두 비용을 정리해 주세요.",
+     "status": "needs_clarification",
+     "error": null,
+     "latency_ms": 8147.1,
+     "n_contexts": 7,
+     "context_books": [
+      "AS103",
+      "AS019",
+      "AS083",
+      "AS073",
+      "AS083",
+      "AS039",
+      "AS053"
+     ],
+     "scores": {
+      "recall_at_7": 0.25,
+      "hit_at_7": 1.0,
+      "mrr_at_7": 1.0,
+      "context_recall": 0.5,
+      "answer_relevancy": 0.7354138755972269,
+      "context_precision": 0.91666666664375,
+      "faithfulness": 0.25,
+      "judge_facts": 0.0,
+      "judge_conditions": 0.0,
+      "judge_evidence": 0.0,
+      "judge_decision": 0.0
+     },
+     "states": {},
+     "tokens": {
+      "input": 2853,
+      "output": 249,
+      "cost": 0.00035514,
+      "generations": 1,
+      "with_usage": 1
+     },
+     "trace_id": "2d99d80af1110238014272168e2e5ab5"
+    },
+    {
+     "question_id": "AS-DEV19",
+     "question": "2029-08-27 16:00 KST 기준 예약 HG2029-00784·장비 HL-40GP-00784 건에서 보관료와 반납지연료의 날짜 계산 방식이 같은가요? 각각의 산입·무료·유료일 수와 금액을 알려 주세요.",
+     "status": "needs_clarification",
+     "error": null,
+     "latency_ms": 9320.1,
+     "n_contexts": 7,
+     "context_books": [
+      "AS078",
+      "AS026",
+      "AS080",
+      "AS079",
+      "AS078",
+      "AS004",
+      "AS071"
+     ],
+     "scores": {
+      "recall_at_7": 0.5,
+      "hit_at_7": 1.0,
+      "mrr_at_7": 1.0,
+      "answer_relevancy": 0.8370708088549282,
+      "context_recall": 0.5,
+      "faithfulness": 1.0,
+      "context_precision": 0.7499999999625,
+      "judge_facts": 0.0,
+      "judge_conditions": 0.0,
+      "judge_evidence": 1.0,
+      "judge_decision": 0.0
+     },
+     "states": {},
+     "tokens": {
+      "input": 2915,
+      "output": 285,
+      "cost": 0.00039439,
+      "generations": 1,
+      "with_usage": 1
+     },
+     "trace_id": "5118ff05bacf6e45b3c41655f9ed36ce"
+    },
+    {
+     "question_id": "AS-DEV20",
+     "question": "2030-04-08 16:00 KST 기준 주원부품의 2030-03-14 양하 금속 연결봉 202상자 건에서 실제 반납일을 반납지연료에 포함하나요? 그 비용의 유료일 수와 금액을 알려 주세요.",
+     "status": "needs_clarification",
+     "error": null,
+     "latency_ms": 7300.3,
+     "n_contexts": 7,
+     "context_books": [
+      "AS079",
+      "AS086",
+      "AS076",
+      "AS086",
+      "AS013",
+      "AS068",
+      "AS064"
+     ],
+     "scores": {
+      "recall_at_7": 0.0,
+      "hit_at_7": 0.0,
+      "mrr_at_7": 0.0,
+      "context_precision": 0.9999999999,
+      "answer_relevancy": 0.0,
+      "context_recall": 0.0,
+      "faithfulness": 0.8,
+      "judge_facts": 0.0,
+      "judge_conditions": 0.0,
+      "judge_evidence": 1.0,
+      "judge_decision": 0.0
+     },
+     "states": {},
+     "tokens": {
+      "input": 2928,
+      "output": 284,
+      "cost": 0.000335515,
+      "generations": 1,
+      "with_usage": 1
+     },
+     "trace_id": "b87989dfb6ce2a5b303e85a3cdd650a7"
+    },
+    {
+     "question_id": "AS-DEV21",
+     "question": "2030-11-13 16:00 KST 기준 예약 HG2030-01206·장비 HL-40GP-01206 건에서 양하일을 보관료에 포함하나요? 보관료의 산입일 수와 무료·유료일 수, 금액을 계산해 주세요.",
+     "status": "needs_clarification",
+     "error": null,
+     "latency_ms": 6301.6,
+     "n_contexts": 7,
+     "context_books": [
+      "AS034",
+      "AS020",
+      "AS032",
+      "AS062",
+      "AS026",
+      "AS027",
+      "AS116"
+     ],
+     "scores": {
+      "mrr_at_7": 1.0,
+      "recall_at_7": 0.5,
+      "hit_at_7": 1.0,
+      "context_precision": 0.99999999998,
+      "faithfulness": 1.0,
+      "context_recall": 0.25,
+      "answer_relevancy": 0.7565368890154728,
+      "judge_facts": 0.0,
+      "judge_conditions": 0.0,
+      "judge_evidence": 1.0,
+      "judge_decision": 0.0
+     },
+     "states": {},
+     "tokens": {
+      "input": 2913,
+      "output": 191,
+      "cost": 0.000214139999,
+      "generations": 1,
+      "with_usage": 1
+     },
+     "trace_id": "4432645a026a47d0529878e5319eae6f"
+    },
+    {
+     "question_id": "AS-DEV22",
+     "question": "2029-07-25 16:00 KST 기준 가온상공의 2029-06-29 양하 합성수지 커버 178상자 건에서 무료기간 연장 승인이 두 비용 모두에 적용되나요? 적용 범위와 각 비용 금액을 알려 주세요.",
+     "status": "needs_clarification",
+     "error": null,
+     "latency_ms": 6949.8,
+     "n_contexts": 7,
+     "context_books": [
+      "AS078",
+      "AS077",
+      "AS063",
+      "AS061",
+      "AS053",
+      "AS023",
+      "AS064"
+     ],
+     "scores": {
+      "mrr_at_7": 1.0,
+      "recall_at_7": 0.5,
+      "hit_at_7": 1.0,
+      "context_recall": 0.5,
+      "answer_relevancy": 0.6788971077602929,
+      "faithfulness": 0.6666666666666666,
+      "context_precision": 0.8333333332916666,
+      "judge_facts": 0.0,
+      "judge_conditions": 0.0,
+      "judge_evidence": 0.0,
+      "judge_decision": 0.0
+     },
+     "states": {},
+     "tokens": {
+      "input": 2773,
+      "output": 205,
+      "cost": 0.00026764,
+      "generations": 1,
+      "with_usage": 1
+     },
+     "trace_id": "3ab8c5b9bebe5df8451a9068718e358d"
+    },
+    {
+     "question_id": "AS-DEV23",
+     "question": "2030-02-28 16:00 KST 기준 예약 HG2030-01628·장비 HL-40GP-01628 건에서 요청한 무료2일 연장을 적용해도 되나요? 현재 확정 가능한 두 비용과 근거 상태를 알려 주세요.",
+     "status": "needs_clarification",
+     "error": null,
+     "latency_ms": 6424.2,
+     "n_contexts": 7,
+     "context_books": [
+      "AS103",
+      "AS112",
+      "AS082",
+      "AS038",
+      "AS068",
+      "AS072",
+      "AS092"
+     ],
+     "scores": {
+      "mrr_at_7": 1.0,
+      "recall_at_7": 0.25,
+      "hit_at_7": 1.0,
+      "answer_relevancy": 0.6866426586445885,
+      "context_recall": 0.5,
+      "context_precision": 0.817857142843512,
+      "faithfulness": 0.25,
+      "judge_facts": 0.0,
+      "judge_conditions": 0.0,
+      "judge_evidence": 0.0,
+      "judge_decision": 0.0
+     },
+     "states": {},
+     "tokens": {
+      "input": 2654,
+      "output": 182,
+      "cost": 0.000250765,
+      "generations": 1,
+      "with_usage": 1
+     },
+     "trace_id": "f3981ca527699f6e79479848077509d4"
+    },
+    {
+     "question_id": "AS-DEV24",
+     "question": "2030-10-05 16:00 KST 기준 선진기공의 2030-09-14 양하 공구 보관함 154상자 건에서 반납지연료 면제 후 두 비용 합계를 안내해 주세요. 보관료까지 면제되는지도 확인해 주세요.",
+     "status": "needs_clarification",
+     "error": null,
+     "latency_ms": 6073.8,
+     "n_contexts": 7,
+     "context_books": [
+      "AS090",
+      "AS119",
+      "AS094",
+      "AS084",
+      "AS089",
+      "AS058",
+      "AS085"
+     ],
+     "scores": {
+      "hit_at_7": 1.0,
+      "answer_relevancy": 0.7248675401980478,
+      "context_precision": 0.9999999999,
+      "context_recall": 1.0,
+      "recall_at_7": 0.5,
+      "faithfulness": 0.5,
+      "mrr_at_7": 1.0,
+      "judge_facts": 1.0,
+      "judge_conditions": 0.0,
+      "judge_evidence": 1.0,
+      "judge_decision": 0.0
+     },
+     "states": {},
+     "tokens": {
+      "input": 2613,
+      "output": 175,
+      "cost": 0.000269139999,
+      "generations": 1,
+      "with_usage": 1
+     },
+     "trace_id": "8521ae0db741478cddb8478adb232c9d"
+    },
+    {
+     "question_id": "AS-DEV25",
+     "question": "2029-06-16 16:00 KST 기준 예약 HG2029-02050·장비 HL-40GP-02050 건에서 반납지연료 면제 요청을 확정액에 반영할 수 있나요? 현재 두 비용과 합계를 알려 주세요.",
+     "status": "answered",
+     "error": null,
+     "latency_ms": 4990.7,
+     "n_contexts": 7,
+     "context_books": [
+      "AS111",
+      "AS086",
+      "AS096",
+      "AS069",
+      "AS106",
+      "AS116",
+      "AS076"
+     ],
+     "scores": {
+      "recall_at_7": 0.25,
+      "context_precision": 0.9999999999,
+      "mrr_at_7": 1.0,
+      "faithfulness": 0.16666666666666666,
+      "answer_relevancy": 0.7441001741839662,
+      "hit_at_7": 1.0,
+      "context_recall": 0.5,
+      "judge_facts": 0.0,
+      "judge_conditions": 0.0,
+      "judge_evidence": 0.0,
+      "judge_decision": 1.0
+     },
+     "states": {},
+     "tokens": {
+      "input": 2593,
+      "output": 229,
+      "cost": 0.00023664,
+      "generations": 1,
+      "with_usage": 1
+     },
+     "trace_id": "1b7eaa16a96306bf0f6ea79849e8dc99"
+    },
+    {
+     "question_id": "AS-DEV26",
+     "question": "2030-01-21 16:00 KST 기준 한림철재의 2029-12-30 양하 유리섬유 덮개 130상자 건에서 보관료 정액 감액을 어느 단계에서 적용하나요? 두 비용과 최종 합계를 알려 주세요.",
+     "status": "abstained",
+     "error": null,
+     "latency_ms": 7983.6,
+     "n_contexts": 7,
+     "context_books": [
+      "AS077",
+      "AS058",
+      "AS046",
+      "AS057",
+      "AS078",
+      "AS120",
+      "AS023"
+     ],
+     "scores": {
+      "recall_at_7": 0.5,
+      "mrr_at_7": 1.0,
+      "hit_at_7": 1.0,
+      "faithfulness": 0.42857142857142855,
+      "answer_relevancy": 0.7150874153333326,
+      "context_recall": 0.3333333333333333,
+      "context_precision": 0.6428571428357143,
+      "judge_facts": 0.0,
+      "judge_conditions": 0.0,
+      "judge_evidence": 0.0,
+      "judge_decision": 0.0
+     },
+     "states": {},
+     "tokens": {
+      "input": 2733,
+      "output": 243,
+      "cost": 0.00035964,
+      "generations": 1,
+      "with_usage": 1
+     },
+     "trace_id": "9f44946126fe46ca64c9c4defdcf0514"
+    },
+    {
+     "question_id": "AS-DEV27",
+     "question": "2030-09-02 16:00 KST 기준 예약 HG2030-02472·장비 HL-40GP-02472 건에서 반납지연료 감액이 보관료에도 적용되나요? 두 비용의 최종 금액과 합계를 알려 주세요.",
+     "status": "answered",
+     "error": null,
+     "latency_ms": 3527.0,
+     "n_contexts": 7,
+     "context_books": [
+      "AS108",
+      "AS109",
+      "AS089",
+      "AS079",
+      "AS111",
+      "AS103",
+      "AS028"
+     ],
+     "scores": {
+      "mrr_at_7": 1.0,
+      "hit_at_7": 1.0,
+      "recall_at_7": 0.5,
+      "context_precision": 0.8095238094968253,
+      "context_recall": 1.0,
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.7001349377845908,
+      "judge_facts": 0.0,
+      "judge_conditions": 0.0,
+      "judge_evidence": 0.0,
+      "judge_decision": 0.0
+     },
+     "states": {},
+     "tokens": {
+      "input": 2735,
+      "output": 161,
+      "cost": 0.00017689,
+      "generations": 1,
+      "with_usage": 1
+     },
+     "trace_id": "4ea6a770be6e1d10c8f26aa6f6bd241c"
+    },
+    {
+     "question_id": "AS-DEV28",
+     "question": "2029-05-14 16:00 KST 기준 이든상공의 2029-04-16 양하 펌프 연결구 106상자 건에서 부분 수납 후 청구 총액과 미수액은 각각 얼마인가요? 수납을 어떤 비용에 충당했는지도 설명해 주세요.",
+     "status": "abstained",
+     "error": null,
+     "latency_ms": 5660.3,
+     "n_contexts": 7,
+     "context_books": [
+      "AS063",
+      "AS033",
+      "AS003",
+      "AS090",
+      "AS003",
+      "AS071",
+      "AS027"
+     ],
+     "scores": {
+      "hit_at_7": 0.0,
+      "mrr_at_7": 0.0,
+      "recall_at_7": 0.0,
+      "context_recall": 0.0,
+      "context_precision": 0.0,
+      "answer_relevancy": 0.0,
+      "faithfulness": 0.4,
+      "judge_facts": 0.0,
+      "judge_conditions": 0.0,
+      "judge_evidence": 1.0,
+      "judge_decision": 0.0
+     },
+     "states": {},
+     "tokens": {
+      "input": 2834,
+      "output": 245,
+      "cost": 0.000231265,
+      "generations": 1,
+      "with_usage": 1
+     },
+     "trace_id": "c6ad97d00b032c5d48cb2c4aa298a200"
+    },
+    {
+     "question_id": "AS-DEV29",
+     "question": "2030-02-25 16:00 KST 기준 예약 HG2030-00164·장비 HL-20GP-00164 건에서 보관료·반납지연료·전체 합계 중 확정할 수 있는 것을 구분하고 추가로 필요한 증빙을 알려 주세요.",
+     "status": "answered",
+     "error": null,
+     "latency_ms": 113527.1,
+     "n_contexts": 7,
+     "context_books": [
+      "AS099",
+      "AS079",
+      "AS104",
+      "AS109",
+      "AS049",
+      "AS096",
+      "AS104"
+     ],
+     "scores": {
+      "hit_at_7": 1.0,
+      "mrr_at_7": 1.0,
+      "recall_at_7": 0.6666666666666666,
+      "context_recall": 0.6666666666666666,
+      "context_precision": 0.9666666666473333,
+      "faithfulness": 0.2,
+      "answer_relevancy": 0.7126634187023161,
+      "judge_facts": 1.0,
+      "judge_conditions": 1.0,
+      "judge_evidence": 1.0,
+      "judge_decision": 0.0
+     },
+     "states": {},
+     "tokens": {
+      "input": 2792,
+      "output": 254,
+      "cost": 0.000230515,
+      "generations": 1,
+      "with_usage": 1
+     },
+     "trace_id": "1b4a1d18a8e37451411ce68ba43a569e"
+    },
+    {
+     "question_id": "AS-DEV30",
+     "question": "2030-10-01 16:00 KST 기준 예림무역의 2030-09-10 양하 고무 받침대 262상자 건에서 변경된 반납 예약일로 실제 반납 완료와 최종 합계를 확정할 수 있나요? 확정 가능한 금액도 알려 주세요.",
+     "status": "abstained",
+     "error": null,
+     "latency_ms": 114682.0,
+     "n_contexts": 7,
+     "context_books": [
+      "AS117",
+      "AS096",
+      "AS038",
+      "AS072",
+      "AS075",
+      "AS036",
+      "AS094"
+     ],
+     "scores": {
+      "recall_at_7": 0.3333333333333333,
+      "hit_at_7": 1.0,
+      "mrr_at_7": 0.25,
+      "faithfulness": 0.6363636363636364,
+      "context_recall": 0.75,
+      "context_precision": 0.9484126983968916,
+      "answer_relevancy": 0.0,
+      "judge_facts": 0.0,
+      "judge_conditions": 0.0,
+      "judge_evidence": 0.0,
+      "judge_decision": 0.0
+     },
+     "states": {},
+     "tokens": {
+      "input": 2737,
+      "output": 316,
+      "cost": 0.00030414,
+      "generations": 1,
+      "with_usage": 1
+     },
+     "trace_id": "ae03e7056390fd91d9518744b2174112"
+    }
+   ]
+  }
+ ]
+}

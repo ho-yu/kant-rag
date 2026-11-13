@@ -93,12 +93,14 @@ def configs_b(d):
             domain="shipping", difficulty=d, k=MAX_K, candidate_k=c, rerank_n=n)
 
 
-def main(diffs):
+def main(diffs, impls=("retrieval_a", "retrieval_b")):
     results = json.loads(OUT.read_text(encoding="utf-8")) if OUT.exists() else []
     done = {(r["impl"], r["difficulty"], r["mode"], r["setting"]) for r in results}
     for d in diffs:
         qs = golden(d)
         for impl, gen in (("retrieval_a", configs_a), ("retrieval_b", configs_b)):
+            if impl not in impls:
+                continue
             for mode, setting, retriever in gen(d):
                 if (impl, d, mode, setting) in done:
                     continue
@@ -118,4 +120,9 @@ def main(diffs):
 
 
 if __name__ == "__main__":
-    main(sys.argv[1:] or ["basic", "intermediate", "advanced"])
+    # 사용: python k_sweep.py [retrieval_a|retrieval_b] [난이도 ...]
+    # 모델을 여러 벌 불러 GPU 메모리가 쌓이지 않게, 구성·난이도마다 프로세스를 따로 띄워 돌리는 것을 권장
+    args = sys.argv[1:]
+    impls = tuple(a for a in args if a.startswith("retrieval_")) or ("retrieval_a", "retrieval_b")
+    diffs = [a for a in args if not a.startswith("retrieval_")] or ["basic", "intermediate", "advanced"]
+    main(diffs, impls)
