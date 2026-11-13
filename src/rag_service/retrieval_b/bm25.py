@@ -28,7 +28,7 @@ from rag_service.contracts.chunk import Chunk
 from rag_service.retrieval_b.dense import get_store
 from rag_service.retrieval_b.settings import BM25_SOURCES
 from rag_service.storage.corpus import load_chunks
-from rag_service.storage.qdrant_store import level_filter
+from rag_service.storage.qdrant_store import bm25_tokens, level_filter
 
 # 장비 코드가 "20" + "GP"로 쪼개지지 않게 한 단어로 등록한다 (basic·intermediate jsonl에 나오는 코드)
 USER_WORDS = ["20GP", "40GP", "40HC", "40RF", "B/L"]
