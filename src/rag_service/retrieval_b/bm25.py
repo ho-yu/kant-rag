@@ -189,7 +189,7 @@ def get_bm25_index(
     """팀 청크로 색인을 만든다. (domain, difficulty, levels, source)마다 한 번만 만든다."""
     chunks = load_team_chunks(domain, difficulty, levels, source)
     docs = [Document(**chunk.payload()) for chunk in chunks]
-    return BM25Index(docs, [chunk.embedding_text() for chunk in chunks])
+    return BM25Index(docs, [chunk.embedding_text() for chunk in chunks], tokenizer=bm25_tokens)
 
 
 def as_levels(levels: Iterable[str]) -> tuple[str, ...]:
