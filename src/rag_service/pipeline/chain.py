@@ -26,7 +26,7 @@ from rag_service.generation.prompt import (
 from rag_service.generation.rag_config import max_docs
 from rag_service.generation.sources import add_sources, build_answer_result
 from rag_service.observability import with_langfuse
-from rag_service.pipeline.prepare_retriever import RETRIEVAL_LOCK, RetrieverPool
+from rag_service.pipeline.prepare_retriever import RETRIEVAL_LOCK, RetrievalBPool, RetrieverPool
 from rag_service.retrieval_a import (
     build_hybrid_retriever,
     build_naive_retriever,
@@ -37,6 +37,9 @@ from rag_service.storage.qdrant_store import get_pages
 
 MAX_DOCS = max_docs()  # 나눠 찾기(sub_questions)로 합친 검색 결과를 LLM에 넘기는 최대 개수 (config/generation/rag.yaml)
 IMPLS = ("retrieval_a", "retrieval_b")  # 동일한 체인에서 선택 가능한 검색 구현
+# 서비스(main.py)가 쓰는 검색 구현과 난이도별 최종 문맥 수 k (k 실험 결과, 2026-11-13)
+SERVICE_IMPL = "retrieval_b"
+SERVICE_TOP_K = {"basic": 10, "intermediate": 5, "advanced": 8}
 
 
 def format_docs(docs: list[Document]) -> str:
@@ -102,7 +105,7 @@ def create_chain(
     # A의 Hybrid 공유 유지 및 B의 선택한 검색기만 최초 호출 시 생성
     # 서버에서 사전 준비한 검색 자원 주입 및 기존 독립 호출의 자체 준비 유지
     # top_k: 답변에 넣을 최종 문맥 수 (None이면 설정 파일·Settings 기본값). k 비교 실험용
-    pool = (retriever_pool or RetrieverPool(domain, difficulty, profile, top_k=top_k)) if impl == "retrieval_a" else None
+    pool = retriever_pool or (RetrieverPool(domain, difficulty, profile, top_k=top_k) if impl == "retrieval_a" else None)
     retrievers = {}
 
     def retrieve_docs(request):
@@ -159,9 +162,14 @@ def create_chain(
 def _cached_rag_resources(domain, difficulty):
     """서비스의 세 난이도별 체인과 검색 자원 보관 및 준비한 객체의 재사용."""
     # 호출한 난이도만 생성하며 난이도 전환 시 기존 워밍업 자원의 캐시 퇴출 방지
-    pool = RetrieverPool(domain, difficulty)
+    k = SERVICE_TOP_K.get(difficulty)
+    if SERVICE_IMPL == "retrieval_b":
+        pool = RetrievalBPool(domain, difficulty, k=k)
+    else:
+        pool = RetrieverPool(domain, difficulty, top_k=k)
     chain = create_chain(
-        domain=domain, difficulty=difficulty, include_context=True, trace=False, retriever_pool=pool,
+        domain=domain, difficulty=difficulty, impl=SERVICE_IMPL,
+        include_context=True, trace=False, retriever_pool=pool,
     )
     return chain, pool
 

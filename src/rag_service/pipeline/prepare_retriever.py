@@ -76,3 +76,28 @@ class RetrieverPool:
                 # 검색 결과가 없어도 첫 점수 계산 때 로드되는 리랭커의 사전 준비
                 if mode == "hybrid_rerank" and not docs:
                     retriever.score_fn("해상 운송", ["해상 운송"])
+
+
+class RetrievalBPool(RetrieverPool):
+    """retrieval_b 검색기의 최초 요청 시 생성 및 재사용. 워밍업은 RetrieverPool과 같음."""
+
+    def __init__(self, domain, difficulty, k=None):
+        super().__init__(domain, difficulty)
+        self.scope = {"domain": domain, "difficulty": difficulty}
+        self.k = k  # 최종 문맥 수 (None이면 retrieval_b Settings 기본값)
+
+    def get(self, mode):
+        with self.lock:
+            if mode not in self.retrievers:
+                from rag_service import retrieval_b
+
+                builders = {
+                    "naive": retrieval_b.build_naive_retriever,
+                    "hybrid": retrieval_b.build_hybrid_retriever,
+                    "hybrid_rerank": retrieval_b.build_rerank_retriever,
+                }
+                if mode not in builders:
+                    raise ValueError(f"지원하지 않는 검색 방식: {mode}")
+                extra = {"k": self.k} if self.k else {}
+                self.retrievers[mode] = builders[mode](**self.scope, **extra)
+            return self.retrievers[mode]
