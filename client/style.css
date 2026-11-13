@@ -1,0 +1,73 @@
+/* Streamlit 컴포넌트 구조를 유지하며 브랜드와 타이포그래피를 조정한다. */
+.stApp { background: #f5f7fa; }
+[data-testid="stHeader"] { background: transparent; }
+.block-container { max-width: 1040px; padding: 3rem 2.4rem 5rem; }
+[data-testid="stSidebar"] { background: #101e2d; }
+[data-testid="stSidebar"] > div:first-child { padding-top: 2rem; }
+.sidebar-brand { display: flex; align-items: center; gap: 12px; margin-bottom: 2rem; color: #f3f8fb; }
+.brand-mark { width: 42px; height: 42px; border: 1px solid #426775; border-radius: 12px;
+    display: grid; place-items: center; background: #193a46; color: #79e0cc; font-size: 25px; font-weight: 700; }
+.sidebar-brand strong { display: block; font-size: 18px; letter-spacing: -.4px; }
+.dataset-info { background: #172c3c; border: 1px solid #2a4555; border-radius: 12px;
+    padding: 14px; margin: .2rem 0 .8rem; }
+.dataset-info span { display: block; color: #9cb1c1; font-size: 10px; letter-spacing: 1.2px; }
+.database-label { display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; }
+.database-label strong { color: #82ddcb; font-size: 13px; font-weight: 600; }
+.dataset-info code { display: block; background: transparent; color: #e0ebf3; padding: 0;
+    margin-top: 6px; font-size: 12px; line-height: 1.7; overflow-wrap: anywhere; white-space: normal; }
+.sidebar-footer { margin-top: 3rem; padding-top: 1.4rem; border-top: 1px solid #2a3c4d; }
+.sidebar-footer span { display: block; color: #90a6b8; font-size: 10px; letter-spacing: 1.8px; }
+.sidebar-footer strong { display: block; color: #dfeaf3; font-size: 14px; margin-top: 7px; }
+.page-header { padding: 0 0 1.8rem; border-bottom: 1px solid #dfe6ed; margin-bottom: 1.7rem; }
+.page-header h1 { color: #142b3d; font-size: clamp(24px, 3vw, 34px); font-weight: 750;
+    letter-spacing: -1.2px; padding: 0; line-height: 1.4; }
+.intro-label { color: #243f50; font-size: 18px; font-weight: 650; margin: .6rem 0 1rem; }
+.processing-status { display: flex; align-items: center; gap: 10px; color: #49606f;
+    font-size: 14px; margin-bottom: .8rem; }
+.loading-spinner { width: 18px; height: 18px; flex-shrink: 0; border: 2px solid #d7e7e4;
+    border-top-color: #0f766e; border-radius: 50%; animation: processing-spin .8s linear infinite; }
+@keyframes processing-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .loading-spinner { animation: none; } }
+[data-testid="stMain"] [data-testid="stVerticalBlockBorderWrapper"] { border-radius: 14px; }
+[data-testid="stMain"] [data-testid="stChatMessage"] {
+    background: #fff; border: 1px solid #e1e8ee; border-radius: 18px;
+    padding: 1.7rem 1.6rem; margin-bottom: 1.1rem; gap: 1rem; box-shadow: 0 3px 14px #18344b04;
+}
+[data-testid="stMain"] [data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarUser"]) {
+    background: #eaf0f5; border-color: #e1e8ee; padding: 1.15rem 1.6rem; box-shadow: none;
+}
+[data-testid="stChatMessageAvatarAssistant"] { background: #123b47; color: #8ae4d2; }
+[data-testid="stChatMessageAvatarUser"] { background: #d8e3ec; color: #425e73; }
+[data-testid="stChatMessageContent"] { min-width: 0; }
+[data-testid="stChatMessageContent"] [data-testid="stMarkdownContainer"] {
+    color: #233b4e; line-height: 1.85; font-size: 16px; overflow-wrap: anywhere;
+}
+[data-testid="stChatMessageContent"] p { line-height: 1.85; margin-bottom: 1rem; }
+[data-testid="stChatMessageContent"] strong { color: #123b47; font-weight: 700; }
+[data-testid="stChatMessageContent"] a { color: #087d78; text-decoration-color: #a2d6cf; }
+[data-testid="stChatMessageContent"] li { margin-bottom: .4rem; }
+[data-testid="stChatMessageContent"] table { font-size: 14px; }
+[data-testid="stChatMessageContent"] [data-testid="stCaptionContainer"] p {
+    color: #788a99; font-size: 12px; line-height: 1.6; margin: .3rem 0 .7rem;
+}
+[data-testid="stChatMessageContent"] [data-testid="stExpander"] {
+    background: #fbfcfe; border: 1px solid #e3eaf0; border-radius: 10px; margin-top: .5rem;
+}
+[data-testid="stExpander"] summary { font-size: 13px; }
+[data-testid="stChatMessageContent"] blockquote {
+    border-left: 3px solid #add4ce; background: #f0f6f6; padding: .75rem 1rem; border-radius: 0 8px 8px 0;
+}
+[data-testid="stChatMessageContent"] blockquote p { font-size: 13px; color: #49606f; }
+[data-testid="stBottom"] { background: #f5f7fa; }
+[data-testid="stChatInput"] { border-radius: 15px; border: 1px solid #cbd9e2;
+    background: #fff; box-shadow: 0 6px 24px #18344b08; }
+[data-testid="stChatInput"] textarea { font-size: 15px; padding-top: 14px; }
+@media (max-width: 640px) {
+    .block-container { padding: 2rem 1rem 4rem; }
+    [data-testid="stMain"] [data-testid="stChatMessage"],
+    [data-testid="stMain"] [data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarUser"]) {
+        padding: 1rem .8rem; gap: .6rem;
+    }
+    [data-testid="stChatMessageContent"] [data-testid="stMarkdownContainer"] { font-size: 15px; }
+    .page-header { margin-bottom: 1rem; }
+}

@@ -12,6 +12,7 @@ from dotenv import load_dotenv
 from fastapi import Depends, FastAPI, HTTPException, Request, Response
 from fastapi.security import APIKeyHeader
 
+from rag_service.api.streaming import QueryStreamResponse, encode_event, stream_answer
 from rag_service.contracts.query import QueryRequest, QueryResponse
 from rag_service.observability.tracing import optional_trace, update_trace
 from rag_service.pipeline import create_service_chain
@@ -93,7 +94,7 @@ def health():
 
 
 @app.post("/query", response_model=QueryResponse, dependencies=[Depends(require_api_key)])
-async def query(body: QueryRequest, request: Request, response: Response):
+async def query(body: QueryRequest, request: Request, response: Response, stream: bool = False):
     """허용한 수의 질문을 비동기로 처리하고 초과 요청에 재시도 가능 상태 반환."""
     request_id = uuid4().hex
     slots = request.app.state.query_slots
@@ -106,6 +107,8 @@ async def query(body: QueryRequest, request: Request, response: Response):
         )
     await slots.acquire()
     started = time.perf_counter()
+    if stream:
+        return QueryStreamResponse(stream_query(body, request, request_id, started), slots, request_id)
     trace_id = None
     try:
         with optional_trace(body.question, request_id) as trace:
@@ -136,6 +139,30 @@ async def query(body: QueryRequest, request: Request, response: Response):
     finally:
         # 성공과 실패 및 요청 취소 시 확보한 처리 자리 반환
         slots.release()
+
+
+async def stream_query(body, request, request_id, started):
+    """/query?stream=true: 진행 상태·본문 미리보기·최종 응답을 한 요청으로 전송."""
+    try:
+        with optional_trace(body.question, request_id) as trace:
+            trace_id = trace.trace_id if trace is not None else None
+            update_trace(trace, metadata={
+                "request_id": request_id, "domain": body.domain, "difficulty": body.difficulty,
+                "retrieval_mode": body.retrieval_mode, "page_context": body.page_context,
+            })
+            async for event, data in stream_answer(request.app.state.chain, body):
+                if event == "done":
+                    update_trace(trace, output=data)
+                    data = QueryResponse(
+                        **data, request_id=request_id, trace_id=trace_id,
+                        elapsed=round(time.perf_counter() - started, 3),
+                    ).model_dump()
+                yield encode_event(event, data)
+    except Exception:
+        logger.exception("stream query failed request_id=%s", request_id)
+        yield encode_event("error", {
+            "message": "답변을 완료하지 못했습니다. 잠시 후 다시 시도해주세요.", "request_id": request_id,
+        })
 
 
 if __name__ == "__main__":

@@ -380,6 +380,7 @@ def test_chain_picks_retriever_impl(monkeypatch):
     monkeypatch.setattr(chain_mod, "load_config", dict)
     monkeypatch.setattr(chain_mod, "collection_name", lambda *a, **kw: "test")
     monkeypatch.setattr(chain_mod, "create_model", lambda role="answer": SimpleNamespace(with_structured_output=lambda s: RunnableLambda(lambda p: ANSWER)))
+    monkeypatch.setattr(chain_mod, "warmup_retriever", lambda retriever, mode: None)  # 가짜 검색기엔 리랭커 score_fn이 없음
     chain = chain_mod.create_chain("shipping", "advanced", impl="retrieval_b")
     # 검색기는 처음 요청한 검색 방식만 그때 만든다 (만들 때는 아무것도 준비하지 않음)
     assert seen == []
@@ -531,5 +532,6 @@ def test_top_k_reaches_retrievers(monkeypatch):
 
     pool_seen = {}
     monkeypatch.setattr(pr, "build_naive_retriever", lambda **kw: pool_seen.update(kw) or "r")
+    monkeypatch.setattr(pr, "warmup_retriever", lambda retriever, mode: None)
     assert pr.RetrieverPool("shipping", "basic", top_k=3).get("naive") == "r"
     assert pool_seen["top_k"] == 3
